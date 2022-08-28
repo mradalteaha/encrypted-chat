@@ -5,45 +5,43 @@ import MyButton from '../components/MyButton'
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
 
 
-function LoginScreen (props) {
+function ChatScreen(props) {
 
-return (
-    <KeyboardAvoidingWrapper>
-    <SafeAreaView style = {styles.container}>
-   
-           
-        <View style= {styles.TopView}>
 
-              <Text style={styles.Header} >Sign In</Text>
-        </View>
+    return (
+        <KeyboardAvoidingWrapper>
+        <SafeAreaView style = {styles.container}>
+       
+               
+            <View style= {styles.TopView}>
+    
+                  <Text style={styles.Header} >Chat Screen</Text>
+            </View>
+            
+            <View style= {styles.BottomView}>
+            <Text style={styles.WelcomeTitle} >Welcome Back </Text>
+            <Text style={styles.WelcomeText} >Have fun chatting ! </Text>
+                
+                <View style={styles.FormView}>
+               
+                <TextInput style={styles.TextInput} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'UserName'} />
+                <TextInput style={styles.TextInput} secureTextEntry={true} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'PassWord'} />
+    
+                </View>
+                
+                <View style={styles.ButtonsView}>
+                    <MyButton title={'Sign In'}/>
+                        
+                    <MyButton title={ 'Forgot Password'}/>
+                </View>
         
-        <View style= {styles.BottomView}>
-        <Text style={styles.WelcomeTitle} >Welcome Back </Text>
-        <Text style={styles.WelcomeText} >Have fun chatting ! </Text>
-            
-            <View style={styles.FormView}>
-           
-            <TextInput style={styles.TextInput} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'UserName'} />
-            <TextInput style={styles.TextInput} secureTextEntry={true} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'PassWord'} />
-
-            </View>
-            
-            <View style={styles.ButtonsView}>
-                <MyButton title={'Sign In'}/>
-                    
-                <MyButton title={ 'Forgot Password'}/>
-            </View>
-    
-        </View> 
-
-
-</SafeAreaView>
-</KeyboardAvoidingWrapper>
-
+            </View> 
     
     
-
-)
+    </SafeAreaView>
+    </KeyboardAvoidingWrapper>
+    
+    )
 
 }
 
@@ -53,7 +51,7 @@ const styles =StyleSheet.create({
         marginTop:40,
         width:'100%',
         flexDirection :'column',
-        justifyContent:"flex-end",
+        justifyContent:"center",
         backgroundColor:'#fff',
     },
     TopView:{
@@ -140,4 +138,4 @@ const styles =StyleSheet.create({
 
 })
 
-export default LoginScreen ;
+export default ChatScreen ; 
