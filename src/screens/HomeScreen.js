@@ -5,14 +5,19 @@ import MyButton from '../components/MyButton'
 function HomeScreen(props) {
 
     function goToLogin(){
-        console.log(props.navigation.navigate('LogInScreen'));
+        props.navigation.navigate('LogInScreen')
 
     }
     function goToSignUp(){
-        console.log(props.navigation.navigate('SignUpScreen'));
+       props.navigation.navigate('SignUpScreen')
     
     
     }
+    function goToChat(){
+        props.navigation.navigate('ChatScreen')
+     
+     
+     }
 
     return (
         <SafeAreaView>
@@ -20,6 +25,8 @@ function HomeScreen(props) {
       
         <MyButton title={'go To Sign In Screen'} onPress={goToLogin}></MyButton>
         <MyButton title={'go To Sign Up Screen'} onPress={goToSignUp}></MyButton>
+        <MyButton title={'go To Chat Screen'} onPress={goToChat}></MyButton>
+         
          
         </SafeAreaView>
     )
