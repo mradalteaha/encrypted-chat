@@ -84,7 +84,7 @@ const styles =StyleSheet.create({
         alignSelf:'center',
         color:'rgb(185, 255, 248)',
         fontStyle:'italic',
-        fontFamily:'sans-serif-condensed'
+        //fontFamily:'sans-serif-condensed'
     },
     FormView:{
         height:'60%',
@@ -130,7 +130,7 @@ const styles =StyleSheet.create({
         alignSelf:'flex-start',
         color:'rgb(185, 255, 248)',
         fontStyle:'italic',
-        fontFamily:'sans-serif-condensed'
+       // fontFamily:'sans-serif-condensed'
 
     },
     WelcomeText:{
@@ -140,7 +140,7 @@ const styles =StyleSheet.create({
         alignSelf:'flex-start',
         color:'rgb(185, 255, 248)',
         fontStyle:'italic',
-        fontFamily:'sans-serif-condensed'
+        //fontFamily:'sans-serif-condensed'
     },
     TopViewinner:{
         backgroundColor:'rgb(61, 178, 255)',
