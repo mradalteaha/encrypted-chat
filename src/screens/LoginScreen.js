@@ -14,7 +14,11 @@ return (
            
         <View style= {styles.TopView}>
 
-              <Text style={styles.Header} >Sign In</Text>
+            <View style={styles.TopViewinner}>
+                <Text style={styles.Header} >Sign In</Text>
+            </View>
+
+              
         </View>
         
         <View style= {styles.BottomView}>
@@ -53,24 +57,26 @@ const styles =StyleSheet.create({
         marginTop:40,
         width:'100%',
         flexDirection :'column',
-        justifyContent:"flex-end",
+        justifyContent:"center",
         backgroundColor:'#fff',
     },
     TopView:{
         width:'100%',
-        height:'20%',
-        backgroundColor: 'rgb(61, 178, 255)',
+        height:'30%',
+        backgroundColor: '#fff',
         justifyContent:"center",
         display:'flex',
         borderTopLeftRadius:30,
         borderTopRightRadius:30,
         marginTop:50,
+        flexDirection :'column',
+        justifyContent:"flex-end",
         
 
     },
     BottomView:{
         width:'100%',
-        height:'80%',
+        height:'70%',
         backgroundColor: 'rgb(61, 178, 255)',
     },
     Header:{
@@ -135,6 +141,13 @@ const styles =StyleSheet.create({
         color:'rgb(185, 255, 248)',
         fontStyle:'italic',
         fontFamily:'sans-serif-condensed'
+    },
+    TopViewinner:{
+        backgroundColor:'rgb(61, 178, 255)',
+        height:'50%',
+        borderTopLeftRadius:30,
+        borderTopRightRadius:30,
+
     }
 
 

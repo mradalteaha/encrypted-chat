@@ -1,5 +1,5 @@
 import React from "react";
-import {Text, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard} from 'react-native';
+import {Text,TouchableOpacity, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard} from 'react-native';
 import { TextInput } from "react-native-gesture-handler";
 import MyButton from '../components/MyButton'
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
@@ -8,8 +8,13 @@ import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // 
 function ChatScreen(props) {
 
 
+    function buttonClickedHandler(){
+        console.log('i got clicked i will send chat')
+    }
+
     return (
         <KeyboardAvoidingWrapper>
+       
         <SafeAreaView style = {styles.container}>
        
                
@@ -17,29 +22,31 @@ function ChatScreen(props) {
     
                   <Text style={styles.Header} >Chat Screen</Text>
             </View>
-            
-            <View style= {styles.BottomView}>
-            <Text style={styles.WelcomeTitle} >Welcome Back </Text>
-            <Text style={styles.WelcomeText} >Have fun chatting ! </Text>
-                
-                <View style={styles.FormView}>
-               
-                <TextInput style={styles.TextInput} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'UserName'} />
-                <TextInput style={styles.TextInput} secureTextEntry={true} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'PassWord'} />
-    
-                </View>
-                
-                <View style={styles.ButtonsView}>
-                    <MyButton title={'Sign In'}/>
-                        
-                    <MyButton title={ 'Forgot Password'}/>
-                </View>
-        
-            </View> 
-    
+            <KeyboardAvoidingView>
+            <View style= {styles.CenterView}>
+      
+        <View style= {styles.BottomView}>
+
+      
+        <TextInput style={styles.TextInput} secureTextEntry={false} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'Message'} />
+
+            <TouchableOpacity
+                onPress={buttonClickedHandler}
+                style={styles.roundButton}>
+                <Text>I'm a button</Text>
+            </TouchableOpacity>
+
+
+            </View>
+           
+
+            </View>
+            </KeyboardAvoidingView>
+           
     
     </SafeAreaView>
     </KeyboardAvoidingWrapper>
+    
     
     )
 
@@ -48,93 +55,73 @@ function ChatScreen(props) {
 
 const styles =StyleSheet.create({
     container : {
-        marginTop:40,
+        marginTop:10,
         width:'100%',
         flexDirection :'column',
-        justifyContent:"center",
+        justifyContent:"flex-start",
         backgroundColor:'#fff',
+        height:'100%',
     },
     TopView:{
-        width:'100%',
-        height:'20%',
         backgroundColor: 'rgb(61, 178, 255)',
-        justifyContent:"center",
-        display:'flex',
-        borderTopLeftRadius:30,
-        borderTopRightRadius:30,
-        marginTop:50,
+        marginTop:25,
+        width:'100%',
+        height:70,
+        justifyContent:'flex-start',
+        flexDirection:'row',
         
 
     },
+    CenterView:{
+        width:'100%',
+        flexGrow: 1,
+        
+        backgroundColor:'green',
+        height:'88%',
+        justifyContent:'flex-end',
+        flexDirection:'column',
+
+    },
+
     BottomView:{
         width:'100%',
-        height:'80%',
-        backgroundColor: 'rgb(61, 178, 255)',
-    },
-    Header:{
-        fontSize:50,
-        alignSelf:'center',
-        color:'rgb(185, 255, 248)',
-        fontStyle:'italic',
-        fontFamily:'sans-serif-condensed'
-    },
-    FormView:{
-        height:'60%',
-        alignSelf:'center',
-        alignItems:'center',
-        width:'100%',
-        display:'flex',
-        flexDirection:'column',
-        justifyContent:'center',
-        marginTop:0,
-        backgroundColor:'rgb(61, 178, 255)'
+     
+        height:40,
+        justifyContent:'flex-start',
+        flexDirection:'row',
+        marginBottom:25,
+       
 
-    },
+    }
+    ,
     TextInput:{
-        width:'90%',
+        width:'80%',
         borderWidth:1,
         borderColor:'rgb(185, 255, 248)',
-        height:50,
-        color:'rgb(185, 255, 248)',
-        fontSize:25,
-        
-        borderRadius:10,
-        paddingLeft:20,
-        marginTop:20,
+        height:40,
+        color:'black',
+        fontSize:20,
+        backgroundColor:'#fff',
+        borderRadius:40,
+        paddingLeft:15,
+        marginTop:5,
+        marginLeft:10,
         multiline:false,
         
+        
     },
-    ButtonsView:{
-        alignSelf:'center',
-        alignItems:'center',
-        width:'100%',
-        display:'flex',
-        flexDirection:'row',
-        justifyContent:'center',
-        marginTop:0,
-        backgroundColor:'rgb(61, 178, 255)'
+    roundButton:{
+        width: 45,
+        height: 45,
+        marginLeft:10,
+        marginTop:2,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 10,
+        borderRadius: 100,
+        backgroundColor: 'rgb(0, 103, 120)',
+        
     },
-    WelcomeTitle:{
-        fontSize:30,
-        paddingLeft:10,
-        fontWeight:'bold',
-
-        alignSelf:'flex-start',
-        color:'rgb(185, 255, 248)',
-        fontStyle:'italic',
-        fontFamily:'sans-serif-condensed'
-
-    },
-    WelcomeText:{
-        paddingLeft:10,
-
-        fontSize:25,
-        alignSelf:'flex-start',
-        color:'rgb(185, 255, 248)',
-        fontStyle:'italic',
-        fontFamily:'sans-serif-condensed'
-    }
-
 
 })
 
