@@ -22,26 +22,48 @@ function ChatScreen(props) {
     
                   <Text style={styles.Header} >Chat Screen</Text>
             </View>
-            <KeyboardAvoidingView>
-            <View style= {styles.CenterView}>
-      
-        <View style= {styles.BottomView}>
+        
+        
+        <View style= {styles.CenterView}>
+        
 
-      
-        <TextInput style={styles.TextInput} secureTextEntry={false} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'Message'} />
+        <KeyboardAvoidingView >
+                
+            <View srtyle={styles.ChatView }>
 
-            <TouchableOpacity
-                onPress={buttonClickedHandler}
-                style={styles.roundButton}>
-                <Text>I'm a button</Text>
-            </TouchableOpacity>
+
+                    <Text> chat text fields </Text>
+
+                    <Text> chat text fields </Text>
+                    <Text> chat text fields </Text>
+                    <Text> chat text fields </Text>
+                    <Text> chat text fields </Text>
+
+                    <Text> chat text fields </Text>
+                    <Text> chat text fields </Text>
+                    <Text> chat text fields </Text>
+                    <Text> chat text fields </Text>
+
+            </View>
+
+            <View style= {styles.BottomView}>
+
+        
+                    <TextInput style={styles.TextInput} secureTextEntry={false} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'Message'} />
+
+                        <TouchableOpacity
+                            onPress={buttonClickedHandler}
+                            style={styles.roundButton}>
+                            <Text>I'm a button</Text>
+                        </TouchableOpacity>
 
 
             </View>
            
-
-            </View>
             </KeyboardAvoidingView>
+            </View>
+            
+            
            
     
     </SafeAreaView>
@@ -122,7 +144,14 @@ const styles =StyleSheet.create({
         backgroundColor: 'rgb(0, 103, 120)',
         
     },
+    ChatView :{
+        backgroundColor : 'red' , 
+        width : '100%', 
+        height :'80%',
 
+        backgroundColor : 'rgb(0, 103, 120)',
+
+    } ,
 })
 
 export default ChatScreen ; 
