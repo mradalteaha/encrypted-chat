@@ -1,12 +1,24 @@
-import React from "react";
-import {Text, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard} from 'react-native';
+import React, { useContext, useState } from "react";
+import {Text,TouchableOpacity, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard} from 'react-native';
 import { TextInput } from "react-native-gesture-handler";
 import MyButton from '../components/MyButton'
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
+import {signUp ,signIn} from '../firebase'
 
 
 function LoginScreen (props) {
+    const [email ,setEmail]= useState('')
+    const [password ,setPassWord]= useState('')
 
+    async function handleClick(){
+         await signIn(email,password)
+    }
+
+
+    function gotosignup(){
+        props.navigation.navigate('SignUpScreen')
+
+    }
 return (
     <KeyboardAvoidingWrapper>
     <SafeAreaView style = {styles.container}>
@@ -27,16 +39,27 @@ return (
             
             <View style={styles.FormView}>
            
-            <TextInput style={styles.TextInput} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'UserName'} />
-            <TextInput style={styles.TextInput} secureTextEntry={true} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'PassWord'} />
+            <TextInput value={email} onChangeText={setEmail} style={styles.TextInput} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'Email'} />
+            <TextInput value={password} onChangeText={setPassWord} style={styles.TextInput} secureTextEntry={true} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'PassWord'} />
 
+
+            <View style={styles.ButtonsView}>
+                        <MyButton title={'Sign In'} onPress={handleClick} disabled={!password ||!email}
+                            
+                        />
+                            
+                        <MyButton title={ 'Forgot Password'}/>
+                    </View>
+            </View>
+
+            <View style={styles.Registered}>
+            <Text style={styles.WelcomeText} >I have no account ! </Text>
+                    <TouchableOpacity>
+                        <Text onPress={gotosignup} style={styles.Signin}>sign up </Text>
+                    </TouchableOpacity>
             </View>
             
-            <View style={styles.ButtonsView}>
-                <MyButton title={'Sign In'}/>
-                    
-                <MyButton title={ 'Forgot Password'}/>
-            </View>
+      
     
         </View> 
 
@@ -148,7 +171,22 @@ const styles =StyleSheet.create({
         borderTopLeftRadius:30,
         borderTopRightRadius:30,
 
-    }
+    },
+
+    Registered:{
+        flex:1,
+        marginTop:20 ,
+        flexDirection:'row',
+        
+
+    },
+
+    Signin:{
+        fontSize:30,
+       
+        color:'rgb(185, 255, 248)',
+       
+    },
 
 
 })
