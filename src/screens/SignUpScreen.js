@@ -1,12 +1,24 @@
-import React from "react";
-import {Text, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard} from 'react-native';
+import React ,{useState} from "react";
+import {Text, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard, TouchableOpacity} from 'react-native';
 import { TextInput } from "react-native-gesture-handler";
 import MyButton from '../components/MyButton'
-import AntDesign from 'react-native-vector-icons';
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
-
+import {signUp ,signIn} from '../firebase'
 
 function SignUpScreen (props) {
+
+    const [email ,setEmail]= useState('')
+    const [password ,setPassWord]= useState('')
+    const [conPassword ,setconPassWord]= useState('')
+
+
+    async function handleClick(){
+        await signUp(email,password)
+    }
+    
+    function gotosignin(){
+        props.navigation.navigate('LogInScreen')
+    }
 
 return (
     <KeyboardAvoidingWrapper>
@@ -25,19 +37,24 @@ return (
             <View style={styles.FormView}>
            
 
-            <TextInput style={styles.TextInput} spellCheck ={false} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'Full Name'} />
-            <TextInput style={styles.TextInput} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'Email'} />
-            <TextInput style={styles.TextInput} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'UserName'} />
-            <TextInput style={styles.TextInput} secureTextEntry={true} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'PassWord'} />
-            <TextInput style={styles.TextInput} secureTextEntry={true} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'PassWord Confirm'} />
+            <TextInput value={email} onChangeText={setEmail} style={styles.TextInput} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'Email'} />
+            <TextInput value={password} onChangeText={setPassWord} style={styles.TextInput} secureTextEntry={true} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'PassWord'} />
+            <TextInput value={conPassword} onChangeText={setconPassWord} style={styles.TextInput} secureTextEntry={true} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'PassWord Confirm'} />
 
-            </View>
-            
             <View style={styles.ButtonsView}>
-                <MyButton title={'Sign Up'}/>
+                <MyButton title={'Sign Up'} disabled={(!email || !password || !conPassword) ||(password!==conPassword)  } onPress={handleClick}/>
                     
-                <MyButton title={ 'Cancel'}/>
             </View>
+
+            <View style={styles.Registered}>
+            <Text style={styles.WelcomeText} >I already have account ! </Text>
+                    <TouchableOpacity>
+                        <Text onPress={gotosignin} style={styles.Signin}>sign In </Text>
+                    </TouchableOpacity>
+            </View>
+            </View> 
+            
+        
     
         </View> 
 
@@ -81,6 +98,12 @@ const styles =StyleSheet.create({
         color:'rgb(185, 255, 248)',
         fontStyle:'italic',
         fontFamily:'sans-serif-condensed'
+    },
+    Signin:{
+        fontSize:30,
+       
+        color:'rgb(185, 255, 248)',
+       
     },
     FormView:{
         height:'60%',
@@ -137,7 +160,15 @@ const styles =StyleSheet.create({
         color:'rgb(185, 255, 248)',
         fontStyle:'italic',
         fontFamily:'sans-serif-condensed'
-    }
+    },
+    Registered:{
+        flex:1,
+        marginTop:20 ,
+        flexDirection:'row',
+        
+
+    },
+
 
 
 })
