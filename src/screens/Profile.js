@@ -1,26 +1,80 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import {StatusBar} from 'expo-status-bar'
 import {useState} from "react";
-import {Text, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard, TouchableOpacity} from 'react-native';
+import {Image,Button,Text, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard, TouchableOpacity} from 'react-native';
 import { TextInput } from "react-native-gesture-handler";
 import MyButton from '../components/MyButton'
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
-import {signUp ,signIn} from '../firebase'
+import {auth, db} from '../firebase'
 import { Constants } from 'expo-constants';
 import {MaterialCommunityIcons} from '@expo/vector-icons'
 import Context from '../../Context/Context'
-import FormInput from '../components/FormInput'
+import FormInput from '../components/FormInput' 
+import {pickImage ,askForPermission,uploadImage} from '../../utils'
+import { theme } from '../../utils';
+import { updateProfile } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
+
 
 export default function Profile(props) {
 
     const [displayName , setDisplayName ] = useState('');
     const [selectImage , setSelectedImage] = useState(null);
+    const [permissionStatus , permissionStatusUpdate] = useState(null);
     const {theme:{colors}} = useContext(Context)
 
+    const navigation = useNavigation()
 
-    function handlePress(){
+    useEffect(()=>{
+        (async ()=>{
+            const status = await askForPermission();
+            permissionStatusUpdate(status)
+        })()
+    },[])
 
+    async function handlePress(){
+        const user = auth.currentUser;
+        let photoURL 
+        if(selectImage){
+            const {url} = await uploadImage(selectImage.uri ,`Images/${user.uid}`,"profilePicture" )
+            photoURL = url;
+        }
+
+        
+        const userData = {
+            displayName,
+            email: user.email
+        }
+
+        if(photoURL){
+            userData.photoURL = photoURL
+        }
+        await Promise.all([updateProfile(user,userData),setDoc(doc(db,'users',user.uid),{...userData,uid:user.uid})])
+
+            
+        navigation.navigate('HomeScreen')
+    
     }
+
+
+
+    async function handleProfileImage(){
+        const result = await pickImage()
+        if(!result.cancelled){
+            setSelectedImage(result)
+        }
+    }
+
+
+    if(!permissionStatus){
+        return <Text>Loading ...</Text>
+    }
+    if(permissionStatus !== 'granted'){
+        return <Text> you need to grant permission </Text>
+
+    } 
+ 
   return (
     <React.Fragment>
    <KeyboardAvoidingWrapper>
@@ -35,17 +89,17 @@ export default function Profile(props) {
         </View>
         
         <View style= {styles.BottomView}>
-            <TouchableOpacity style={{marginTop:30 , borderRadius:120 ,width:120 , height:120 , backgroundColor:colors.foreground ,alignItems:'center', justifyContent:'center' }}>
+            <TouchableOpacity onPress={handleProfileImage} style={{marginTop:50 , borderRadius:120 ,width:120 , height:120 , backgroundColor:colors.foreground ,alignItems:'center', justifyContent:'center' }}>
                 {!selectImage ? (<MaterialCommunityIcons name='camera-plus' color={colors.iconGray} size={45} />) :
 
-                 <Image source={{uri:selectImage}} style={{width:'100%', height:'100%' , borderRadius:120}} /> }
+                 <Image source={{uri:selectImage.uri}} style={{width:'100%', height:'100%' , borderRadius:120}} /> }
             </TouchableOpacity>
             <TextInput value={displayName} onChangeText={setDisplayName} style={styles.TextInput} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'Enter your display name '} />
 
            
         
             <View style={styles.ButtonsView}>
-                <MyButton title={'Next'} onPress={handlePress} disabled={!displayName} />
+                <Button title={'Next'} onPress={handlePress} disabled={!displayName} />
                     
             </View>
 
@@ -76,7 +130,7 @@ const styles =StyleSheet.create({
     TopView:{
         width:'100%',
         height:'20%',
-        backgroundColor: 'rgb(61, 178, 255)',
+        backgroundColor: theme.colors.skyblue,
         justifyContent:"center",
         display:'flex',
         borderTopLeftRadius:30,
@@ -87,8 +141,8 @@ const styles =StyleSheet.create({
     BottomView:{
         width:'100%',
         height:'80%',
-        backgroundColor: 'rgb(61, 178, 255)',
-        alignItems:'center'
+        backgroundColor: theme.colors.skyblue,
+        alignItems:'center',
     },
     Header:{
         fontSize:50,
@@ -125,7 +179,7 @@ const styles =StyleSheet.create({
         
         borderRadius:10,
         paddingLeft:20,
-        marginTop:40,
+        marginTop:50,
         borderBottomWidth:2,
         multiline:false,
         
@@ -137,7 +191,7 @@ const styles =StyleSheet.create({
         display:'flex',
         flexDirection:'row',
         justifyContent:'center',
-        marginTop:0,
+        marginTop:20,
         backgroundColor:'rgb(61, 178, 255)'
     },
     WelcomeTitle:{
