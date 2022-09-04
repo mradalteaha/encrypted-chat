@@ -14,6 +14,7 @@ function SignUpScreen (props) {
 
     async function handleClick(){
         await signUp(email,password)
+    
     }
     
     function gotosignin(){
