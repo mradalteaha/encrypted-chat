@@ -6,6 +6,8 @@ import HomeScreen from './src/screens/HomeScreen';
 import LogInScreen from './src/screens/LoginScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
 import ChatScreen from './src/screens/ChatScreen';
+import ContactScreen from './src/screens/ContactScreen';
+import ChatsScreen from './src/screens/ChatsScreen';
 import Profile from './src/screens/Profile';
 import { useAssets } from 'expo-asset';
 import {onAuthStateChanged} from 'firebase/auth'

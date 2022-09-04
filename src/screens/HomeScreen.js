@@ -1,35 +1,54 @@
-import React from 'react';
+import React ,{useContext}from 'react';
 import { SafeAreaView ,View ,Text ,StyleSheet } from 'react-native';
+import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs'
 import MyButton from '../components/MyButton'
+import GlobalContext from '../../Context/Context';
+import ChatsScreen from './ChatsScreen';
+import ContactScreen from './ContactScreen';
+import {AntDesign} from '@expo/vector-icons';
 
+
+
+const Tab=createMaterialTopTabNavigator()
 function HomeScreen(props) {
 
-    function goToLogin(){
-        props.navigation.navigate('LogInScreen')
 
-    }
-    function goToSignUp(){
-       props.navigation.navigate('SignUpScreen')
-    
-    
-    }
-    function goToChat(){
-        props.navigation.navigate('ChatScreen')
-     
-     
-     }
-
-    return (
-        <SafeAreaView>
-      <Text style={styles.header}>  بسم  الله الرحمن الرحيم </Text>
-      
-        <MyButton title={'go To Sign In Screen'} onPress={goToLogin}></MyButton>
-        <MyButton title={'go To Sign Up Screen'} onPress={goToSignUp}></MyButton>
-        <MyButton title={'go To Chat Screen'} onPress={goToChat}></MyButton>
-         
-         
-        </SafeAreaView>
-    )
+    const {
+        theme: { colors },
+      } = useContext(GlobalContext);
+      return (
+        <Tab.Navigator
+          screenOptions={({ route }) => {
+            return {
+              tabBarLabel: () => {
+                if (route.name === "contacts") {
+                  return <AntDesign name="contacts" size={20} color={colors.white} />;
+                } else {
+                  return (
+                    <Text style={{ color: colors.white }}>
+                      {route.name.toLocaleUpperCase()}
+                    </Text>
+                  );
+                }
+              },
+              tabBarShowIcon: true,
+              tabBarLabelStyle: {
+                color: colors.white,
+              },
+              tabBarIndicatorStyle: {
+                backgroundColor: colors.white,
+              },
+              tabBarStyle: {
+                backgroundColor: colors.foreground,
+              },
+            };
+          }}
+          initialRouteName="chats"
+        >
+          <Tab.Screen name="contacts" component={ContactScreen} />
+          <Tab.Screen name="chats" component={ChatsScreen} />
+        </Tab.Navigator>
+      );
 }
 
 const styles = StyleSheet.create({
