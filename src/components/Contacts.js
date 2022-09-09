@@ -3,7 +3,7 @@ import React, { useContext } from 'react'
 import {MaterialCommunityIcons} from '@expo/vector-icons'
 import GlobalContext from '../../Context/Context'
 import { useNavigation } from '@react-navigation/native'
-
+//after a long thought this component is no longer used 
 export default function Contacts() {
     const {theme:{colors}} = useContext(GlobalContext)
     const navigation =useNavigation()

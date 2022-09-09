@@ -14,7 +14,7 @@ export default function ItemList({type,description,user,style,time ,room ,image,
     <TouchableOpacity style={{height:80,borderRadius:30, ...style}} onPress={()=>navigation.navigate("ChatScreen",{user,room,image})}>
       <Grid style={{maxHeight:80}} >
       <Col style={{width:80,alignItems:'center',justifyContent:'center'}}>
-        <Avatar user={user} size={type ==='contacts' ? 40 : 65}/>
+        <Avatar user={user} size={type ==='contacts' ? 40 : 60}/>
       </Col>
       <Col style={{marginLeft:10}}>
         <Row style={{alignItems:'center'}}>
