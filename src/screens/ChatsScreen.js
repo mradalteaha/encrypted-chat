@@ -34,12 +34,17 @@ export default function ChatsScreen() {
 
         return ()=> unsubscribe();
     },[])
+
     function getContactedUser(user , contacts){
         const userContact = contacts.find((c)=>c.email ===user.email);
         if(userContact && userContact.contactName ){
+        
             return {...user , contactName : userContact.contactName}
         }
+      
     }
+
+  //need to initialize the room with reciever photo `
 
     return (
         <SafeAreaView style={styles.container}>
@@ -47,6 +52,7 @@ export default function ChatsScreen() {
         key={room.id}
         room={room}
         time={room.lastMessage.createdAt}
+       
         user={getContactedUser(room.contactedUser,contacts)}
          />)}
 
