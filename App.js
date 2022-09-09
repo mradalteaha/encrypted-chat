@@ -16,6 +16,7 @@ import {StyleSheet , View , LogBox ,Text} from 'react-native'
 import ContextWrapper from './Context/ContextWrapper';
 import Context from './Context/Context';
 import {theme} from './utils'
+import ChatHeader from './src/components/ChatHeader';
 
 LogBox.ignoreLogs([
   "Setting a timer",
@@ -60,6 +61,7 @@ const App= ()=>{
         {!currentUser.displayName && <Stack.Screen name="Profile" component={Profile} options={{headerShown:false}}  />}
           
         <Stack.Screen name="HomeScreen" component={HomeScreen} options={{title:'Secret-Chat'}}  />
+        <Stack.Screen name="ChatScreen" component={ChatScreen} options={{headerTitle:(props)=> <ChatHeader {...props}/>}}  />
 
             </Stack.Navigator>
 

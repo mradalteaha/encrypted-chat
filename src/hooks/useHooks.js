@@ -8,7 +8,7 @@ export default function useContacts(){
         const {status} = await Contacts.requestPermissionsAsync();
         if(status==='granted'){
             const {data} = await Contacts.getContactsAsync({
-                fields:[Contacts.Fields.Emails]
+                fields:[Contacts.Fields.Emails , Contacts.IMAGE]
             })
             if(data.length>0){
                 setContacts(
@@ -30,7 +30,7 @@ export default function useContacts(){
 function mapContactToUser(contact){
     return {
         contactName : contact.firstName && contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName,
-
+        image:contact.image,
         email : contact.emails[0].email
     }
 }

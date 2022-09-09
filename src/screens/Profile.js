@@ -149,7 +149,6 @@ const styles =StyleSheet.create({
         alignSelf:'center',
         color:'rgb(185, 255, 248)',
         fontStyle:'italic',
-        fontFamily:'sans-serif-condensed'
     },
     Signin:{
         fontSize:30,
@@ -202,8 +201,8 @@ const styles =StyleSheet.create({
         alignSelf:'flex-start',
         color:'rgb(185, 255, 248)',
         fontStyle:'italic',
-        fontFamily:'sans-serif-condensed'
 
+        
     },
     WelcomeText:{
         paddingLeft:10,
@@ -212,7 +211,6 @@ const styles =StyleSheet.create({
         alignSelf:'flex-start',
         color:'rgb(185, 255, 248)',
         fontStyle:'italic',
-        fontFamily:'sans-serif-condensed'
     },
 
 

@@ -20,6 +20,20 @@ export async function pickImage(){
   return result ; 
 }
 
+export async function pickImageChat(){
+  
+  // let result = await ImagePicker.launchCameraAsync(); 
+ 
+   let result = await ImagePicker.launchImageLibraryAsync({
+     mediaTypes: ImagePicker.MediaTypeOptions.All,
+     allowsEditing: false,
+     quality: 1,
+   });
+   
+   
+   return result ; 
+ }
+
 export async function askForPermission(){
   const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync()
   return status ; 
