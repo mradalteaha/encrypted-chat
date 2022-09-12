@@ -3,15 +3,24 @@ import {Text,TouchableOpacity, View,SafeAreaView, StyleSheet,KeyboardAvoidingVie
 import { TextInput } from "react-native-gesture-handler";
 import MyButton from '../components/MyButton'
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
-import {signUp ,signIn} from '../firebase'
-
+import ServerApi from "../Api/ServerApi";
 
 function LoginScreen (props) {
     const [email ,setEmail]= useState('')
     const [password ,setPassWord]= useState('')
 
     async function handleClick(){
-         await signIn(email,password)
+        try{
+            const res = await ServerApi.post('/signIn',{
+                email:email,
+                password:password
+            })
+            console.log(res.data)
+
+        }catch(err){
+            console.log('error on sign up')
+            console.log(err)
+        }
     }
 
 

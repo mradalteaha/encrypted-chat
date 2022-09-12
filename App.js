@@ -14,9 +14,11 @@ import {onAuthStateChanged} from 'firebase/auth'
 import { auth } from './src/firebase';
 import {StyleSheet , View , LogBox ,Text} from 'react-native'
 import ContextWrapper from './Context/ContextWrapper';
-import Context from './Context/Context';
+import GlobalContext from './Context/Context';
 import {theme} from './utils'
 import ChatHeader from './src/components/ChatHeader';
+import ServerApi from './src/Api/ServerApi.js'
+
 
 LogBox.ignoreLogs([
   "Setting a timer",
@@ -24,18 +26,41 @@ LogBox.ignoreLogs([
 ]);
 const App= ()=>{
 
-  const [currentUser, setCurrentUser] = useState(null)
+
   const [loading , setLoading] = useState(true)
 
-    const {theme:{colors}} = useContext(Context) 
+    const {theme:{colors},currentUser,setCurrentUser} = useContext(GlobalContext) 
 
   useEffect(()=>{
+
+    (async ()=>{
+      
+      try{
+        const res = await ServerApi.get('/signIn')
+        //console.log(res.data.user)
+        if(res.data.user){
+          const user=res.data.user
+
+          setCurrentUser(user)
+          setLoading(false)
+          console.log('user are logged in ')
+        }
+
+      }catch(err){
+        console.log(err)
+      console.log('something went wrong')
+
+      }
+  
+    } )()
     const unsubscribe = onAuthStateChanged(auth,user =>{
       setLoading(false)
       if(user){
         setCurrentUser(user)
+        setLoading(false)
       }
     })
+ 
     return ()=>unsubscribe();
   },[])
 

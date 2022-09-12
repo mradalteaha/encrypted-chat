@@ -6,6 +6,7 @@ import GlobalContext from '../../Context/Context';
 import ChatsScreen from './ChatsScreen';
 import ContactScreen from './ContactScreen';
 import {AntDesign} from '@expo/vector-icons';
+import ManagerScreen from './ManagerScreen';
 
 
 
@@ -47,6 +48,7 @@ function HomeScreen(props) {
         >
           <Tab.Screen name="contacts" component={ContactScreen} />
           <Tab.Screen name="chats" component={ChatsScreen} />
+          <Tab.Screen name="ManagerScreen" component={ManagerScreen} />
         </Tab.Navigator>
       );
 }
