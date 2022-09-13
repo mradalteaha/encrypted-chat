@@ -7,7 +7,7 @@ const GlobalContext = React.createContext({
   unfilteredRooms:[],
   SetRoom:()=>{},
   setUnfilteredRooms:()=>{},
-  currentUser,
+  currentUser:null,
   setCurrentUser:()=>{},
 
 

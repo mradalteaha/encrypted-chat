@@ -8,21 +8,21 @@ import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // 
 import {auth, db} from '../firebase'
 import { Constants } from 'expo-constants';
 import {MaterialCommunityIcons} from '@expo/vector-icons'
-import Context from '../../Context/Context'
 import FormInput from '../components/FormInput' 
 import {pickImage ,askForPermission,uploadImage} from '../../utils'
 import { theme } from '../../utils';
 import { updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
-
+import GlobalContext from '../../Context/Context';
+import ServerApi from '../Api/ServerApi';
 
 export default function Profile(props) {
 
     const [displayName , setDisplayName ] = useState('');
     const [selectImage , setSelectedImage] = useState(null);
     const [permissionStatus , permissionStatusUpdate] = useState(null);
-    const {theme:{colors}} = useContext(Context)
+    const {theme:{colors},currentUser} = useContext(GlobalContext)
 
     const navigation = useNavigation()
 
@@ -34,11 +34,20 @@ export default function Profile(props) {
     },[])
 
     async function handlePress(){
-        const user = auth.currentUser;
-        let photoURL 
+        const user = currentUser;
+        let photolink 
         if(selectImage){
-            const {url} = await uploadImage(selectImage.uri ,`Images/${user.uid}`,"profilePicture" )
-            photoURL = url;
+            try{
+            const res = await ServerApi.post('/ProfilePhotoUpload',{
+                photo:selectImage.uri,
+            })
+            const {photoURL} = res.data;
+            photolink = photoURL;
+            }
+            catch(err){
+                console.log('uploading the photo failed')
+                console.log(err)
+            }
         }
 
         
@@ -48,9 +57,18 @@ export default function Profile(props) {
         }
 
         if(photoURL){
-            userData.photoURL = photoURL
+            userData.photoURL = photolink
         }
-        await Promise.all([updateProfile(user,userData),setDoc(doc(db,'users',user.uid),{...userData,uid:user.uid})])
+
+        try{
+            const updateres = await ServerApi.post('/ProfileUpdate',{
+                userData:userData
+            }
+            )
+
+        }catch(err){
+            console.log(err)
+        }
 
             
         navigation.navigate('HomeScreen')

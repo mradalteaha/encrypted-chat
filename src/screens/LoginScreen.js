@@ -10,6 +10,8 @@ function LoginScreen (props) {
     const [password ,setPassWord]= useState('')
 
     async function handleClick(){
+        console.log('sign in triggereer')
+
         try{
             const res = await ServerApi.post('/signIn',{
                 email:email,
@@ -18,7 +20,7 @@ function LoginScreen (props) {
             console.log(res.data)
 
         }catch(err){
-            console.log('error on sign up')
+            console.log('error on sign in')
             console.log(err)
         }
     }
