@@ -15,7 +15,6 @@ function LoginScreen (props) {
         console.log('sign in triggereer')
 
         try{
-            console.log('inside the login function tr ')
             const res = await ServerApi.post('/signIn',{
                 email:email,
                 password:password
@@ -24,7 +23,6 @@ function LoginScreen (props) {
                     'Content-Type': 'application/json'
                 }
               })
-            console.log(res)
             setIsLogged(true)
         }catch(err){
             console.log('error on sign in')

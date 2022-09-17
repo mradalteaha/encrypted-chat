@@ -18,7 +18,7 @@ import GlobalContext from './Context/Context';
 import {theme} from './utils'
 import ChatHeader from './src/components/ChatHeader';
 import ServerApi from './src/Api/ServerApi.js'
-
+import axios from 'axios'
 
 LogBox.ignoreLogs([
   "Setting a timer",
@@ -39,23 +39,27 @@ const App= ()=>{
 
       try{
         setLoading(false)
-        const res = await ServerApi.get('/signIn',{
-          headers: {
-              'Content-Type': 'application/json'
+        if(isLogged){
+          const res = await ServerApi.get('/signIn',{
+            headers: {
+                'Content-Type': 'application/json'
+            }
+          })
+          
+          if(res.data.user){
+            const user=res.data.user
+  
+            setCurrentUser(user)
+            setLoading(false)
+            setIsLogged(true)
+            console.log('user are logged in ')
           }
-        })
-        //console.log(res.data.user)
-        if(res.data.user){
-          const user=res.data.user
-
-          setCurrentUser(user)
-          setLoading(false)
-          setIsLogged(true)
-          console.log('user are logged in ')
         }
+  
 
       }catch(err){
         console.log(err)
+        console.info(err)
       console.log('something went wrong')
 
       }

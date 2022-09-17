@@ -50,11 +50,11 @@ const uploadProfilePhotoAPI = async (imageURI) => {
         console.log(err)
 
         console.log('uploading the photo failed')
-        return err 
+        return err
 
     }
 
- 
+
 
 }
 
@@ -104,7 +104,8 @@ export default function Profile(props) {
 
         if (selectImage) {
             try {
-               const  photoURL = await uploadProfilePhotoAPI(selectImage.uri);
+                console.log(selectImage.uri)
+                const photoURL = await uploadProfilePhotoAPI(selectImage.uri);
                 if (photoURL) {
                     console.log(photoURL)
                 }
