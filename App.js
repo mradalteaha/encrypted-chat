@@ -29,13 +29,16 @@ const App= ()=>{
 
   const [loading , setLoading] = useState(true)
 
-    const {theme:{colors},currentUser,setCurrentUser} = useContext(GlobalContext) 
+
+    const {theme:{colors},currentUser,setCurrentUser,isLogged,setIsLogged} = useContext(GlobalContext) 
 
   useEffect(()=>{
 
+
     (async ()=>{
-      
+
       try{
+        setLoading(false)
         const res = await ServerApi.get('/signIn')
         //console.log(res.data.user)
         if(res.data.user){
@@ -43,6 +46,7 @@ const App= ()=>{
 
           setCurrentUser(user)
           setLoading(false)
+          setIsLogged(true)
           console.log('user are logged in ')
         }
 
@@ -53,16 +57,8 @@ const App= ()=>{
       }
   
     } )()
-    const unsubscribe = onAuthStateChanged(auth,user =>{
-      setLoading(false)
-      if(user){
-        setCurrentUser(user)
-        setLoading(false)
-      }
-    })
- 
-    return ()=>unsubscribe();
-  },[])
+  
+  },[isLogged])
 
   const Stack = createNativeStackNavigator();
   if(loading){
@@ -83,8 +79,7 @@ const App= ()=>{
           shadowOpacity:0,
           elevation :0,
         }}} >    
-        {!currentUser.displayName && <Stack.Screen name="Profile" component={Profile} options={{headerShown:false}}  />}
-          
+          <Stack.Screen name="Profile" component={Profile} options={{headerShown:false}}  />
         <Stack.Screen name="HomeScreen" component={HomeScreen} options={{title:'Secret-Chat'}}  />
         <Stack.Screen name="ChatScreen" component={ChatScreen} options={{headerTitle:(props)=> <ChatHeader {...props}/>}}  />
 

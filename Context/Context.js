@@ -9,6 +9,8 @@ const GlobalContext = React.createContext({
   setUnfilteredRooms:()=>{},
   currentUser:null,
   setCurrentUser:()=>{},
+  isLogged:false,
+  setIsLogged:()=>{},
 
 
 });

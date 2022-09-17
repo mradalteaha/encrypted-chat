@@ -44,7 +44,9 @@ export async function askForPermission(){
 export async function uploadImage(uri, path, fName) {
 
   const blob = await new Promise((resolve, reject) => {
+    console.log('starting creating blob')
     const xhr = new XMLHttpRequest();
+    console.log(xhr)
     xhr.onload = function () {
       resolve(xhr.response);
     };

@@ -6,9 +6,10 @@ export default function ContextWrapper(props) {
   const [rooms, setRooms] = useState([]);
   const [unfilteredRooms, setUnfilteredRooms] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isLogged,setIsLogged]=useState(false)
   return (
     <Context.Provider
-      value={{ theme, rooms, setRooms, unfilteredRooms, setUnfilteredRooms,currentUser,setCurrentUser }}
+      value={{ theme, rooms, setRooms, unfilteredRooms, setUnfilteredRooms,currentUser,setCurrentUser,isLogged,setIsLogged }}
     >
       {props.children}
     </Context.Provider>

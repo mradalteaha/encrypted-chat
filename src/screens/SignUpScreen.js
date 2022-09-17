@@ -55,7 +55,23 @@ return (
             <TextInput value={conPassword} onChangeText={setconPassWord} style={styles.TextInput} secureTextEntry={true} placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'PassWord Confirm'} />
 
             <View style={styles.ButtonsView}>
-                <MyButton title={'Sign Up'} disabled={(!email || !password || !conPassword) ||(password!==conPassword)  } onPress={handleClick}/>
+                <TouchableOpacity style={{
+                    backgroundColor:"rgb(15, 52, 96)",
+                    margin:20,
+                    borderRadius:15,
+                    height:50,
+                    alignContent:'center',
+                    
+                    
+                }} title={'Sign Up'} disabled={(!email || !password || !conPassword) ||(password!==conPassword)  } onPress={handleClick}> 
+                <Text style={{ 
+                fontSize:35,
+                marginLeft:5,
+                
+                color:'rgb(185, 255, 248)',
+                }}>sign Up </Text>
+
+                </TouchableOpacity>
                     
             </View>
 
@@ -119,13 +135,13 @@ const styles =StyleSheet.create({
     },
     FormView:{
         height:'60%',
-        alignSelf:'center',
+        alignSelf:'flex-end',
         alignItems:'center',
         width:'100%',
         display:'flex',
         flexDirection:'column',
         justifyContent:'center',
-        marginTop:0,
+        marginTop:40,
         backgroundColor:'rgb(61, 178, 255)'
 
     },
