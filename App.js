@@ -39,7 +39,11 @@ const App= ()=>{
 
       try{
         setLoading(false)
-        const res = await ServerApi.get('/signIn')
+        const res = await ServerApi.get('/signIn',{
+          headers: {
+              'Content-Type': 'application/json'
+          }
+        })
         //console.log(res.data.user)
         if(res.data.user){
           const user=res.data.user

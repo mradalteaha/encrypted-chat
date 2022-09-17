@@ -5,6 +5,7 @@ import MyButton from '../components/MyButton'
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
 import ServerApi from "../Api/ServerApi";
 import GlobalContext from "../../Context/Context";
+import axios from "axios";
 
 function LoginScreen (props) {
     const [email ,setEmail]= useState('')
@@ -14,10 +15,16 @@ function LoginScreen (props) {
         console.log('sign in triggereer')
 
         try{
+            console.log('inside the login function tr ')
             const res = await ServerApi.post('/signIn',{
                 email:email,
                 password:password
-            })
+            },{
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+              })
+            console.log(res)
             setIsLogged(true)
         }catch(err){
             console.log('error on sign in')
