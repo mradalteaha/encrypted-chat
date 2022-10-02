@@ -24,15 +24,21 @@ export async function pickImageChat(){
   
   // let result = await ImagePicker.launchCameraAsync(); 
  
-   let result = await ImagePicker.launchImageLibraryAsync({
+   const result =  ImagePicker.launchImageLibraryAsync({
      mediaTypes: ImagePicker.MediaTypeOptions.All,
      allowsEditing: false,
      quality: 1,
+   })
+   
+   result.then(result => {
+    if (!result.cancelled){
+      return result
+    }
+   }).catch(err =>{
+    return err
    });
    
-   
-   return result ; 
- }
+   }
 
 export async function askForPermission(){
   const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -40,6 +46,26 @@ export async function askForPermission(){
 }
 
 
+export async function createBlob(uri) {
+
+  const blob = await new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    console.log(xhr)
+    xhr.onload = function () {
+      resolve(xhr.response);
+    };
+    xhr.onerror = function (e) {
+      console.log(e);
+      reject(new TypeError("Network request failed"));
+    };
+    xhr.responseType = "blob";
+    xhr.open("GET", uri, true);
+    xhr.send(null);
+  });
+  return blob
+
+ 
+}
 
 export async function uploadImage(uri, path, fName) {
 

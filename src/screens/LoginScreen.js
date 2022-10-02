@@ -10,7 +10,7 @@ import axios from "axios";
 function LoginScreen (props) {
     const [email ,setEmail]= useState('')
     const [password ,setPassWord]= useState('')
-    const {isLogged,setIsLogged}=useContext(GlobalContext)
+    const {isLogged,setIsLogged,currentUser,setCurrentUser}=useContext(GlobalContext)
     async function handleClick(){
         console.log('sign in triggereer')
 
@@ -23,6 +23,10 @@ function LoginScreen (props) {
                     'Content-Type': 'application/json'
                 }
               })
+              if(res.data.currentUser){
+                setCurrentUser(res.data.currentUser)
+              }
+
             setIsLogged(true)
         }catch(err){
             console.log('error on sign in')

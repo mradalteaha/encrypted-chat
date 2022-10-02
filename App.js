@@ -10,112 +10,81 @@ import ContactScreen from './src/screens/ContactScreen';
 import ChatsScreen from './src/screens/ChatsScreen';
 import Profile from './src/screens/Profile';
 import { useAssets } from 'expo-asset';
-import {onAuthStateChanged} from 'firebase/auth'
+import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from './src/firebase';
-import {StyleSheet , View , LogBox ,Text} from 'react-native'
+import { StyleSheet, View, LogBox, Text } from 'react-native'
 import ContextWrapper from './Context/ContextWrapper';
 import GlobalContext from './Context/Context';
-import {theme} from './utils'
+import { theme } from './utils'
 import ChatHeader from './src/components/ChatHeader';
 import ServerApi from './src/Api/ServerApi.js'
 import axios from 'axios'
+import useContacts from './src/hooks/useHooks.js'
+import LoadingContacts from './src/screens/LoadingContacts.js'
 
 LogBox.ignoreLogs([
   "Setting a timer",
   "AsyncStorage has been extracted from react-native core and will be removed in a future release.",
+  ,'AsyncStorage has been extracted from react-native core and will be removed in a future release.'
 ]);
-const App= ()=>{
 
 
-  const [loading , setLoading] = useState(true)
+const App = () => {
 
 
-    const {theme:{colors},currentUser,setCurrentUser,isLogged,setIsLogged} = useContext(GlobalContext) 
-
-  useEffect(()=>{
+  const [loading, setLoading] = useState(true)
 
 
-    (async ()=>{
+  const { theme: { colors }, currentUser,loadingContacts} = useContext(GlobalContext)
 
-      try{
-        setLoading(false)
-        if(isLogged){
-          const res = await ServerApi.get('/signIn',{
-            headers: {
-                'Content-Type': 'application/json'
-            }
-          })
-          
-          if(res.data.user){
-            const user=res.data.user
-  
-            setCurrentUser(user)
-            setLoading(false)
-            setIsLogged(true)
-            console.log('user are logged in ')
-          }
-        }
-  
 
-      }catch(err){
-        console.log(err)
-        console.info(err)
-      console.log('something went wrong')
 
-      }
-  
-    } )()
-  
-  },[isLogged])
+  useEffect(() => {
+    setLoading(false)
+
+  }, [currentUser])
+
 
   const Stack = createNativeStackNavigator();
-  if(loading){
-    return <Text>Loading ... </Text>
+  if (loading || loadingContacts ) {
+    return <LoadingContacts/>
+  }else{
+    return (
+      <NavigationContainer>
+        {!currentUser ? (
+          <Stack.Navigator>
+            <Stack.Screen name="SignUpScreen" component={SignUpScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="LogInScreen" component={LogInScreen} options={{ headerShown: false }} />
+  
+          </Stack.Navigator>
+        ) : (
+          <Stack.Navigator screenOptions={{
+            headerStyle: {
+              backgroundColor: colors.foreground,
+              shadowOpacity: 0,
+              elevation: 0,
+            }
+          }} >
+            {!currentUser.displayName && <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />}
+            <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ title: 'Secret-Chat' }} />
+            <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerTitle: (props) => <ChatHeader {...props} /> }} />
+  
+          </Stack.Navigator>
+  
+  
+        )}
+  
+  
+      </NavigationContainer>
+  
+    )
+
   }
 
-    return (
-      <NavigationContainer> 
-      {!currentUser ? (
-        <Stack.Navigator>
-        <Stack.Screen name="SignUpScreen" component={SignUpScreen} options={{headerShown:false}}  />
-        <Stack.Screen name="LogInScreen" component={LogInScreen} options={{headerShown:false}} />
-
-        </Stack.Navigator>
-      ) : (
-        <Stack.Navigator screenOptions={{headerStyle:{
-          backgroundColor:colors.foreground,
-          shadowOpacity:0,
-          elevation :0,
-        }}} >    
-          <Stack.Screen name="Profile" component={Profile} options={{headerShown:false}}  />
-        <Stack.Screen name="HomeScreen" component={HomeScreen} options={{title:'Secret-Chat'}}  />
-        <Stack.Screen name="ChatScreen" component={ChatScreen} options={{headerTitle:(props)=> <ChatHeader {...props}/>}}  />
-
-            </Stack.Navigator>
-
-
-      )}
-      
-      
-      </NavigationContainer>
-
-    )
-/*
-  return (
-    <NavigationContainer>
-      <Stack.Navigator>
-      <Stack.Screen name="HomeScreen" component={HomeScreen}   />
-      <Stack.Screen name="LogInScreen" component={LogInScreen} options={{headerShown:false}} />
-      <Stack.Screen name="SignUpScreen" component={SignUpScreen} options={{headerShown:false}} />
-      <Stack.Screen name="ChatScreen" component={ChatScreen} options={{headerShown:false}} />
-
-      </Stack.Navigator>
-    </NavigationContainer>
-  );*/
 };
 
 
-function Main(){
+function Main() {
   const [assets] = useAssets(
     require('./assets/icon-square.png'),
     require('./assets/chatbg.png'),
@@ -124,15 +93,21 @@ function Main(){
 
   );
 
-  if(!assets){
-    return <Text>Loading ...</Text>
-  }
-  
-  return  (<ContextWrapper>
 
-   <App/>
-   
-   </ContextWrapper>)
+
+  if (!assets ) {
+ 
+    return <Text>Loading ...</Text>
+  }else{
+  
+    return (<ContextWrapper>
+
+      <App />
+  
+    </ContextWrapper>)
+  }
+
+
 };
 
 export default Main;

@@ -11,6 +11,7 @@ import {GiftedChat, Actions, Bubble,InputToolbar} from 'react-native-gifted-chat
 import { Ionicons ,Fontisto } from "@expo/vector-icons";
 import {uploadImage,pickImageChat} from '../../utils'
 import ImageView from "react-native-image-viewing";
+import ServerApi from '../Api/ServerApi';
 
 const randomId = nanoid()
 
@@ -21,14 +22,18 @@ function ChatScreen(props) {
     //these two states are related to view images 
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImageView, setSeletedImageView] = useState("");
-
-    const {currentUser} = auth;
+    const [counter, setCounter] = useState(0);
+    const [loaded, setloaded] = useState(false);
+    const {theme:{colors} ,currentUser} = useContext(GlobalContext)
+  
     const route = useRoute();
     const room = route.params.room;
     const selectedImage = route.params.image;
     const contactedUser = route.params.user;
 
-    const {theme:{colors}} = useContext(GlobalContext)
+    //console.log('printing the room')
+   // console.log(room)
+  
 
     const senderUser = currentUser.photoURL //asssigning the current user to the sender user
     ? {
@@ -44,6 +49,7 @@ function ChatScreen(props) {
   const roomMessagesRef = collection(db, "rooms", roomId, "messages");//refrecnce for the messegaes on particular room
 
   useEffect(()=>{ //creating room if there is not existed one 
+
     (async()=>{
         if(!room){
             const currentUserData ={
@@ -74,37 +80,146 @@ function ChatScreen(props) {
         const emailHash =`${currentUser.email}:${contactedUser.email}`
 
         setroomHash(emailHash);
-        if (selectedImage && selectedImage.uri) {
+       /* if (selectedImage && selectedImage.uri) {
           await sendImage(selectedImage.uri, emailHash);
-        }
+        }*/
     })()
   },[])
 
-  useEffect(()=>{ //query over the messages in the room at start and append new messages
-    const unsubscribe = onSnapshot(roomMessagesRef,querysnapshot=>{
-        const messagesFirestore = querysnapshot.docChanges().filter(({type})=>type ==='added').map(
-            ({doc})=>{
-                const message = doc.data()
-                return {...message,createdAt : message.createdAt.toDate()}
-            }).sort((a,b)=> b.createdAt.getTime() - a.createdAt.getTime())
-            appendMessages(messagesFirestore) 
-    });
-    return ()=>unsubscribe();
-  },[])
+  useEffect(()=>{ //this use effect run once on the start of the chat and loads the previeous messages 
+    (async ()=>{
+      if(!loaded){
+
+      
+
+      try{
+        const roomID =roomId
+        const dataob ={roomID:roomID}
+        const data = JSON.stringify(dataob);
+      
+        const response = await ServerApi.post('/getMessages',data,{headers: {
+
+          'Content-Type': 'application/json',
+
+        },})
+
+//      console.log(JSON.parse(response.data.messages))
+      appendMessages(response.data.messages) 
+      setloaded(true)
+
+      }
+      catch(err){
+        console.log('error fetching last message ')
+        console.log(err)
+      }
+    }
+    })()
+
+  },[loaded])
+
+
+  async function getNewMessage(){
+
+    try{
+      const roomID =roomId
+      const dataob ={roomID:roomID}
+      const data = JSON.stringify(dataob);
+    
+      const response = await ServerApi.post('/getNewMessage',data,{headers: {
+
+        'Content-Type': 'application/json',
+
+      },})
+
+  //    console.log('inside get new message ');
+  //  console.log(response.data.messages)
+    const newMessage = []
+    newMessage.push(response.data.messages)
+    appendMessages(newMessage)
+    
+
+    return response.data.messages
+    }
+    catch(err){
+      console.log('error fetching last message ')
+      console.log(err)
+    }
+
+  }
+ 
+  /*
+  useEffect(()=>{ //this use effect runs only when new message gets added 
+    (async ()=>{
+
+      try{
+        const roomID =roomId
+        const dataob ={roomID:roomID}
+        const data = JSON.stringify(dataob);
+      
+        const response = await ServerApi.post('/getNewMessage',data,{headers: {
+
+          'Content-Type': 'application/json',
+
+        },})
+
+      console.log(response.data.messages)
+//      appendMessages(response.data.messages)
+      setMessages((previousMessaged)=>[...previousMessaged,response.data.messages])
+
+      }
+      catch(err){
+        console.log('error fetching last message ')
+        console.log(err)
+      }
+
+    })()
+
+  },[counter])*/
 
   const appendMessages = useCallback((messages)=>{ // help function to append messages
     setMessages((previousMessaged) => GiftedChat.append(previousMessaged,messages))
   },[messages])
 
+
+
       
-    
+    /*
     async function onSend(messages=[]){
+      console.log('printing messages onSend function')
+      console.log(messages)
         const writes  = messages.map(m=>addDoc(roomMessagesRef,m)) //adding the new message to the firestore
         const lastMessage= messages[messages.length -1]
         writes.push(updateDoc(roomRef,{lastMessage}))//updating the last message for the look of chats screen
         await Promise.all(writes)
-    }
+    }*/
 
+
+
+    async function onSend(messages=[]){
+
+      try{
+  
+        const roomID =roomId
+        const messageob = JSON.stringify(messages)
+        const dataob ={roomID:roomID,messageob}
+        const data = JSON.stringify(dataob);
+      
+        const response = await ServerApi.post('/messageOnSend',data,{headers: {
+
+          'Content-Type': 'application/json',
+
+      },})
+
+
+      console.log(response.data)
+      //setCounter(counter+1);
+      getNewMessage()
+      }catch(err){
+        console.log('error on send message ')
+        console.log(err)
+      }
+    
+  }
 
     async function sendImage(uri, roomPath) {
         const { url, fileName } = await uploadImage(
@@ -178,6 +293,7 @@ function ChatScreen(props) {
                       text: text.trim(),
                       user,
                       _id: messageIdGenerator(),
+                      createdAt: new Date(),
                     },
                     true
                   );

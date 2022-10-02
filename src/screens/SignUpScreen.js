@@ -19,13 +19,12 @@ function SignUpScreen (props) {
                 email:email,
                 password:password
             })
-            console.log(res)
+           console.log('sign up successful ')
 
         }catch(err){
             console.log('error on sign up')
             console.log(err)
         }
-       // await signUp(email,password)
     
     }
     
