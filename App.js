@@ -21,13 +21,22 @@ import ServerApi from './src/Api/ServerApi.js'
 import axios from 'axios'
 import useContacts from './src/hooks/useHooks.js'
 import LoadingContacts from './src/screens/LoadingContacts.js'
-
+import { AppRegistry } from 'react-native';
+import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 LogBox.ignoreLogs([
   "Setting a timer",
   "AsyncStorage has been extracted from react-native core and will be removed in a future release.",
   ,'AsyncStorage has been extracted from react-native core and will be removed in a future release.'
 ]);
 
+
+
+
+// Initialize Apollo Client
+const client = new ApolloClient({
+  uri: 'localhost:4000/graphql',
+  cache: new InMemoryCache()
+});
 
 const App = () => {
 
@@ -100,14 +109,20 @@ function Main() {
     return <Text>Loading ...</Text>
   }else{
   
-    return (<ContextWrapper>
+    return (
+      <ApolloProvider client={client}>
+    <ContextWrapper>
 
       <App />
   
-    </ContextWrapper>)
+    </ContextWrapper>
+    </ApolloProvider>
+    )
   }
 
 
 };
+AppRegistry.registerComponent('ChatApplication', () => Main);
+
 
 export default Main;

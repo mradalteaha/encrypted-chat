@@ -4,7 +4,7 @@ const { manifest } = Constants;
 const uri = `http://${manifest.debuggerHost
   .split(`:`)
   .shift()
-  .concat(`:5000`)}`;
+  .concat(`:4000`)}`;
 
 export default axios.create({
     baseURL: `${uri}`
