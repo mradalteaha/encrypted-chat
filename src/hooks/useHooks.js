@@ -1,5 +1,6 @@
 import {useEffect,useState} from 'react'
 import * as Contacts from 'expo-contacts'
+
 export default function useContacts(){
 
     const [contacts , setContacts] = useState([])
@@ -23,6 +24,7 @@ export default function useContacts(){
     },[])
     
     return contacts
+
 
 }
 

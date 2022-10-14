@@ -9,7 +9,7 @@ import { auth, db } from '../firebase'
 import { Constants } from 'expo-constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import FormInput from '../components/FormInput'
-import { pickImage, askForPermission, uploadImage } from '../../utils'
+import { pickImage, askForPermission, uploadImage, createBlob } from '../../utils'
 import { theme } from '../../utils';
 import { updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -21,58 +21,9 @@ import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
 
 
 
-const uploadProfilePhotoAPI = async (imageURI) => {
-
-    const formData = new FormData();
-    formData.append('file', {
-        name: new Date() + '_profile',
-        uri: imageURI,
-        type: 'image/jpg',
-    });;
 
 
 
-    try {
-
-        const response = await ServerApi.post('/ProfilePhotoUpload', formData, {
-            headers: {
-
-                'Content-Type': 'multipart/form-data',
-
-            },
-        })
-
-        if (response) {
-            console.log(response.data)
-            return response.data.url
-        }
-    } catch (err) {
-        console.log(err)
-
-        console.log('uploading the photo failed')
-        return err 
-
-    }
-
- 
-
-}
-
-
-async function updateProfileAPI(userData) {
-
-    console.log('inside update profile api printing the userdata')
-    console.log(userData)
-    /*
-        const formData = new FormData();
-    
-        userData.enteries.array.forEach(element => {
-            formData.append(element.key(),element.val());
-        });
-        console.log('printing the form Data in update profile API')
-        console.log(formData)*/
-
-}
 
 
 export default function Profile(props) {
@@ -80,11 +31,12 @@ export default function Profile(props) {
     const [displayName, setDisplayName] = useState('');
     const [selectImage, setSelectedImage] = useState(null);
     const [permissionStatus, permissionStatusUpdate] = useState(null);
+    const [uploading, setUploading] = useState(false);
     const { theme: { colors }, currentUser } = useContext(GlobalContext)
 
     const navigation = useNavigation()
 
-    useEffect(() => {
+    useEffect(() => { //request permission for using the gallery 
         (async () => {
             const status = await askForPermission();
             permissionStatusUpdate(status)
@@ -94,36 +46,46 @@ export default function Profile(props) {
 
 
 
-    const handlePress = async () => {
+    const handlePress = async (selectImage) => {
         const user = currentUser;
 
-        const userData = {
-            displayName: displayName,
-            email: user.email
-        }
-
         if (selectImage) {
-            try {
-               const  photoURL = await uploadProfilePhotoAPI(selectImage.uri);
-                if (photoURL) {
-                    console.log(photoURL)
-                }
+            const formData = new FormData();
+            formData.append('file', {
+                name: new Date() + '_profile',
+                uri: selectImage.uri,
+                type: 'image/jpg',
+            });;
 
-            } catch (err) {
-                console.log('failed !!')
+            formData.append('displayName', displayName)
+            formData.append('email', user.email)
+
+            console.log(selectImage.uri)
+
+            setUploading(true)
+            const photoURL = ServerApi.post('/ProfilePhotoUpload', formData, {
+                headers: {
+
+                    'Content-Type': 'multipart/form-data',
+
+                },
+            })
+
+            photoURL.then(res => {
+                console.log(res.data)
+                alert('uploading completed')
+
+                setUploading(false)
+                navigation.navigate('HomeScreen')
+
+
+            }).catch(err => {
                 console.log(err)
-            }
-            /*
-            photoURL =await uploadProfilePhotoAPI(selectImage.uri).then(async(photo)=>{
-                if(photo){
-                    userData.photoURL = photo
-                }
-            }).then(async ()=>
-                await updateProfileAPI(userData) 
-            ).catch(err=>{console.log(err)}).finally(()=>{
-                console.log('finally block')
-                //navigation.navigate('HomeScreen')
-            })*/
+                alert('uploading failed try again')
+                setUploading(false)
+            })
+
+
         }
 
 
@@ -131,11 +93,15 @@ export default function Profile(props) {
 
 
 
-    async function handleProfileImage() {
-        const result = await pickImage()
-        if (!result.cancelled) {
-            setSelectedImage(result)
-        }
+    async function handleProfileImage() { //this function to upload photo from the phone gallery and set the current state
+        try {
+            const result = await pickImage()
+            if (result) {
+                setSelectedImage(result)
+            }
+
+        } catch (err) { }
+
     }
 
 
@@ -171,7 +137,7 @@ export default function Profile(props) {
 
 
                         <View style={styles.ButtonsView}>
-                            <Button title={'Next'} onPress={handlePress} disabled={!displayName || !selectImage} />
+                            <Button title={'Next'} onPress={() => handlePress(selectImage)} disabled={!displayName || !selectImage || uploading} />
 
                         </View>
 

@@ -11,6 +11,10 @@ const GlobalContext = React.createContext({
   setCurrentUser:()=>{},
   isLogged:false,
   setIsLogged:()=>{},
+  myContacts:[],
+  setMyContacts:()=>{},
+  loadingContacts:null,
+  setLoadingContacts:()=>{},
 
 
 });

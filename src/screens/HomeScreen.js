@@ -44,7 +44,9 @@ function HomeScreen(props) {
               },
             };
           }}
-          initialRouteName="chats"
+          initialRouteName="chats" // this route is the default after login
+          //initialRouteName="contacts" // testing for the contact page 
+
         >
           <Tab.Screen name="contacts" component={ContactScreen} />
           <Tab.Screen name="chats" component={ChatsScreen} />
