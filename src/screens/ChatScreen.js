@@ -90,7 +90,24 @@ function ChatScreen(props) {
     })()
   }, [])
 
-  useEffect(() => { //this use effect run once on the start of the chat and loads the previeous messages 
+
+
+
+  //older implementation of the use hook to render the new messages recieved from the firebase room //
+
+  useEffect(()=>{ //query over the messages in the room at start and append new messages
+    const unsubscribe = onSnapshot(roomMessagesRef,querysnapshot=>{
+        const messagesFirestore = querysnapshot.docChanges().filter(({type})=>type ==='added').map(
+            ({doc})=>{
+                const message = doc.data()
+                return {...message,createdAt : message.createdAt.toDate()}
+            }).sort((a,b)=> b.createdAt.getTime() - a.createdAt.getTime())
+            appendMessages(messagesFirestore) 
+    });
+    return ()=>unsubscribe();
+  },[])
+
+ /* useEffect(() => { //this use effect run once on the start of the chat and loads the previeous messages 
     (async () => {
       if (!loaded) {
 
@@ -122,7 +139,7 @@ function ChatScreen(props) {
     })()
 
   }, [loaded])
-
+*/
 
   async function getNewMessage() {
 
@@ -220,31 +237,15 @@ function ChatScreen(props) {
   }
 */
 
+  
   // older implementation using firebase directly
   async function onSend(messages=[]){
-    console.log('printing messages onSend function')
-    console.log(messages)
+ 
       const writes  = messages.map(m=>addDoc(roomMessagesRef,m)) //adding the new message to the firestore
       const lastMessage= messages[messages.length -1]
       writes.push(updateDoc(roomRef,{lastMessage}))//updating the last message for the look of chats screen
       await Promise.all(writes)
   }
-
-
-  //older implementation of the use hook to render the new messages recieved from the firebase room //
-
-  useEffect(()=>{ //query over the messages in the room at start and append new messages
-    const unsubscribe = onSnapshot(roomMessagesRef,querysnapshot=>{
-        const messagesFirestore = querysnapshot.docChanges().filter(({type})=>type ==='added').map(
-            ({doc})=>{
-                const message = doc.data()
-                return {...message,createdAt : message.createdAt.toDate()}
-            }).sort((a,b)=> b.createdAt.getTime() - a.createdAt.getTime())
-            appendMessages(messagesFirestore) 
-    });
-    return ()=>unsubscribe();
-  },[])
-
 
   
 
