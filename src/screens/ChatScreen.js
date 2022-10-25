@@ -156,7 +156,7 @@ function ChatScreen(props) {
   }
 
   /*
-  useEffect(()=>{ //this use effect runs only when new message gets added 
+  useEffect(()=>{ //this use effect runs only when new message gets added it can be disposed when we implement subscription and ioSocket 
     (async ()=>{
 
       try{
@@ -323,7 +323,7 @@ function ChatScreen(props) {
               onPress={() => {
                 if (text && onSend) {
                   onSend(
-                    {
+                    {// represent of the message object 
                       text: text.trim(),
                       user,
                       _id: messageIdGenerator(),
