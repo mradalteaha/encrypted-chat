@@ -30,13 +30,7 @@ export async function pickImageChat(){
      quality: 1,
    })
    
-   result.then(result => {
-    if (!result.cancelled){
-      return result
-    }
-   }).catch(err =>{
-    return err
-   });
+   return result
    
    }
 

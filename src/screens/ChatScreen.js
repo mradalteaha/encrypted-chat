@@ -31,8 +31,7 @@ function ChatScreen(props) {
   const selectedImage = route.params.image;
   const contactedUser = route.params.user;
 
-  //console.log('printing the room')
-  // console.log(room)
+
 
 
   const senderUser = currentUser.photoURL //asssigning the current user to the sender user
@@ -84,9 +83,9 @@ function ChatScreen(props) {
       const emailHash = `${currentUser.email}:${contactedUser.email}`
 
       setroomHash(emailHash);
-      /* if (selectedImage && selectedImage.uri) {
+       if (selectedImage && selectedImage.uri) {
          await sendImage(selectedImage.uri, emailHash);
-       }*/
+       }
     })()
   }, [])
 
@@ -107,135 +106,10 @@ function ChatScreen(props) {
     return ()=>unsubscribe();
   },[])
 
- /* useEffect(() => { //this use effect run once on the start of the chat and loads the previeous messages 
-    (async () => {
-      if (!loaded) {
-
-
-
-        try {
-          const roomID = roomId
-          const dataob = { roomID: roomID }
-          const data = JSON.stringify(dataob);
-
-          const response = await ServerApi.post('/getMessages', data, {
-            headers: {
-
-              'Content-Type': 'application/json',
-
-            },
-          })
-
-          //      console.log(JSON.parse(response.data.messages))
-          appendMessages(response.data.messages)
-          setloaded(true)
-
-        }
-        catch (err) {
-          console.log('error fetching last message ')
-          console.log(err)
-        }
-      }
-    })()
-
-  }, [loaded])
-*/
-
-  async function getNewMessage() {
-
-    try {
-      const roomID = roomId
-      const dataob = { roomID: roomID }
-      const data = JSON.stringify(dataob);
-
-      const response = await ServerApi.post('/getNewMessage', data, {
-        headers: {
-
-          'Content-Type': 'application/json',
-
-        },
-      })
-
-      //    console.log('inside get new message ');
-      //  console.log(response.data.messages)
-      const newMessage = []
-      newMessage.push(response.data.messages)
-      appendMessages(newMessage)
-
-
-      return response.data.messages
-    }
-    catch (err) {
-      console.log('error fetching last message ')
-      console.log(err)
-    }
-
-  }
-
-  /*
-  useEffect(()=>{ //this use effect runs only when new message gets added it can be disposed when we implement subscription and ioSocket 
-    (async ()=>{
-
-      try{
-        const roomID =roomId
-        const dataob ={roomID:roomID}
-        const data = JSON.stringify(dataob);
-      
-        const response = await ServerApi.post('/getNewMessage',data,{headers: {
-
-          'Content-Type': 'application/json',
-
-        },})
-
-      console.log(response.data.messages)
-//      appendMessages(response.data.messages)
-      setMessages((previousMessaged)=>[...previousMessaged,response.data.messages])
-
-      }
-      catch(err){
-        console.log('error fetching last message ')
-        console.log(err)
-      }
-
-    })()
-
-  },[counter])*/
-
-
 
   const appendMessages = useCallback((messages) => { // help function to append messages
     setMessages((previousMessaged) => GiftedChat.append(previousMessaged, messages))
   }, [messages])
-/*
-  async function onSend(messages = []) {
-
-    try {
-
-      console.log(messages)
-      const roomID = roomId
-      const messageob = JSON.stringify(messages)
-      const dataob = { roomID: roomID, messageob }
-      const data = JSON.stringify(dataob);
-
-      const response = await ServerApi.post('/messageOnSend', data, {
-        headers: {
-
-          'Content-Type': 'application/json',
-
-        },
-      })
-
-
-      console.log(response.data)
-      //setCounter(counter+1);
-      getNewMessage()
-    } catch (err) {
-      console.log('error on send message ')
-      console.log(err)
-    }
-
-  }
-*/
 
   
   // older implementation using firebase directly
