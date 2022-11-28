@@ -125,7 +125,6 @@ function ChatScreen(props) {
 
 
 
-
   //send image to chat //older implementation // currently doesn't work needs to be fixed after adding the graphql implementation 
   async function sendImage(uri, roomPath) {
     const { url, fileName } = await uploadImage(

@@ -4,6 +4,7 @@ import { TextInput } from "react-native-gesture-handler";
 import MyButton from '../components/MyButton'
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
 import ServerApi from "../Api/ServerApi";
+import {signUp} from './../firebase.js'
 
 function SignUpScreen (props) {
 
@@ -15,15 +16,19 @@ function SignUpScreen (props) {
     async function handleClick(){
 
         try{
+            /*
             const res = await ServerApi.post('/signUp',{
                 email:email,
                 password:password
-            })
+            })*/
+
+            const res = await signUp(email,password)
+
            console.log('sign up successful ')
 
         }catch(err){
             console.log('error on sign up')
-            console.log(err)
+            console.error(err)
         }
     
     }
