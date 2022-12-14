@@ -10,13 +10,14 @@ import ServerApi from '../Api/ServerApi.js'
 
 
 function ManagerScreen(props) {
+    const {currentUser}=auth 
 
-    const {theme:{colors},currentUser,setCurrentUser} = useContext(GlobalContext) 
+    const {theme:{colors},setCurrentUser} = useContext(GlobalContext) 
 
    async function SignOutfun(){ // sign out function for future use 
 
         try{
-            const res = await ServerApi.get('signOut')
+            const res = signOut(auth)
             console.log(res.data)
             setCurrentUser(null);
         }

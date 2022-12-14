@@ -9,6 +9,7 @@ import useUsers from '../hooks/useUsers';
 import ItemList from '../components/ItemList';
 import { useRoute } from '@react-navigation/native';
 import ServerApi from '../Api/ServerApi';
+import { collection, onSnapshot, query, QuerySnapshot, where,getDocs,getDoc} from 'firebase/firestore'
  
 function ContactScreen(props) {
 
@@ -25,12 +26,18 @@ function ContactScreen(props) {
 
             try {
 
+                const usersRef = collection(db,'users') 
+                const docsSnap = await getDocs(usersRef);
+                const usersArray =[];
+            
+                docsSnap.forEach(doc => {
+                    usersArray.push(doc.data())
+                //    console.log(doc.data());
+                })
+
                 //    console.log('-------------------------------------')
                 //   console.log('inside get users use effect')
 
-                const result = await ServerApi.get('/getUsers') //fetching users from the users collection database
-
-                const usersArray = result.data.users;
                 //    console.log('result of users array')
                 //    console.log(usersArray);
 

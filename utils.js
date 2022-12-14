@@ -3,12 +3,9 @@ import "react-native-get-random-values";
 import { nanoid }from 'nanoid'
 import {ref, uploadBytes, getDownloadURL} from 'firebase/storage'
 import { storage } from "./src/firebase"
-
-
 export async function pickImage(){
   
  // let result = await ImagePicker.launchCameraAsync(); 
-
   let result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.All,
     allowsEditing: true,
@@ -21,52 +18,26 @@ export async function pickImage(){
 }
 
 export async function pickImageChat(){
-  
+
   // let result = await ImagePicker.launchCameraAsync(); 
- 
-   const result =  ImagePicker.launchImageLibraryAsync({
+
+   let result = await ImagePicker.launchImageLibraryAsync({
      mediaTypes: ImagePicker.MediaTypeOptions.All,
      allowsEditing: false,
      quality: 1,
-   })
-   
-   return result
-   
-   }
+   });
+
+
+   return result ; 
+ }
 
 export async function askForPermission(){
   const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync()
   return status ; 
 }
-
-
-export async function createBlob(uri) {
-
-  const blob = await new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    console.log(xhr)
-    xhr.onload = function () {
-      resolve(xhr.response);
-    };
-    xhr.onerror = function (e) {
-      console.log(e);
-      reject(new TypeError("Network request failed"));
-    };
-    xhr.responseType = "blob";
-    xhr.open("GET", uri, true);
-    xhr.send(null);
-  });
-  return blob
-
- 
-}
-
 export async function uploadImage(uri, path, fName) {
-
   const blob = await new Promise((resolve, reject) => {
-    console.log('starting creating blob')
     const xhr = new XMLHttpRequest();
-    console.log(xhr)
     xhr.onload = function () {
       resolve(xhr.response);
     };
@@ -78,20 +49,16 @@ export async function uploadImage(uri, path, fName) {
     xhr.open("GET", uri, true);
     xhr.send(null);
   });
-
   const fileName = fName || nanoid();
   const imageRef = ref(storage, `${path}/${fileName}.jpeg`);
-
   const snapshot = await uploadBytes(imageRef, blob, {
     contentType: "image/jpeg",
   });
-
   blob.close();
-
   const url = await getDownloadURL(snapshot.ref);
-
   return { url, fileName };
 }
+
 
 const palette = {
   tealBlue: "rgb(165, 241, 233)",

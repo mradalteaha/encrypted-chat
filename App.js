@@ -31,20 +31,13 @@ LogBox.ignoreLogs([
 
 
 
-
-// Initialize Apollo Client
-const client = new ApolloClient({
-  uri: 'localhost:4000/graphql',
-  cache: new InMemoryCache()
-});
-
 const App = () => {
 
-
+const {currentUser}=auth
   const [loading, setLoading] = useState(true)
 
 
-  const { theme: { colors }, currentUser,loadingContacts} = useContext(GlobalContext)
+  const { theme: { colors },loadingContacts} = useContext(GlobalContext)
 
 
 
@@ -110,13 +103,13 @@ function Main() {
   }else{
   
     return (
-      <ApolloProvider client={client}>
+  
     <ContextWrapper>
 
       <App />
   
     </ContextWrapper>
-    </ApolloProvider>
+
     )
   }
 

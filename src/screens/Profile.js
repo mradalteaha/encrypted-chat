@@ -1,117 +1,68 @@
 import React, { useContext, useEffect } from 'react'
-import { StatusBar } from 'expo-status-bar'
-import { useState } from "react";
-import { Image, Button, Text, View, SafeAreaView, StyleSheet, KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
+import {StatusBar} from 'expo-status-bar'
+import {useState} from "react";
+import {Image,Button,Text, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard, TouchableOpacity} from 'react-native';
 import { TextInput } from "react-native-gesture-handler";
 import MyButton from '../components/MyButton'
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
-import { auth, db } from '../firebase'
+import {auth, db} from '../firebase'
 import { Constants } from 'expo-constants';
-import { MaterialCommunityIcons } from '@expo/vector-icons'
-import FormInput from '../components/FormInput'
-import { pickImage, askForPermission, uploadImage, createBlob } from '../../utils'
+import {MaterialCommunityIcons} from '@expo/vector-icons'
+import Context from '../../Context/Context'
+import FormInput from '../components/FormInput' 
+import {pickImage ,askForPermission,uploadImage} from '../../utils'
 import { theme } from '../../utils';
 import { updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
-import GlobalContext from '../../Context/Context';
-import ServerApi from '../Api/ServerApi';
-import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
-
-
-
-
-
-
-
-
-
 export default function Profile(props) {
 
-    const [displayName, setDisplayName] = useState('');
-    const [selectImage, setSelectedImage] = useState(null);
-    const [permissionStatus, permissionStatusUpdate] = useState(null);
-    const [uploading, setUploading] = useState(false);
-    const { theme: { colors }, currentUser } = useContext(GlobalContext)
-
+    
+    const [displayName , setDisplayName ] = useState('');
+    const [selectImage , setSelectedImage] = useState(null);
+    const [permissionStatus , permissionStatusUpdate] = useState(null);
+    const {theme:{colors}} = useContext(Context)
     const navigation = useNavigation()
 
-    useEffect(() => { //request permission for using the gallery 
-        (async () => {
+
+    useEffect(()=>{
+        (async ()=>{
             const status = await askForPermission();
             permissionStatusUpdate(status)
         })()
-    }, [])
-
-
-
-
-    const handlePress = async (selectImage) => {
-        const user = currentUser;
-
-        if (selectImage) {
-            const formData = new FormData();
-            formData.append('file', {
-                name: new Date() + '_profile',
-                uri: selectImage.uri,
-                type: 'image/jpg',
-            });;
-
-            formData.append('displayName', displayName)
-            formData.append('email', user.email)
-
-            console.log(selectImage.uri)
-
-            setUploading(true)
-            const photoURL = ServerApi.post('/ProfilePhotoUpload', formData, {
-                headers: {
-
-                    'Content-Type': 'multipart/form-data',
-
-                },
-            })
-
-            photoURL.then(res => {
-                console.log(res.data)
-                alert('uploading completed')
-
-                setUploading(false)
-                navigation.navigate('HomeScreen')
-
-
-            }).catch(err => {
-                console.log(err)
-                alert('uploading failed try again')
-                setUploading(false)
-            })
-
-
+    },[])
+    async function handlePress(){
+        const user = auth.currentUser;
+        let photoURL 
+        if(selectImage){
+            const {url} = await uploadImage(selectImage.uri ,`Images/${user.uid}`,"profilePicture" )
+            photoURL = url;
         }
-
-
+        
+        const userData = {
+            displayName,
+            email: user.email
+        }
+        if(photoURL){
+            userData.photoURL = photoURL
+        }
+        await Promise.all([updateProfile(user,userData),setDoc(doc(db,'users',user.uid),{...userData,uid:user.uid})])
+            
+        navigation.navigate('HomeScreen')
+    
     }
-
-
-
-    async function handleProfileImage() { //this function to upload photo from the phone gallery and set the current state
-        try {
-            const result = await pickImage()
-            if (result) {
-                setSelectedImage(result)
-            }
-
-        } catch (err) { }
-
+    async function handleProfileImage(){
+        const result = await pickImage()
+        if(!result.cancelled){
+            setSelectedImage(result)
+        }
     }
-
-
-    if (!permissionStatus) {
+    if(!permissionStatus){
         return <Text>Loading ...</Text>
     }
-    if (permissionStatus !== 'granted') {
+    if(permissionStatus !== 'granted'){
         return <Text> you need to grant permission </Text>
-
-    }
+    } 
 
     return (
         <React.Fragment>
