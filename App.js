@@ -33,7 +33,7 @@ LogBox.ignoreLogs([
 
 const App = () => {
 
-const {currentUser}=auth
+  const [currentUser, setCurrentUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
 
@@ -41,10 +41,15 @@ const {currentUser}=auth
 
 
 
-  useEffect(() => {
-    setLoading(false)
-
-  }, [currentUser])
+  useEffect(()=>{
+    const unsubscribe = onAuthStateChanged(auth,user =>{
+      setLoading(false)
+      if(user){
+        setCurrentUser(user)
+      }
+    })
+    return ()=>unsubscribe();
+  },[])
 
 
   const Stack = createNativeStackNavigator();
@@ -81,7 +86,7 @@ const {currentUser}=auth
   
     )
 
-  }
+        }
 
 };
 

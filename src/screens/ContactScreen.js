@@ -1,3 +1,4 @@
+import { collection, onSnapshot, query, QuerySnapshot, where,getDocs,getDoc } from 'firebase/firestore';
 import React, { cloneElement, useContext, useEffect, useState } from 'react';
 import { SafeAreaView, View, Text, StyleSheet, FlatList } from 'react-native';
 import GlobalContext from '../../Context/Context';
@@ -5,13 +6,13 @@ import MyButton from '../components/MyButton'
 import { auth, db } from '../firebase'
 import Contacts from '../components/Contacts';
 import useContacts from '../hooks/useHooks';
-import useUsers from '../hooks/useUsers';
 import ItemList from '../components/ItemList';
 import { useRoute } from '@react-navigation/native';
 import ServerApi from '../Api/ServerApi';
-import { collection, onSnapshot, query, QuerySnapshot, where,getDocs,getDoc} from 'firebase/firestore'
- 
+
 function ContactScreen(props) {
+
+    const contacts =useContacts()
 
     //const contacts = useContacts() // fetching contacts from the phone
     const route = useRoute() //using route for navigation and passing data
@@ -26,6 +27,9 @@ function ContactScreen(props) {
 
             try {
 
+                //    console.log('-------------------------------------')
+                //   console.log('inside get users use effect')
+
                 const usersRef = collection(db,'users') 
                 const docsSnap = await getDocs(usersRef);
                 const usersArray =[];
@@ -34,17 +38,16 @@ function ContactScreen(props) {
                     usersArray.push(doc.data())
                 //    console.log(doc.data());
                 })
-
-                //    console.log('-------------------------------------')
-                //   console.log('inside get users use effect')
-
-                //    console.log('result of users array')
-                //    console.log(usersArray);
-
+                console.log('printing usercollection')
+                console.log(usersArray)
                 setUsersCollection(usersArray) // setting the users found on the database to the users state hook 
 
                 //   console.log('------------------end of use effect ---------------')
 
+                console.log("inside contactsScreen")
+
+                console.log(`printing my contacts `)
+                myContacts.forEach(e =>console.log(e))
 
             } catch (err) {
                 console.log('error occured on the useEffect useUsers');
@@ -66,8 +69,14 @@ function ContactScreen(props) {
             {usersCollection ?
                 <FlatList style={{ flex: 1, padding: 10 }} data={myContacts} keyExtractor={(item, i) => item.email}
 
-                    renderItem={({ item }) => <ContactPreview contact={item} image={image} usersCollection={usersCollection} />}
+                    renderItem={({ item }) => <ContactPreview contact={item} image={image}  />}
                 /> : null}
+
+
+<FlatList style={{flex:1,padding:10}} data={contacts} keyExtractor={(item,i)=> item.email}
+
+            renderItem={({item})=> <ContactPreview contact={item} image={image}/>}
+             />   
 
 
         </SafeAreaView>
@@ -76,6 +85,7 @@ function ContactScreen(props) {
 }
 
 const styles = StyleSheet.create({
+
     container: {
         backgroundColor: '#fff',
         flex: 1,
@@ -85,6 +95,7 @@ const styles = StyleSheet.create({
 
     },
 
+
     header: {
         color: 'red',
         fontSize: 50,
@@ -93,27 +104,30 @@ const styles = StyleSheet.create({
 
 });
 
-function ContactPreview({ contact, image, usersCollection }) {
+
+function ContactPreview({ contact, image }) {
     const { unfilteredRooms } = useContext(GlobalContext);
     const [user, setUser] = useState(contact);
 
+    
+
+    useEffect(()=>{
+        const q = query(collection(db,'users'),where('email','==',contact.email))
+
+        const unsubscribe = onSnapshot(q,snapshot=>{
+            if(snapshot.docs.length){
+                const userDoc = snapshot.docs[0].data()
+                setUser((prevUser)=>({...prevUser , userDoc}))
+            }
+        })
+        return () => unsubscribe()
+    },[])
 
     ///////////need few fixes with the quer
 
-    useEffect(() => {
-        const userFromCollection = usersCollection.find((userDoc) => (userDoc.email == contact.email))
-
-        if (userFromCollection) {
-
-            setUser((prevUser) => ({ ...prevUser, userFromCollection }))
-        }
-
-    }, [])
+  
     return (
-        <ItemList style={{ marginTop: 7 }} type='contacts' user={user}
-            image={image} room={unfilteredRooms.find((room) =>
-                room.participantsArray.includes(contact.email)
-            )} />
+    <ItemList style={{marginTop:7}} type='contacts' user={user} image={image} room={unfilteredRooms.find((room) => room.participantsArray.includes(contact.email))} />
     )
 
 }

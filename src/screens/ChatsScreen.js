@@ -31,12 +31,16 @@ export default function ChatsScreen() {
         return ()=> unsubscribe();
     },[])
 
-    function getContactedUser(user , myContacts){
-        const userContact = myContacts.find((c)=>c.email ===user.email);
-        if(userContact && userContact.contactName ){
+    function getContactedUser(user , contacts){
+        console.log(`evaluating my contacts ${contacts}`)
+        if(contacts){
+            const userContact = contacts.find((c)=>c.email ===user.email);
+            if(userContact && userContact.contactName ){
 
-            return {...user , contactName : userContact.contactName}
+                return {...user , contactName : userContact.contactName}
+            }
         }
+       
 
     }
 
