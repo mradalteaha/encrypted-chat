@@ -16,15 +16,12 @@ function ManagerScreen(props) {
 
    async function SignOutfun(){ // sign out function for future use 
 
-        try{
-            const res = signOut(auth)
-            console.log(res.data)
-            setCurrentUser(null);
-        }
-        catch(err){
-            console.log(err)
-        }
-        
+       
+    signOut(auth).then(() => {
+        setCurrentUser(null)
+    }).catch((error) => {
+        // An error happened.
+      });
     }
   
     function goToChat(){

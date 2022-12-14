@@ -21,42 +21,7 @@ function ContactScreen(props) {
     const image = route.params && route.params.image  //extracting the image if founded on the route the && to check if it exist on passed arguments
 
 
-    useEffect(() => {
-
-        (async () => {
-
-            try {
-
-                //    console.log('-------------------------------------')
-                //   console.log('inside get users use effect')
-
-                const usersRef = collection(db,'users') 
-                const docsSnap = await getDocs(usersRef);
-                const usersArray =[];
-            
-                docsSnap.forEach(doc => {
-                    usersArray.push(doc.data())
-                //    console.log(doc.data());
-                })
-                console.log('printing usercollection')
-                console.log(usersArray)
-                setUsersCollection(usersArray) // setting the users found on the database to the users state hook 
-
-                //   console.log('------------------end of use effect ---------------')
-
-                console.log("inside contactsScreen")
-
-                console.log(`printing my contacts `)
-                myContacts.forEach(e =>console.log(e))
-
-            } catch (err) {
-                console.log('error occured on the useEffect useUsers');
-                console.log(err)
-            }
-
-        })()
-    }, [])
-
+    
 
     if (!myContacts) {
         return (<SafeAreaView style={styles.container}>
@@ -67,18 +32,7 @@ function ContactScreen(props) {
     return (
         <SafeAreaView style={styles.container}>
             {usersCollection ?
-                <FlatList style={{ flex: 1, padding: 10 }} data={myContacts} keyExtractor={(item, i) => item.email}
-
-                    renderItem={({ item }) => <ContactPreview contact={item} image={image}  />}
-                /> : null}
-
-
-<FlatList style={{flex:1,padding:10}} data={contacts} keyExtractor={(item,i)=> item.email}
-
-            renderItem={({item})=> <ContactPreview contact={item} image={image}/>}
-             />   
-
-
+                <FlatList style={{ flex: 1, padding: 10 }} data={myContacts} keyExtractor={(item, i) => item.email}renderItem={({ item }) => <ContactPreview contact={item} image={image}  />} /> : null}        
         </SafeAreaView>
     )
             }
@@ -108,8 +62,8 @@ const styles = StyleSheet.create({
 function ContactPreview({ contact, image }) {
     const { unfilteredRooms } = useContext(GlobalContext);
     const [user, setUser] = useState(contact);
-
-    
+// console.log("@@@@@@@@@@@@@@@@@@@@@@@@@");
+//     console.log(contact);
 
     useEffect(()=>{
         const q = query(collection(db,'users'),where('email','==',contact.email))
@@ -127,7 +81,7 @@ function ContactPreview({ contact, image }) {
 
   
     return (
-    <ItemList style={{marginTop:7}} type='contacts' user={user} image={image} room={unfilteredRooms.find((room) => room.participantsArray.includes(contact.email))} />
+    <ItemList style={{marginTop:7}} type='contacts' user={user} image={user.Image} room={unfilteredRooms.find((room) => room.participantsArray.includes(contact.email))} />
     )
 
 }

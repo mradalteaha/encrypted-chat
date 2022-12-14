@@ -21,9 +21,9 @@ export default function LoadingContacts() {
                fields:[Contacts.Fields.Emails , Contacts.IMAGE]
            })
            if(data.length>0){
-            console.log('inside loading contacts screen')
-            console.log(data.length)
-            setMyContacts(
+            // console.log('inside loading contacts screen')
+            // console.log(data.length)
+             setMyContacts(
                    data.filter(
                        c => c.firstName && c.emails && c.emails[0].email
 

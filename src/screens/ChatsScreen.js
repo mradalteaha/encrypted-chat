@@ -10,7 +10,7 @@ import useContacts from '../hooks/useHooks';
 export default function ChatsScreen() {
     const {currentUser} = auth // grabing the current signed in user via firebase auth
     const contacts =useContacts()
-    const {rooms,setRooms,setUnfilteredRooms,myContacts} = useContext(GlobalContext) // getting the global context provider
+    const {rooms,setRooms,setUnfilteredRooms,myContacts } = useContext(GlobalContext) // getting the global context provider
     const chatsQuery = query(// query on firestore collection 
         collection(db,'rooms'),
         where('participantsArray','array-contains',currentUser.email)
@@ -31,10 +31,10 @@ export default function ChatsScreen() {
         return ()=> unsubscribe();
     },[])
 
-    function getContactedUser(user , contacts){
-        console.log(`evaluating my contacts ${contacts}`)
-        if(contacts){
-            const userContact = contacts.find((c)=>c.email ===user.email);
+    function getContactedUser(user , myContacts){
+        // console.log(`evaluating my contacts ${myContacts}`)
+        if(myContacts){
+            const userContact = myContacts.find((c)=>c.email ===user.email);
             if(userContact && userContact.contactName ){
 
                 return {...user , contactName : userContact.contactName}
@@ -53,8 +53,7 @@ export default function ChatsScreen() {
                 key={room.id}
                 room={room}
                 time={room.lastMessage.createdAt}
-
-                user={getContactedUser(room.contactedUser)}
+                user={getContactedUser(room.contactedUser,myContacts)}
             />)}
 
 

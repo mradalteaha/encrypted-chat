@@ -33,11 +33,10 @@ LogBox.ignoreLogs([
 
 const App = () => {
 
-  const [currentUser, setCurrentUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
 
-  const { theme: { colors },loadingContacts} = useContext(GlobalContext)
+  const { theme: { colors },loadingContacts,currentUser,setCurrentUser} = useContext(GlobalContext)
 
 
 
@@ -49,7 +48,7 @@ const App = () => {
       }
     })
     return ()=>unsubscribe();
-  },[])
+  },[currentUser])
 
 
   const Stack = createNativeStackNavigator();

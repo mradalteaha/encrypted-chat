@@ -10,7 +10,7 @@ export default function ItemList({type,description,user,style,time ,room ,image,
     const {theme:{colors}} = useContext(GlobalContext)
 
    
-
+  // console.log(user);
 
   return (
     <TouchableOpacity style={{height:80,borderRadius:30, ...style}} onPress={()=>navigation.navigate("ChatScreen",{user,room,image})}>

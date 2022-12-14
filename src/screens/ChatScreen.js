@@ -16,7 +16,7 @@ import ServerApi from '../Api/ServerApi';
 const randomId = nanoid()
 
 function ChatScreen(props) {
-
+  const {currentUser} = auth;
   const [roomHash, setroomHash] = useState('');//for generating path in the database 
   const [messages, setMessages] = useState([]);//to be able to access the data and manipulate the messages
   //these two states are related to view images 
@@ -24,7 +24,7 @@ function ChatScreen(props) {
   const [selectedImageView, setSeletedImageView] = useState("");
   const [counter, setCounter] = useState(0);
   const [loaded, setloaded] = useState(false);
-  const { theme: { colors }, currentUser } = useContext(GlobalContext)
+  const { theme: { colors } } = useContext(GlobalContext)
 
   const route = useRoute();
   const room = route.params.room;
@@ -38,9 +38,9 @@ function ChatScreen(props) {
     ? {
       name: currentUser.displayName,
       _id: currentUser.uid,
-      avatar: currentUser.photoURL,
+      photoURL: currentUser.photoURL,
     }
-    : { name: currentUser.displayName, _id: currentUser.uid };
+    : { name: currentUser.displayName, _id: currentUser.uid  ,photoURL: require('../../assets/icon-square.png')    };
 
   const roomId = room ? room.id : randomId; //if there are no existing room generate a new room id
 
@@ -64,7 +64,8 @@ function ChatScreen(props) {
         }
         const contactedUserData = {
           displayName: contactedUser.contactName || contactedUser.displayName || '',
-          email: contactedUser.email
+          email: contactedUser.email,
+
         }
         if (contactedUser.photoURL) {
           contactedUserData.photoURL = contactedUser.photoURL

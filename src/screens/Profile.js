@@ -88,7 +88,7 @@ export default function Profile(props) {
 
 
                         <View style={styles.ButtonsView}>
-                            <Button title={'Next'} onPress={() => handlePress(selectImage)} disabled={!displayName || !selectImage || uploading} />
+                            <Button title={'Next'} onPress={() => handlePress(selectImage)} disabled={!displayName || !selectImage } />
 
                         </View>
 
