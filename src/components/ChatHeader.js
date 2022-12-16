@@ -14,7 +14,7 @@ export default function ChatHeader(props) {
       </View>
       <View style={{marginLeft:10,alignItems:'center',justifyContent:'center'}}>
         <Text style={{color:colors.white , fontSize:18,}}>
-        { route.params.user.contactName ||route.params.user.displayName }</Text>
+        { route.params.user.displayName }</Text>
       </View>
     </View>
   )

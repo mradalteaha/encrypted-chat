@@ -4,6 +4,8 @@ import { TextInput } from "react-native-gesture-handler";
 import MyButton from '../components/MyButton'
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
 import {signUp ,signIn} from '../firebase'
+
+
 function LoginScreen (props) {
     const [email ,setEmail]= useState('')
     const [password ,setPassWord]= useState('')
@@ -126,7 +128,6 @@ const styles =StyleSheet.create({
         borderRadius:10,
         paddingLeft:20,
         marginTop:20,
-        multiline:false,
         
     },
     ButtonsView:{

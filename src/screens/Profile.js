@@ -1,15 +1,11 @@
 import React, { useContext, useEffect } from 'react'
-import {StatusBar} from 'expo-status-bar'
 import {useState} from "react";
 import {Image,Button,Text, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard, TouchableOpacity} from 'react-native';
 import { TextInput } from "react-native-gesture-handler";
-import MyButton from '../components/MyButton'
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
 import {auth, db} from '../firebase'
-import { Constants } from 'expo-constants';
 import {MaterialCommunityIcons} from '@expo/vector-icons'
 import Context from '../../Context/Context'
-import FormInput from '../components/FormInput' 
 import {pickImage ,askForPermission,uploadImage} from '../../utils'
 import { theme } from '../../utils';
 import { updateProfile } from 'firebase/auth';

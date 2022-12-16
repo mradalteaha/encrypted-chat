@@ -17,12 +17,8 @@ import ContextWrapper from './Context/ContextWrapper';
 import GlobalContext from './Context/Context';
 import { theme } from './utils'
 import ChatHeader from './src/components/ChatHeader';
-import ServerApi from './src/Api/ServerApi.js'
-import axios from 'axios'
-import useContacts from './src/hooks/useHooks.js'
 import LoadingContacts from './src/screens/LoadingContacts.js'
 import { AppRegistry } from 'react-native';
-import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 LogBox.ignoreLogs([
   "Setting a timer",
   "AsyncStorage has been extracted from react-native core and will be removed in a future release.",

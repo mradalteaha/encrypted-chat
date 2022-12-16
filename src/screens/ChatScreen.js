@@ -1,7 +1,6 @@
 //@refresh reset
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import "react-native-get-random-values"; // to generate random ids 
-import { nanoid } from 'nanoid'// to generate random ids
 import { Image, TouchableOpacity, View, StyleSheet, ImageBackground } from 'react-native';
 import GlobalContext from '../../Context/Context';//global variables to access via provider
 import { auth, db } from "../firebase"; // firebase instance 
@@ -11,27 +10,27 @@ import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-c
 import { Ionicons, Fontisto } from "@expo/vector-icons";
 import { uploadImage, pickImageChat } from '../../utils'
 import ImageView from "react-native-image-viewing";
-import ServerApi from '../Api/ServerApi';
+import { v4 as uuid } from 'uuid';
 
-const randomId = nanoid()
-// abedjamal test push
+
 function ChatScreen(props) {
   const {currentUser} = auth;
   const [roomHash, setroomHash] = useState('');//for generating path in the database 
   const [messages, setMessages] = useState([]);//to be able to access the data and manipulate the messages
   //these two states are related to view images 
   const [modalVisible, setModalVisible] = useState(false);
+  const [myrandID,setMyrandID]=useState(uuid())
   const [selectedImageView, setSeletedImageView] = useState("");
-  const [counter, setCounter] = useState(0);
-  const [loaded, setloaded] = useState(false);
   const { theme: { colors } } = useContext(GlobalContext)
 
   const route = useRoute();
   const room = route.params.room;
+
+
   const selectedImage = route.params.image;
   const contactedUser = route.params.user;
 
-
+//console.log('chat screen is rendering ')
 
 
   const senderUser = currentUser.photoURL //asssigning the current user to the sender user
@@ -40,9 +39,12 @@ function ChatScreen(props) {
       _id: currentUser.uid,
       photoURL: currentUser.photoURL,
     }
-    : { name: currentUser.displayName, _id: currentUser.uid  ,photoURL: require('../../assets/icon-square.png')    };
+    : { name: currentUser.displayName, _id: currentUser.uid   };
 
-  const roomId = room ? room.id : randomId; //if there are no existing room generate a new room id
+  const roomId = room ? room.id : myrandID; //if there are no existing room generate a new room id
+
+  //console.log('printing the room id ')
+  //console.log(roomId)
 
   const roomRef = doc(db, "rooms", roomId); //document of the room based on it's id
   const roomMessagesRef = collection(db, "rooms", roomId, "messages");//refrecnce for the messegaes on particular room
@@ -63,7 +65,7 @@ function ChatScreen(props) {
           currentUserData.photoURL = currentUser.photoURL
         }
         const contactedUserData = {
-          displayName: contactedUser.contactName || contactedUser.displayName || '',
+          displayName: contactedUser.displayName || '',
           email: contactedUser.email,
 
         }

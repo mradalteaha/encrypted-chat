@@ -2,11 +2,9 @@ import React, { useContext } from 'react';
 import { SafeAreaView ,View ,Text ,StyleSheet } from 'react-native';
 import MyButton from '../components/MyButton'
 import GlobalContext from '../../Context/Context';
-import SignUpScreen from './SignUpScreen';
 import LoginScreen from './LoginScreen';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
-import ServerApi from '../Api/ServerApi.js'
 
 
 function ManagerScreen(props) {
