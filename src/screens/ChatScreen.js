@@ -337,7 +337,6 @@ const styles = StyleSheet.create({
     paddingLeft: 15,
     marginTop: 5,
     marginLeft: 10,
-    multiline: false,
 
 
   },
