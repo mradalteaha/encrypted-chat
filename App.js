@@ -90,7 +90,7 @@ function Main() {
   const [assets] = useAssets(
     require('./assets/icon-square.png'),
     require('./assets/chatbg.png'),
-    require('./assets/user-icon.png'),
+    require('./assets/user-icon.png')
     
 
   );
