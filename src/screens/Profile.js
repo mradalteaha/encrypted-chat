@@ -11,6 +11,13 @@ import { theme } from '../../utils';
 import { updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
+const crypto = require('../../crypto-custom.js');
+
+const userKeys = crypto.getDiffieHellman('modp15')
+userKeys.generateKeys()
+console.log('printing generated keys ')
+console.log(userKeys.getPrivateKey('hex'))
+
 export default function Profile(props) {
 
     
@@ -19,6 +26,8 @@ export default function Profile(props) {
     const [permissionStatus , permissionStatusUpdate] = useState(null);
     const {theme:{colors}} = useContext(Context)
     const navigation = useNavigation()
+    
+  
 
 
     useEffect(()=>{
@@ -165,7 +174,6 @@ const styles = StyleSheet.create({
         paddingLeft: 20,
         marginTop: 50,
         borderBottomWidth: 2,
-        multiline: false,
 
     },
     ButtonsView: {
