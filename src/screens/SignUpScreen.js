@@ -139,7 +139,6 @@ const styles =StyleSheet.create({
         borderRadius:10,
         paddingLeft:20,
         marginTop:20,
-        multiline:false,
         
     },
     ButtonsView:{
