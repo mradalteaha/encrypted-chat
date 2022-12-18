@@ -91,7 +91,7 @@ function Main() {
     require('./assets/icon-square.png'),
     require('./assets/chatbg.png'),
     require('./assets/user-icon.png'),
-    require('./assets/welcome-img.png'),
+    
 
   );
 
