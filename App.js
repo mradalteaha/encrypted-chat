@@ -19,6 +19,7 @@ import { theme } from './utils'
 import ChatHeader from './src/components/ChatHeader';
 import LoadingContacts from './src/screens/LoadingContacts.js'
 import { AppRegistry } from 'react-native';
+import ForgotPassword from './src/screens/ForgotPassword';
 LogBox.ignoreLogs([
   "Setting a timer",
   "AsyncStorage has been extracted from react-native core and will be removed in a future release.",
@@ -57,7 +58,7 @@ const App = () => {
           <Stack.Navigator>
             <Stack.Screen name="SignUpScreen" component={SignUpScreen} options={{ headerShown: false }} />
             <Stack.Screen name="LogInScreen" component={LogInScreen} options={{ headerShown: false }} />
-  
+            <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
           </Stack.Navigator>
         ) : (
           <Stack.Navigator screenOptions={{
