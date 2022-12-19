@@ -111,6 +111,11 @@ function ChatScreen(props) {
 
 
   const appendMessages = useCallback((messages) => { // help function to append messages
+    
+    console.log('messages from firestore')
+    console.log(messages)
+    console.log('messages ammount ')
+    console.log(messages.length)
     setMessages((previousMessaged) => GiftedChat.append(previousMessaged, messages))
   }, [messages])
 
