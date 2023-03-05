@@ -9,8 +9,8 @@ export default function ItemList({type,description,user,style,time ,room ,image,
     const navigation = useNavigation()
     const {theme:{colors}} = useContext(GlobalContext)
 
-   
-  // console.log(user);
+   console.log("printing user")
+   console.log(user);
 
   return (
     <TouchableOpacity style={{height:80,borderRadius:30, ...style}} onPress={()=>navigation.navigate("ChatScreen",{user,room,image})}>
@@ -22,7 +22,7 @@ export default function ItemList({type,description,user,style,time ,room ,image,
         <Row style={{alignItems:'center'}}>
             <Col>
               <Text style={{fontWeight:'bold',fontSize:16,color:colors.text}}>
-                {user.contactName || user.displayName}
+                {user.displayName ||''}
               </Text>
             </Col>
             

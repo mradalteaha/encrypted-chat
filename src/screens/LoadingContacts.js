@@ -53,7 +53,7 @@ export default function LoadingContacts() {
 
 function mapContactToUser(contact){
     return {
-        contactName : contact.firstName && contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName,
+        displayName : contact.firstName && contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName,
         Image:contact.image ? contact.image: require('../../assets/icon-square.png'),
         email : contact.emails[0].email
     }

@@ -40,7 +40,7 @@ function ChatScreen(props) {
       _id: currentUser.uid,
       photoURL: currentUser.photoURL,
     }
-    : { name: currentUser.displayName, _id: currentUser.uid  ,photoURL: require('../../assets/icon-square.png')    };
+    : { name: currentUser.displayName, _id: currentUser.uid };
 
   const roomId = room ? room.id : randomId; //if there are no existing room generate a new room id
 
@@ -75,7 +75,8 @@ function ChatScreen(props) {
           participantsArray: [currentUserData.email, contactedUserData.email]
         }
         try {
-          await setDoc(roomRef, roomData) //initializing the room 
+            //initializing the room
+          await Promise.all([setDoc(roomRef, roomData)]) 
         } catch (err) {
           console.log(err)
         }
