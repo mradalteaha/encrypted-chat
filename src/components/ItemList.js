@@ -22,7 +22,7 @@ export default function ItemList({type,description,user,style,time ,room ,image,
         <Row style={{alignItems:'center'}}>
             <Col>
               <Text style={{fontWeight:'bold',fontSize:16,color:colors.text}}>
-                {user.displayName ||''}
+                {user.displayName}
               </Text>
             </Col>
             

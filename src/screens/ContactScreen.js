@@ -2,13 +2,10 @@ import { collection, onSnapshot, query, QuerySnapshot, where,getDocs,getDoc } fr
 import React, { cloneElement, useContext, useEffect, useState } from 'react';
 import { SafeAreaView, View, Text, StyleSheet, FlatList } from 'react-native';
 import GlobalContext from '../../Context/Context';
-import MyButton from '../components/MyButton'
 import { auth, db } from '../firebase'
-import Contacts from '../components/Contacts';
 import useContacts from '../hooks/useHooks';
 import ItemList from '../components/ItemList';
 import { useRoute } from '@react-navigation/native';
-import ServerApi from '../Api/ServerApi';
 
 function ContactScreen(props) {
 

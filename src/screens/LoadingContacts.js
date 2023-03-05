@@ -1,7 +1,8 @@
 import { View, LogBox, Text } from 'react-native'
 import React , {useContext,useState ,useEffect} from 'react'
 import GlobalContext from '../../Context/Context'
-import useContacts from '../hooks/useHooks'
+import { collection, onSnapshot, query, QuerySnapshot, where,getDocs,getDoc} from 'firebase/firestore'
+import {auth ,db} from '../firebase.js'
 import * as Contacts from 'expo-contacts'
 
 
@@ -11,7 +12,6 @@ LogBox.ignoreLogs([
   ]);
 //this screen is just for loading contacts and set up the global context with the contacts 
 export default function LoadingContacts() {
-    const contacts = useContacts() 
     const {myContacts ,setMyContacts , loadingContacts ,setLoadingContacts} = useContext(GlobalContext)
     useEffect(()=>{
       (async()=>{
@@ -23,11 +23,45 @@ export default function LoadingContacts() {
            if(data.length>0){
             // console.log('inside loading contacts screen')
             // console.log(data.length)
+            const usersRef = collection(db,'users') 
+            const docsSnap = await getDocs(usersRef);
+            const usersArray =[];
+        
+            docsSnap.forEach(doc => {
+
+             
+              data.forEach(d=>{
+                if(d.emails){
+                 // console.log('d.emails is not null')
+                  if(d.emails[0].email == doc.data().email){
+                   // console.log('loading contact retrieved data')
+                    //console.log(doc.data())
+                    usersArray.push(doc.data())
+                  }
+                }
+                  
+                })
+              
+                
+              
+            })
+
+            
              setMyContacts(
+              usersArray.map(mapContactToUser)/*
                    data.filter(
                        c => c.firstName && c.emails && c.emails[0].email
 
-                   ).map(mapContactToUser)
+                   ).filter(c=>{
+                    user=usersArray.find(x=>x.email==c.emails[0].email)
+                    
+                    if(user){
+                     // console.log('userfound ')
+                   // console.log(user)
+                      return user
+                    }
+                     
+                   })//.map(mapContactToUser)*/
                )
            }
            setLoadingContacts(false)
@@ -52,9 +86,12 @@ export default function LoadingContacts() {
 
 
 function mapContactToUser(contact){
+//  console.log('print inside mapContactToUser ')
+  //console.log(contact)
+
     return {
-        displayName : contact.firstName && contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName,
-        Image:contact.image ? contact.image: require('../../assets/icon-square.png'),
-        email : contact.emails[0].email
+        displayName : contact.displayName,
+        photoURL:contact.photoURL ? contact.photoURL: require('../../assets/icon-square.png'),
+        email : contact.email
     }
 }

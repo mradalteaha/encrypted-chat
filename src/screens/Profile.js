@@ -1,20 +1,23 @@
 import React, { useContext, useEffect } from 'react'
-import {StatusBar} from 'expo-status-bar'
 import {useState} from "react";
 import {Image,Button,Text, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard, TouchableOpacity} from 'react-native';
 import { TextInput } from "react-native-gesture-handler";
-import MyButton from '../components/MyButton'
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
 import {auth, db} from '../firebase'
-import { Constants } from 'expo-constants';
 import {MaterialCommunityIcons} from '@expo/vector-icons'
 import Context from '../../Context/Context'
-import FormInput from '../components/FormInput' 
 import {pickImage ,askForPermission,uploadImage} from '../../utils'
 import { theme } from '../../utils';
 import { updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
+const crypto = require('../../crypto-custom.js');
+
+const userKeys = crypto.getDiffieHellman('modp15')
+userKeys.generateKeys()
+console.log('printing generated keys ')
+console.log(userKeys.getPrivateKey('hex'))
+
 export default function Profile(props) {
 
     
@@ -23,6 +26,8 @@ export default function Profile(props) {
     const [permissionStatus , permissionStatusUpdate] = useState(null);
     const {theme:{colors}} = useContext(Context)
     const navigation = useNavigation()
+    
+  
 
 
     useEffect(()=>{
@@ -169,7 +174,6 @@ const styles = StyleSheet.create({
         paddingLeft: 20,
         marginTop: 50,
         borderBottomWidth: 2,
-        multiline: false,
 
     },
     ButtonsView: {

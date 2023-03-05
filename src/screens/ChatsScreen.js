@@ -2,9 +2,7 @@ import { collection, onSnapshot, query, QuerySnapshot, where } from 'firebase/fi
 import React, { useContext, useEffect } from 'react';
 import { SafeAreaView ,View ,Text ,StyleSheet } from 'react-native';
 import GlobalContext from '../../Context/Context';
-import MyButton from '../components/MyButton'
 import {auth, db} from '../firebase'
-import Contacts from '../components/Contacts';
 import ItemList from '../components/ItemList';
 import useContacts from '../hooks/useHooks';
 export default function ChatsScreen() {
@@ -33,10 +31,10 @@ export default function ChatsScreen() {
     function getContactedUser(user , myContacts){
         // console.log(`evaluating my contacts ${myContacts}`)
         if(myContacts){
-            const userContact = myContacts.find((c)=>c.email === user.email);
+            const userContact = myContacts.find((c)=>c.email ===user.email);
             if(userContact && userContact.displayName ){
 
-                return {...user , contactName : userContact.contactName}
+                return userContact
             }
         }
        

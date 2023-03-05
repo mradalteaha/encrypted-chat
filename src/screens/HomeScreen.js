@@ -1,7 +1,6 @@
 import React ,{useContext}from 'react';
 import { SafeAreaView ,View ,Text ,StyleSheet } from 'react-native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs'
-import MyButton from '../components/MyButton'
 import GlobalContext from '../../Context/Context';
 import ChatsScreen from './ChatsScreen';
 import ContactScreen from './ContactScreen';

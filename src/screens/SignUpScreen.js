@@ -1,7 +1,6 @@
 import React ,{useState} from "react";
 import {Text, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard, TouchableOpacity} from 'react-native';
 import { TextInput } from "react-native-gesture-handler";
-import MyButton from '../components/MyButton'
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
 import {signUp ,signIn} from '../firebase'
 function SignUpScreen (props) {
@@ -140,7 +139,6 @@ const styles =StyleSheet.create({
         borderRadius:10,
         paddingLeft:20,
         marginTop:20,
-        multiline:false,
         
     },
     ButtonsView:{

@@ -1,18 +1,23 @@
 import React, { useContext, useState } from "react";
-import {Text,TouchableOpacity, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard} from 'react-native';
-import { TextInput } from "react-native-gesture-handler";
-import MyButton from '../components/MyButton'
+import {TextInput,Text,TouchableOpacity, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard} from 'react-native';
+import "react-native-gesture-handler";
+import MyButton from '../components/MyButton'; 
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
-import {signUp ,signIn} from '../firebase'
+import {signUp ,signIn} from '../firebase';
+
+
 function LoginScreen (props) {
     const [email ,setEmail]= useState('')
     const [password ,setPassWord]= useState('')
     async function handleClick(){
-        console.log("sign in triggered ")
+        console.log("sign in triggered successfuly")
          await signIn(email,password)
     }
     function gotosignup(){
         props.navigation.navigate('SignUpScreen')
+    }
+    function gotoforgotpass(){
+        props.navigation.navigate('ForgotPassword')
     }
 return (
     <KeyboardAvoidingWrapper>
@@ -43,7 +48,7 @@ return (
                             
                         />
                             
-                        <MyButton title={ 'Forgot Password'}/>
+                        <MyButton title={ 'Forgot Password'} onPress={gotoforgotpass}/>
                     </View>
             </View>
 
@@ -126,7 +131,6 @@ const styles =StyleSheet.create({
         borderRadius:10,
         paddingLeft:20,
         marginTop:20,
-        multiline:false,
         
     },
     ButtonsView:{

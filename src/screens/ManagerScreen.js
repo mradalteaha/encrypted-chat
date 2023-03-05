@@ -2,11 +2,10 @@ import React, { useContext } from 'react';
 import { SafeAreaView ,View ,Text ,StyleSheet } from 'react-native';
 import MyButton from '../components/MyButton'
 import GlobalContext from '../../Context/Context';
-import SignUpScreen from './SignUpScreen';
 import LoginScreen from './LoginScreen';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
-import ServerApi from '../Api/ServerApi.js'
+import { NavigationHelpersContext } from '@react-navigation/native';
 
 
 function ManagerScreen(props) {
@@ -16,26 +15,23 @@ function ManagerScreen(props) {
 
    async function SignOutfun(){ // sign out function for future use 
 
-       
+
     signOut(auth).then(() => {
         setCurrentUser(null)
     }).catch((error) => {
         // An error happened.
       });
     }
-  
-    function goToChat(){
 
+    function help(){
+        //here we go to create help function will take us to help page 
 
-     }
+    }
 
     return (
         <SafeAreaView>
- <MyButton title={'SignOut'} onPress={SignOutfun}/>
-<LoginScreen/>
-
-
-
+            <MyButton title={'Help'} onPress={help}/>
+            <MyButton title={'SignOut'} onPress={SignOutfun}/>
         </SafeAreaView>
     )
 }
