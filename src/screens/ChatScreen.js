@@ -12,7 +12,7 @@ import { uploadImage, pickImageChat } from '../../utils'
 import ImageView from "react-native-image-viewing";
 import { v4 as uuid } from 'uuid';
 
-
+//here want to encrypt the message
 function ChatScreen(props) {
   const {currentUser} = auth;
   const [roomHash, setroomHash] = useState('');//for generating path in the database 
@@ -109,7 +109,7 @@ function ChatScreen(props) {
     return ()=>unsubscribe();
   },[])
 
-
+//encrypt the message
   const appendMessages = useCallback((messages) => { // help function to append messages
     setMessages((previousMessaged) => GiftedChat.append(previousMessaged, messages))
   }, [messages])
