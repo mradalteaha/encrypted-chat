@@ -7,7 +7,6 @@ import ItemList from '../components/ItemList';
 import useContacts from '../hooks/useHooks';
 export default function ChatsScreen() {
     const {currentUser} = auth // grabing the current signed in user via firebase auth
-    const contacts =useContacts()
     const {rooms,setRooms,setUnfilteredRooms,myContacts } = useContext(GlobalContext) // getting the global context provider
     const chatsQuery = query(// query on firestore collection 
         collection(db,'rooms'),
@@ -41,6 +40,7 @@ export default function ChatsScreen() {
        
 
     }
+    useEffect(()=>{},[rooms])
 
 
     //need to initialize the room with reciever photo `

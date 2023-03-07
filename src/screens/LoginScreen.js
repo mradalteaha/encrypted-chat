@@ -10,7 +10,7 @@ function LoginScreen (props) {
     const [email ,setEmail]= useState('')
     const [password ,setPassWord]= useState('')
     async function handleClick(){
-        console.log("sign in triggered ")
+        console.log("sign in triggered successfuly")
          await signIn(email,password)
     }
     function gotosignup(){

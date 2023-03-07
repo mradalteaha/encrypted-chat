@@ -12,12 +12,12 @@ import { updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 const crypto = require('../../crypto-custom.js');
-
+/*
 const userKeys = crypto.getDiffieHellman('modp15')
 userKeys.generateKeys()
 console.log('printing generated keys ')
 console.log(userKeys.getPrivateKey('hex'))
-
+*/
 export default function Profile(props) {
 
     

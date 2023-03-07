@@ -19,7 +19,7 @@ export const storage = getStorage(app)
 export const db = initializeFirestore(app , {experimentalForceLongPolling: true ,})
 
 export function signIn(email,password) {
-  console.log("sign in triggered in firebase file ")
+  
   return signInWithEmailAndPassword(auth,email,password)
 }
 export function signUp(email,password){

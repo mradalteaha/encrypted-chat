@@ -31,8 +31,8 @@ export default function useContacts(){
 
 function mapContactToUser(contact){
     return {
-        contactName : contact.firstName && contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName,
-        Image:contact.image ? contact.image: require('../../assets/icon-square.png'),
+        displayName : contact.firstName && contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName,
+        photoURL:contact.image ? contact.image: require('../../assets/icon-square.png'),
         email : contact.emails[0].email
     }
 }
