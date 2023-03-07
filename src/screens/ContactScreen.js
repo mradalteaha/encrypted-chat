@@ -35,15 +35,15 @@ function ContactScreen(props) {
                     usersArray.push(doc.data())
                 //    console.log(doc.data());
                 })
-                console.log('printing usercollection')
-                console.log(usersArray)
+                //console.log('printing usercollection')
+                //console.log(usersArray)
                 setUsersCollection(usersArray) // setting the users found on the database to the users state hook 
 
                 //   console.log('------------------end of use effect ---------------')
 
                 console.log("inside contactsScreen")
 
-                console.log(`printing my contacts `)
+                //console.log(`printing my contacts `)
                 myContacts.forEach(e =>console.log(e))
 
             } catch (err) {
