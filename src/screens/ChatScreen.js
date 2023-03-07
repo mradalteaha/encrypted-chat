@@ -11,6 +11,12 @@ import { Ionicons, Fontisto } from "@expo/vector-icons";
 import { uploadImage, pickImageChat } from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
+import CryptoJS from "react-native-crypto-js";
+
+
+
+
+
 //import { v4 as uuid } from 'uuid'; //deprecated causing errors with expo SDK 48 ...
 
 function ChatScreen(props) {
@@ -25,6 +31,8 @@ function ChatScreen(props) {
 
   const route = useRoute();
   const room = route.params.room;
+  const secretKey = '12345789aaaaaaa';
+
 
 
   const selectedImage = route.params.image;
@@ -103,8 +111,10 @@ function ChatScreen(props) {
     const unsubscribe = onSnapshot(roomMessagesRef,querysnapshot=>{
         const messagesFirestore = querysnapshot.docChanges().filter(({type})=>type ==='added').map(
             ({doc})=>{
+                
                 const message = doc.data()
-                return {...message,createdAt : message.createdAt.toDate()}
+                let decryptedText = CryptoJS.AES.decrypt(message.text, secretKey).toString(CryptoJS.enc.Utf8);
+                return {...message,createdAt : message.createdAt.toDate() ,text:decryptedText}
             }).sort((a,b)=> b.createdAt.getTime() - a.createdAt.getTime())
             appendMessages(messagesFirestore) 
     });
@@ -114,10 +124,10 @@ function ChatScreen(props) {
 
   const appendMessages = useCallback((messages) => { // help function to append messages
     
-    console.log('messages from firestore')
-    console.log(messages)
-    console.log('messages ammount ')
-    console.log(messages.length)
+//console.log('messages from firestore')
+   // console.log(messages)
+   // console.log('messages ammount ')
+    //console.log(messages.length)
     setMessages((previousMessaged) => GiftedChat.append(previousMessaged, messages))
   }, [messages])
 
@@ -126,7 +136,22 @@ function ChatScreen(props) {
   async function onSend(messages=[]){
     
       try{
-        const writes  = messages.map(m=>addDoc(roomMessagesRef,m)) //adding the new message to the firestore
+        
+        const writes  = messages.map(m=>{
+          console.log("messages onSend function to test the object fields ")
+          console.log(m)      
+          
+          const encryptedText = CryptoJS.AES.encrypt(m.text, secretKey).toString();
+
+          const encryptedMessage = {
+            ...m,
+            text: encryptedText
+          };
+          
+          
+          addDoc(roomMessagesRef,encryptedMessage)
+        
+        }) //adding the new message to the firestore
         const lastMessage= messages[messages.length -1]
         writes.push(updateDoc(roomRef,{lastMessage}))//updating the last message for the look of chats screen
         await Promise.all(writes)

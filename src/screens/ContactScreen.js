@@ -48,7 +48,7 @@ function ContactScreen(props) {
 
             } catch (err) {
                 console.log('error occured on the useEffect useUsers');
-                console.log(err)
+                console.error(err)
             }
 
         })()
