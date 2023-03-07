@@ -10,8 +10,8 @@ import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-c
 import { Ionicons, Fontisto } from "@expo/vector-icons";
 import { uploadImage, pickImageChat } from '../../utils'
 import ImageView from "react-native-image-viewing";
-import { v4 as uuid } from 'uuid';
-
+import {nanoid} from "nanoid"
+//import { v4 as uuid } from 'uuid'; //deprecated causing errors with expo SDK 48 ...
 
 function ChatScreen(props) {
   const {currentUser} = auth;
@@ -19,7 +19,7 @@ function ChatScreen(props) {
   const [messages, setMessages] = useState([]);//to be able to access the data and manipulate the messages
   //these two states are related to view images 
   const [modalVisible, setModalVisible] = useState(false);
-  const [myrandID,setMyrandID]=useState(uuid())
+  const [myrandID,setMyrandID]=useState(nanoid())
   const [selectedImageView, setSeletedImageView] = useState("");
   const { theme: { colors } } = useContext(GlobalContext)
 
@@ -43,8 +43,8 @@ function ChatScreen(props) {
 
   const roomId = room ? room.id : myrandID; //if there are no existing room generate a new room id
 
-  //console.log('printing the room id ')
-  //console.log(roomId)
+  console.log('printing the room id ')
+  console.log(roomId)
 
   const roomRef = doc(db, "rooms", roomId); //document of the room based on it's id
   const roomMessagesRef = collection(db, "rooms", roomId, "messages");//refrecnce for the messegaes on particular room
@@ -78,6 +78,7 @@ function ChatScreen(props) {
         }
         try {
             //initializing the room
+            console.log("new room has been created")
           await Promise.all([setDoc(roomRef, roomData)]) 
         } catch (err) {
           console.log(err)
@@ -123,11 +124,18 @@ function ChatScreen(props) {
   
   // older implementation using firebase directly
   async function onSend(messages=[]){
- 
-      const writes  = messages.map(m=>addDoc(roomMessagesRef,m)) //adding the new message to the firestore
-      const lastMessage= messages[messages.length -1]
-      writes.push(updateDoc(roomRef,{lastMessage}))//updating the last message for the look of chats screen
-      await Promise.all(writes)
+    
+      try{
+        const writes  = messages.map(m=>addDoc(roomMessagesRef,m)) //adding the new message to the firestore
+        const lastMessage= messages[messages.length -1]
+        writes.push(updateDoc(roomRef,{lastMessage}))//updating the last message for the look of chats screen
+        await Promise.all(writes)
+      }catch(err){
+        console.log("error occured at onSend function at chatsScree")
+        console.error(err)
+      }
+
+     
   }
 
   

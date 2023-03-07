@@ -44,7 +44,7 @@ function ContactScreen(props) {
                 console.log("inside contactsScreen")
 
                 //console.log(`printing my contacts `)
-                myContacts.forEach(e =>console.log(e))
+                //myContacts.forEach(e =>console.log(e))
 
             } catch (err) {
                 console.log('error occured on the useEffect useUsers');
