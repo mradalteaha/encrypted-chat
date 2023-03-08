@@ -1,73 +1,131 @@
 import React, { useContext, useEffect } from 'react'
-import {useState} from "react";
-import {Image,Button,Text, View,SafeAreaView, StyleSheet,KeyboardAvoidingView,ScrollView,TouchableWithoutFeedback,Keyboard, TouchableOpacity} from 'react-native';
+import { useState } from "react";
+import { Image, Button, Text, View, SafeAreaView, StyleSheet, KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
 import { TextInput } from "react-native-gesture-handler";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
-import {auth, db} from '../firebase'
-import {MaterialCommunityIcons} from '@expo/vector-icons'
+import { auth, db } from '../firebase'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 import Context from '../../Context/Context'
-import {pickImage ,askForPermission,uploadImage} from '../../utils'
+import { pickImage, askForPermission, uploadImage } from '../../utils'
 import { theme } from '../../utils';
 import { updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
+import {Buffer} from 'buffer'
+import CryptoJS from "react-native-crypto-js";
+
 const crypto = require('../../crypto-custom.js');
-/*
-const userKeys = crypto.getDiffieHellman('modp15')
-userKeys.generateKeys()
-console.log('printing generated keys ')
-console.log(userKeys.getPrivateKey('hex'))
-*/
+ 
+
 export default function Profile(props) {
 
-    
-    const [displayName , setDisplayName ] = useState('');
-    const [selectImage , setSelectedImage] = useState(null);
-    const [permissionStatus , permissionStatusUpdate] = useState(null);
-    const {theme:{colors}} = useContext(Context)
+
+    const [displayName, setDisplayName] = useState('');
+    const [selectImage, setSelectedImage] = useState(null);
+    const [permissionStatus, permissionStatusUpdate] = useState(null);
+    const { theme: { colors } } = useContext(Context)
     const navigation = useNavigation()
-    
-  
 
 
-    useEffect(()=>{
-        (async ()=>{
+
+
+    useEffect(() => {
+        (async () => {
             const status = await askForPermission();
             permissionStatusUpdate(status)
         })()
-    },[])
-    async function handlePress(){
+    }, [])
+
+    async function handlePress() {
         const user = auth.currentUser;
-        let photoURL 
-        if(selectImage){
-            const {url} = await uploadImage(selectImage.uri ,`Images/${user.uid}`,"profilePicture" )
+        let photoURL
+        if (selectImage) {
+            const { url } = await uploadImage(selectImage.uri, `Images/${user.uid}`, "profilePicture")
             photoURL = url;
         }
-        
+
         const userData = {
             displayName,
             email: user.email
         }
-        if(photoURL){
+        if (photoURL) {
             userData.photoURL = photoURL
         }
-        await Promise.all([updateProfile(user,userData),setDoc(doc(db,'users',user.uid),{...userData,uid:user.uid})])
-            
+        await Promise.all([updateProfile(user, userData), setDoc(doc(db, 'users', user.uid), { ...userData, uid: user.uid })])
+
         navigation.navigate('HomeScreen')
-    
+
     }
-    async function handleProfileImage(){
+
+///for test onlyy !!!!
+    function handlePress2(){
+
+
+        const data = "my secret data";
+
+        const publicKey=`-----BEGIN RSA PUBLIC KEY-----MIIBCgKCAQEAvRY8D3feCyzrkMwobdyC6sTlnOlJoh8trZKdtT3L3xLleUOhqW8xHsfb4EkHseQGBkVLdiqsaT/mWWdQmTryhHWy2j77H99PpB7TCEfS5QafQz+HtqM/QyYPe6/jBVd3XRswsosGnB4kJlcqLX1y744dCN8/eAhMKSbTSKi47MJ37bmCWE7kgy+ZEmhVjiVvKghUfLYOu3tvkApIQwvjT7T9IH9BTPBUu9/078QF8HovQ8BkQuHf1t1QGEteEptOXA/IGW3Zo2IPKbrFvBvsYzSGv37kpDv/YT30KYndvDxKcNHAO/p2rtm8w3fi+WFX4WOtgN8SNkdyY20ssOmsIwIDAQAB-----END RSA PUBLIC KEY-----`
+        const privateKey =`-----BEGIN RSA PRIVATE KEY-----MIIEpQIBAAKCAQEAvRY8D3feCyzrkMwobdyC6sTlnOlJoh8trZKdtT3L3xLleUOhqW8xHsfb4EkHseQGBkVLdiqsaT/mWWdQmTryhHWy2j77H99PpB7TCEfS5QafQz+HtqM/QyYPe6/jBVd3XRswsosGnB4kJlcqLX1y744dCN8/eAhMKSbTSKi47MJ37bmCWE7kgy+ZEmhVjiVvKghUfLYOu3tvkApIQwvjT7T9IH9BTPBUu9/078QF8HovQ8BkQuHf1t1QGEteEptOXA/IGW3Zo2IPKbrFvBvsYzSGv37kpDv/YT30KYndvDxKcNHAO/p2rtm8w3fi+WFX4WOtgN8SNkdyY20ssOmsIwIDAQABAoIBAQCVbU/TbYfEzx/t0tkUUNII08cc5GMzQm5nn9kP1KEbTaSY2zCTZHKt/4UsTqpNE4ULSZGj9X9AwaW4+2N/ZE0pDpZj0KfF/UTDzzQ4dAIeycfsbfVDCOlCmH5d4ZaHryJ+KrGmNyXnFA6/WdzUDDJbS7R4QWy3397IGo2X+vYA6yX7d7fbKdJ/vjwxLjHxOl80dHGnsmhc1VeUS8rTkkSedk/LnMyUeQcDfhn+VFZzgkphSVhsuPs83gSNpmEclSM3EaLvsu+fxJlFh12vAYuFpDGYGbsWCqPBctt8xFM/1lbB/tYCD825QotniZB81q7CbjOdcsfJwa1Sr1ysexVZAoGBANy4r5ZfAQH/x4J66V+DylN62auHePWkbwrapX+Bbh26pHL0mPbo7K3eFCc41wM0Y3J74cRXcZE9nP1NUrll0uYgT6XhBE7EOxRbD6FOxk4Ww6WiSZDn+QmgYkL3MAqBCTPCJLlH5yilLlVHHh2RM7UR5CpwL3I3j7nePeIatHbvAoGBANtPJhwal3PLI9EOraRDJhVCY8qI4Q9ixpjUKWOhu90Owp4uTwzmLH4yvrZWVYkGfwi56YAmqwEypPWspEX5J7A3apJAIj+w4+EKAqavyAPmXtx01dBMd+ZgG14T97AWC6Vakt58bWz3KCpx5sS6TzNXdr4zCFg+2Z05OR8AKn4NAoGBAJgdN/Wb9+fWzTqhVqCbBR9PNSA/tx8jeduzIAelvawDaz5GT/0qPaL9wEnfpF7zBe5qbgeQdBYyrjTryy02fYhXkEyzrPJTzpuSvkzfK0+55JAMLkMNe9YkkFOyY4t5rkvbas++PBMI88uVva2G2mnZsLOGqUw/+m+QOHnRCbpFAoGAVjA47fqVYvCG1vZJz7CEGv7IcSRyLrXHDvDygzFgv3O5kKjqcEtVWRNgWBB99SgUbL2DwtVvhzz8D4EV3loY+uwMegWycA14wUxJ1nBmzwGObl2MWhxzUpqaptJ6GT3Qvd9msQF9j8Fii6vP4ajGz4qkJAOyV9v7cgq3JDPQf1ECgYEAv4T+IbwSyCL6N5PavjfFCisfsOWQlPZf3E3vZV+B1w0Yj2q6YyNs3kJgfBf9+BisQQAUmqUDJOTaa8zOvdXso3ibiMNZ+ZVN+bin+f773ZDWczEUddeN6M0ux/FMom0x+qyegPx+PILBYYSQDTeTNDnKj7LQF4LLKLjNbNzircI=-----END RSA PRIVATE KEY-----`
+        
+
+        const encryptedData = crypto.publicEncrypt(
+          {
+            key: publicKey,
+            padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+            oaepHash: "sha256",
+          },
+          // We convert the data string to a buffer using `Buffer.from`
+          Buffer.from(data)
+        );
+        
+        // The encrypted data is in the form of bytes, so we print it in base64 format
+        // so that it's displayed in a more readable form
+        console.log("encypted data: ", encryptedData.toString("base64"));
+        
+        /*
+        console.log("printing type of enc data")
+        console.log( encryptedData)*/
+        
+        const test1 = encryptedData.toString("base64")
+        const test1buffer = Buffer.from(test1,'base64')
+        const test2 = test1buffer.toString('base64')
+        
+        console.log("is it equal strings ")
+        console.log(test2 === test2)
+        console.log(encryptedData.length) 
+        
+         const decryptedData = crypto.privateDecrypt(
+            {
+              key: privateKey,
+              // In order to decrypt the data, we need to specify the
+              // same hashing function and padding scheme that we used to
+              // encrypt the data in the previous step
+              padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+              oaepHash: "sha256",
+            },
+            test1buffer
+          );
+          
+          // The decrypted data is of the Buffer type, which we can convert to a
+          // string to reveal the original data
+          console.log("decrypted data: ", decryptedData.toString()); 
+
+
+
+            
+    }
+
+    async function handleProfileImage() {
         const result = await pickImage()
-        if(!result.cancelled){
+        if (!result.cancelled) {
             setSelectedImage(result)
         }
     }
-    if(!permissionStatus){
+    if (!permissionStatus) {
         return <Text>Loading ...</Text>
     }
-    if(permissionStatus !== 'granted'){
+    if (permissionStatus !== 'granted') {
         return <Text> you need to grant permission </Text>
-    } 
+    }
 
     return (
         <React.Fragment>
@@ -93,7 +151,8 @@ export default function Profile(props) {
 
 
                         <View style={styles.ButtonsView}>
-                            <Button title={'Next'} onPress={() => handlePress(selectImage)} disabled={!displayName || !selectImage } />
+                            <Button title={'Next'} onPress={() => handlePress(selectImage)} disabled={!displayName || !selectImage} />
+                            <Button title={'Generate'} onPress={handlePress2}  />
 
                         </View>
 

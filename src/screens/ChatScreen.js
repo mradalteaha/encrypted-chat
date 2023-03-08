@@ -51,8 +51,8 @@ function ChatScreen(props) {
 
   const roomId = room ? room.id : myrandID; //if there are no existing room generate a new room id
 
-  console.log('printing the room id ')
-  console.log(roomId)
+ /*  console.log('printing the room id ')
+  console.log(roomId) */
 
   const roomRef = doc(db, "rooms", roomId); //document of the room based on it's id
   const roomMessagesRef = collection(db, "rooms", roomId, "messages");//refrecnce for the messegaes on particular room
@@ -138,8 +138,7 @@ function ChatScreen(props) {
       try{
         
         const writes  = messages.map(m=>{
-          console.log("messages onSend function to test the object fields ")
-          console.log(m)      
+              
           
           const encryptedText = CryptoJS.AES.encrypt(m.text, secretKey).toString();
 
