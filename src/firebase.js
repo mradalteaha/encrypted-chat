@@ -2,6 +2,8 @@ import {initializeApp}  from 'firebase/app'
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import {getStorage} from 'firebase/storage'
 import {initializeFirestore} from 'firebase/firestore'
+import {getFunctions,httpsCallable,connectFunctionsEmulator,httpsCallableFromURL } from 'firebase/functions'
+
 const firebaseConfig = {
     apiKey: "AIzaSyAZpx1QLxH_fxeTljC6bnwtF_hIJn0vTf8",
     authDomain: "secret-chat-dev.firebaseapp.com",
@@ -11,12 +13,17 @@ const firebaseConfig = {
     appId: "1:203726190238:web:ee38724f85678ffa086d8f"
   };
   
-
+const functionsURL ="https://us-central1-secret-chat-dev.cloudfunctions.net/"
 
 export const app = initializeApp(firebaseConfig)
 export const auth= getAuth(app)
 export const storage = getStorage(app)
 export const db = initializeFirestore(app , {experimentalForceLongPolling: true ,})
+export const functions = getFunctions(app,"us-central1")
+connectFunctionsEmulator(functions,'localhots', 5001)
+export const GenKey = httpsCallableFromURL(functions, "https://us-central1-secret-chat-dev.cloudfunctions.net/Genkey" );
+
+
 
 export function signIn(email,password) {
   
