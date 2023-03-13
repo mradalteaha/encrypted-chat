@@ -13,7 +13,6 @@ const firebaseConfig = {
     appId: "1:203726190238:web:ee38724f85678ffa086d8f"
   };
   
-const functionsURL ="https://us-central1-secret-chat-dev.cloudfunctions.net/"
 
 export const app = initializeApp(firebaseConfig)
 export const auth= getAuth(app)
@@ -23,6 +22,7 @@ export const functions = getFunctions(app,"us-central1")
 connectFunctionsEmulator(functions,'localhots', 5001)
 export const GenKey = httpsCallableFromURL(functions, "https://us-central1-secret-chat-dev.cloudfunctions.net/Genkey" );
 
+export const GenAESKey = httpsCallableFromURL(functions, "https://us-central1-secret-chat-dev.cloudfunctions.net/GenAESkey");
 
 
 export function signIn(email,password) {

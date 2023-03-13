@@ -3,7 +3,7 @@ import React, { useCallback, useContext, useEffect, useState } from "react";
 import "react-native-get-random-values"; // to generate random ids 
 import { Image, TouchableOpacity, View, StyleSheet, ImageBackground } from 'react-native';
 import GlobalContext from '../../Context/Context';//global variables to access via provider
-import { auth, db } from "../firebase"; // firebase instance 
+import { auth, db,GenAESKey } from "../firebase"; // firebase instance 
 import { useRoute } from "@react-navigation/native";
 import { collection, onSnapshot, doc, setDoc, addDoc, updateDoc } from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
@@ -80,14 +80,17 @@ function ChatScreen(props) {
         if (contactedUser.photoURL) {
           contactedUserData.photoURL = contactedUser.photoURL
         }
-        const roomData = {
+        let roomData = {
           participants: [currentUserData, contactedUserData],
           participantsArray: [currentUserData.email, contactedUserData.email]
         }
         try {
             //initializing the room
-            console.log("new room has been created")
-          await Promise.all([setDoc(roomRef, roomData)]) 
+
+            const result = await GenAESKey()
+            console.log("success")
+             await setDoc(roomRef, {...roomData,AES:result.data.AES})
+             
         } catch (err) {
           console.log(err)
         }
