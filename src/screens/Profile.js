@@ -125,7 +125,7 @@ export default function Profile(props) {
 
     async function handleProfileImage() {
         const result = await pickImage()
-        if (!result.cancelled) {
+        if (result.assets[0].uri) {
             setSelectedImage(result)
         }
     }
