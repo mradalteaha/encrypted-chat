@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Image, Button, Text, View, SafeAreaView, StyleSheet, KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
 import { TextInput } from "react-native-gesture-handler";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
-import { auth, db ,GenKey} from '../firebase'
+import { auth, db ,GenKey, GenAESKey} from '../firebase'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import Context from '../../Context/Context'
 import { pickImage, askForPermission, uploadImage } from '../../utils'
@@ -125,7 +125,7 @@ export default function Profile(props) {
 
     async function handleProfileImage() {
         const result = await pickImage()
-        if (!result.cancelled) {
+        if (result.assets[0].uri) {
             setSelectedImage(result)
         }
     }
