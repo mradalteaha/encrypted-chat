@@ -9,7 +9,6 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@apollo/client": "^3.7.0",
     "@react-native-async-storage/async-storage": "~1.17.3",
     "@react-native-firebase/functions": "^17.3.2",
     "@react-native-masked-view/masked-view": "0.2.8",
