@@ -28,12 +28,8 @@ function ChatScreen(props) {
   const [myrandID,setMyrandID]=useState(nanoid())
   const [selectedImageView, setSeletedImageView] = useState("");
   const { theme: { colors } } = useContext(GlobalContext)
-
   const route = useRoute();
-  const room = route.params.room;
-  const secretKey = '12345789aaaaaaa';
-
-
+  const room = route.params.room  ;
 
   const selectedImage = route.params.image;
   const contactedUser = route.params.user;
@@ -62,16 +58,11 @@ function ChatScreen(props) {
   
   const [Loading,setLoading] = useState(true)
 
-  if(typeof(room)!='undefined'){
-    console.log('here')
-    secretKey(room.AESkey)
-  }
-
 
   useEffect(() => { //initialize room if there are no existing one within the rooms array.
 
     (async () => {
-      if (!room) {
+      if (!room) { //if the room doesn't exist we initialize it with the neceserly params
        
         const currentUserData = {
           displayName: currentUser.displayName,
@@ -118,7 +109,7 @@ function ChatScreen(props) {
           console.log(err)
         }
 
-      }else{
+      }else{ //if the room exist we import it's key since it 
         getDoc(roomRef).then(res => {
           if (!res.exists) {
             console.log("No such document!"); //Error
@@ -129,7 +120,10 @@ function ChatScreen(props) {
           }
 
         }).catch(err=>console.log(err))
+
         setLoading(false)
+
+        
       }
       const emailHash = `${currentUser.email}:${contactedUser.email}`
 
@@ -141,26 +135,32 @@ function ChatScreen(props) {
   }, [])
 
 
-useEffect(()=>{},AesKey)
+
 
   //older implementation of the use hook to render the new messages recieved from the firebase room //
 
   useEffect(()=>{ //query over the messages in the room at start and append new messages
-    const unsubscribe = onSnapshot(roomMessagesRef,querysnapshot=>{
+
+    if(AesKey!=null){    
+        const unsubscribe = onSnapshot(roomMessagesRef,querysnapshot=>{
+        
         const messagesFirestore = querysnapshot.docChanges().filter(({type})=>type ==='added').map(
             ({doc})=>{
                 
                 const message = doc.data()
-                console.log("printing key useeffect decrypt")
 
-                console.log(AesKey)
+              /*  console.log("printing key useeffect decrypt")  //printing the room AES key
+                console.log(AesKey) */
+
                 let decryptedText = CryptoJS.AES.decrypt(message.text, AesKey).toString(CryptoJS.enc.Utf8);
                 return {...message,createdAt : message.createdAt.toDate() ,text:decryptedText}
             }).sort((a,b)=> b.createdAt.getTime() - a.createdAt.getTime())
             appendMessages(messagesFirestore) 
     });
     return ()=>unsubscribe();
-  },[])
+      }
+
+  },[AesKey])
 
 
   const appendMessages = useCallback((messages) => { // help function to append messages
