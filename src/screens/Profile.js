@@ -74,8 +74,8 @@ export default function Profile(props) {
         if (photoURL) {
             userData.photoURL = photoURL
         }
-        await Promise.all([updateProfile(user, userData), setDoc(doc(db, 'users', user.uid), { ...userData, uid: user.uid })])
-
+        await Promise.all([settingItem,updateProfile(user, userData), setDoc(doc(db, 'users', user.uid), { ...userData, uid: user.uid })])
+        console.log(userData)
         navigation.navigate('HomeScreen')
 
     }catch(e){console.log(e)}

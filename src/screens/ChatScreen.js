@@ -12,6 +12,8 @@ import { uploadImage, pickImageChat } from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
 import CryptoJS from "react-native-crypto-js";
+import AsyncStorageStatic from '@react-native-async-storage/async-storage'
+
 
 
 
@@ -87,6 +89,7 @@ function ChatScreen(props) {
             //initializing the room
 
             GenAESKey().then(result =>{
+              //encrypt the ke
               setDoc(roomRef, {...roomData,AESkey:result.data.AES}).then(() => {
                 return getDoc(roomRef);
                 

@@ -5,6 +5,8 @@ import GlobalContext from '../../Context/Context';
 import {auth, db} from '../firebase'
 import ItemList from '../components/ItemList';
 import useContacts from '../hooks/useHooks';
+import AsyncStorageStatic from '@react-native-async-storage/async-storage'
+
 export default function ChatsScreen() {
     const {currentUser} = auth // grabing the current signed in user via firebase auth
     const {rooms,setRooms,setUnfilteredRooms,myContacts } = useContext(GlobalContext) // getting the global context provider
