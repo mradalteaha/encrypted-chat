@@ -13,9 +13,8 @@ import { doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import {Buffer} from 'buffer'
 import CryptoJS from "react-native-crypto-js";
-import { async } from '@firebase/util';
-import EncryptedStorage from 'react-native-encrypted-storage';
-
+import { async, map } from '@firebase/util';
+import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 const crypto = require('../../crypto-custom.js');
  
 
@@ -24,6 +23,7 @@ export default function Profile(props) {
 
     const [displayName, setDisplayName] = useState('');
     const [selectImage, setSelectedImage] = useState(null);
+    const [RSAkeys, setRSAkeys] = useState(null);
     const [permissionStatus, permissionStatusUpdate] = useState(null);
     const { theme: { colors } } = useContext(Context)
     const navigation = useNavigation()
@@ -39,23 +39,46 @@ export default function Profile(props) {
     }, [])
 
     async function handlePress() {
+
+        try{
+
+        
         const user = auth.currentUser;
         let photoURL
         if (selectImage) {
             const { url } = await uploadImage(selectImage.uri, `Images/${user.uid}`, "profilePicture")
             photoURL = url;
         }
+        const result = await GenKey()
+            console.log("success")
+            console.log(result.data)
+            const RsaKeys=result.data;
+            console.log(RsaKeys)
+           // EncryptedStorage.setItem(auth.currentUser.uid,JSON.stringify(RsaKeys));
 
-        const userData = {
+           //  EncryptedStorage.getItem("user_session");
+           let rooms = new Map();
+           const userLocal ={RsaKeys , rooms}
+          const settingItem = await  AsyncStorageStatic.setItem(auth.currentUser.uid,JSON.stringify(userLocal))
+            if(RsaKeys){
+                console.log(RsaKeys)
+                setRSAkeys(RsaKeys)
+            }
+
+          const userData = {
             displayName,
-            email: user.email
+            email: user.email,
+            RsaPk:RsaKeys.publicKey
         }
+       
         if (photoURL) {
             userData.photoURL = photoURL
         }
         await Promise.all([updateProfile(user, userData), setDoc(doc(db, 'users', user.uid), { ...userData, uid: user.uid })])
 
         navigation.navigate('HomeScreen')
+
+    }catch(e){console.log(e)}
 
     }
 
@@ -110,27 +133,32 @@ export default function Profile(props) {
           // The decrypted data is of the Buffer type, which we can convert to a
           // string to reveal the original data
           console.log("decrypted data: ", decryptedData.toString());  */ 
-
+/* 
           try{
             const result = await GenKey()
             console.log("success")
-            console.log(result.data.publicKey)
-            const RsaKeys={}
-            /* EncryptedStorage.setItem()
-            EncryptedStorage.getItem("user_session") */
+            console.log(result.data)
+            const RsaKeys=result.data;
+            console.log(RsaKeys)
+           // EncryptedStorage.setItem(auth.currentUser.uid,JSON.stringify(RsaKeys));
 
+           //  EncryptedStorage.getItem("user_session");
+           let rooms = new Map();
+           const userLocal ={RsaKeys , rooms}
+          const settingItem = await  AsyncStorageStatic.setItem(auth.currentUser.uid,JSON.stringify(userLocal))
+ 
           }catch(err){
 
             console.log("error occured on the genKey:")
             console.error(err)
-          }
+          } */
 
     }
 
     async function handleProfileImage() {
         const result = await pickImage()
         if (result.assets[0].uri) {
-            setSelectedImage(result)
+            setSelectedImage(result.assets[0])
         }
     }
     if (!permissionStatus) {
@@ -164,7 +192,7 @@ export default function Profile(props) {
 
 
                         <View style={styles.ButtonsView}>
-                            <Button title={'Next'} onPress={() => handlePress(selectImage)} disabled={!displayName || !selectImage} />
+                            <Button title={'Next'} onPress={() => handlePress(selectImage)} disabled={!displayName || !selectImage } />
                             <Button title={'Generate'} onPress={handlePress2}  />
 
                         </View>
