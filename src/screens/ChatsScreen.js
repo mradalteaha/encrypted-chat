@@ -18,6 +18,7 @@ export default function ChatsScreen() {
                 (doc)=>({
                     ...doc.data(),
                     id:doc.id,
+                    AESkey:doc.data().AESkey,
                     contactedUser:doc.data().participants.find(p=> p.email!== currentUser.email),
                 })
             )

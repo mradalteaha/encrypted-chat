@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import {Buffer} from 'buffer'
 import CryptoJS from "react-native-crypto-js";
 import { async } from '@firebase/util';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 const crypto = require('../../crypto-custom.js');
  
@@ -114,6 +115,9 @@ export default function Profile(props) {
             const result = await GenKey()
             console.log("success")
             console.log(result.data.publicKey)
+            const RsaKeys={}
+            /* EncryptedStorage.setItem()
+            EncryptedStorage.getItem("user_session") */
 
           }catch(err){
 
@@ -125,7 +129,7 @@ export default function Profile(props) {
 
     async function handleProfileImage() {
         const result = await pickImage()
-        if (!result.cancelled) {
+        if (result.assets[0].uri) {
             setSelectedImage(result)
         }
     }

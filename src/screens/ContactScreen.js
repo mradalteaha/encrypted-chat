@@ -117,6 +117,7 @@ function ContactPreview({ contact, image, usersCollection }) {
     },[])
 
     ///////////need few fixes with the quer
+   
 
   
     return (

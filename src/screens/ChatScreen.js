@@ -1,11 +1,11 @@
 //@refresh reset
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import "react-native-get-random-values"; // to generate random ids 
-import { Image, TouchableOpacity, View, StyleSheet, ImageBackground } from 'react-native';
+import { Image, TouchableOpacity, View, StyleSheet, ImageBackground,Text } from 'react-native';
 import GlobalContext from '../../Context/Context';//global variables to access via provider
 import { auth, db,GenAESKey } from "../firebase"; // firebase instance 
 import { useRoute } from "@react-navigation/native";
-import { collection, onSnapshot, doc, setDoc, addDoc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, addDoc, updateDoc, getDoc } from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
 import { Ionicons, Fontisto } from "@expo/vector-icons";
 import { uploadImage, pickImageChat } from '../../utils'
@@ -28,12 +28,8 @@ function ChatScreen(props) {
   const [myrandID,setMyrandID]=useState(nanoid())
   const [selectedImageView, setSeletedImageView] = useState("");
   const { theme: { colors } } = useContext(GlobalContext)
-
   const route = useRoute();
-  const room = route.params.room;
-  const secretKey = '12345789aaaaaaa';
-
-
+  const room = route.params.room  ;
 
   const selectedImage = route.params.image;
   const contactedUser = route.params.user;
@@ -57,14 +53,17 @@ function ChatScreen(props) {
   const roomRef = doc(db, "rooms", roomId); //document of the room based on it's id
   const roomMessagesRef = collection(db, "rooms", roomId, "messages");//refrecnce for the messegaes on particular room
 
-
+    const [AesKey,setAesKey] = useState(null)
   
+  
+  const [Loading,setLoading] = useState(true)
 
 
   useEffect(() => { //initialize room if there are no existing one within the rooms array.
 
     (async () => {
-      if (!room) {
+      if (!room) { //if the room doesn't exist we initialize it with the neceserly params
+       
         const currentUserData = {
           displayName: currentUser.displayName,
           email: currentUser.email
@@ -87,14 +86,44 @@ function ChatScreen(props) {
         try {
             //initializing the room
 
-            const result = await GenAESKey()
-            console.log("success")
-             await setDoc(roomRef, {...roomData,AES:result.data.AES})
+            GenAESKey().then(result =>{
+              setDoc(roomRef, {...roomData,AESkey:result.data.AES}).then(() => {
+                return getDoc(roomRef);
+                
+              }).then(res =>{
+                if (!res.exists) {
+                  console.log("No such document!"); //Error
+                } else {
+                  console.log(res.data().AESkey)
+                  setAesKey((prev)=> res.data().AESkey)
+                  setLoading(false)
+                }
+
+              })
+            } ).catch(err=>console.log(err))
+           
+        
+             
              
         } catch (err) {
           console.log(err)
         }
 
+      }else{ //if the room exist we import it's key since it 
+        getDoc(roomRef).then(res => {
+          if (!res.exists) {
+            console.log("No such document!"); //Error
+          } else {
+            console.log(res.data().AESkey)
+            setAesKey((prev)=> res.data().AESkey)
+            setLoading(false)
+          }
+
+        }).catch(err=>console.log(err))
+
+        setLoading(false)
+
+        
       }
       const emailHash = `${currentUser.email}:${contactedUser.email}`
 
@@ -111,18 +140,27 @@ function ChatScreen(props) {
   //older implementation of the use hook to render the new messages recieved from the firebase room //
 
   useEffect(()=>{ //query over the messages in the room at start and append new messages
-    const unsubscribe = onSnapshot(roomMessagesRef,querysnapshot=>{
+
+    if(AesKey!=null){    
+        const unsubscribe = onSnapshot(roomMessagesRef,querysnapshot=>{
+        
         const messagesFirestore = querysnapshot.docChanges().filter(({type})=>type ==='added').map(
             ({doc})=>{
                 
                 const message = doc.data()
-                let decryptedText = CryptoJS.AES.decrypt(message.text, secretKey).toString(CryptoJS.enc.Utf8);
+
+              /*  console.log("printing key useeffect decrypt")  //printing the room AES key
+                console.log(AesKey) */
+
+                let decryptedText = CryptoJS.AES.decrypt(message.text, AesKey).toString(CryptoJS.enc.Utf8);
                 return {...message,createdAt : message.createdAt.toDate() ,text:decryptedText}
             }).sort((a,b)=> b.createdAt.getTime() - a.createdAt.getTime())
             appendMessages(messagesFirestore) 
     });
     return ()=>unsubscribe();
-  },[])
+      }
+
+  },[AesKey])
 
 //encrypt the message
   const appendMessages = useCallback((messages) => { // help function to append messages
@@ -141,9 +179,10 @@ function ChatScreen(props) {
       try{
         
         const writes  = messages.map(m=>{
-              
+          console.log("printing key onSend")
           
-          const encryptedText = CryptoJS.AES.encrypt(m.text, secretKey).toString();
+
+          const encryptedText = CryptoJS.AES.encrypt(m.text, AesKey).toString();
 
           const encryptedMessage = {
             ...m,
@@ -195,14 +234,13 @@ function ChatScreen(props) {
 
   async function handlePhotoPicker() {//just help function uses expo client to pick image from gallery
     const result = await pickImageChat();
-    if (!result.cancelled) {
-      await sendImage(result.uri);
+    if (result.assets[0].uri) {
+      await sendImage(result.assets[0].uri);
     }
   }
 
 
-  return (
-    <ImageBackground style={{ flex: 1 }} resizeMode="cover" source={require('../../assets/chatbg.png')}>
+  return (Loading ?<Text>loading ...</Text>:<ImageBackground style={{ flex: 1 }} resizeMode="cover" source={require('../../assets/chatbg.png')}>
       <GiftedChat
         onSend={onSend}
         messages={messages} //the messages needs to be rendered
