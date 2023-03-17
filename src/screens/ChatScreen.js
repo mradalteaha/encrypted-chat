@@ -13,7 +13,7 @@ import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
 import CryptoJS from "react-native-crypto-js";
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
-
+import { v4 as uuid } from 'uuid';
 
 
 
@@ -27,7 +27,7 @@ function ChatScreen(props) {
   const [messages, setMessages] = useState([]);//to be able to access the data and manipulate the messages
   //these two states are related to view images 
   const [modalVisible, setModalVisible] = useState(false);
-  const [myrandID,setMyrandID]=useState(nanoid())
+  const [myrandID,setMyrandID]=useState(uuid())
   const [selectedImageView, setSeletedImageView] = useState("");
   const { theme: { colors } } = useContext(GlobalContext)
   const route = useRoute();
@@ -199,6 +199,7 @@ function ChatScreen(props) {
         const lastMessage= messages[messages.length -1]
         writes.push(updateDoc(roomRef,{lastMessage}))//updating the last message for the look of chats screen
         await Promise.all(writes)
+     
       }catch(err){
         console.log("error occured at onSend function at chatsScree")
         console.error(err)
