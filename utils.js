@@ -1,8 +1,10 @@
 import * as ImagePicker from "expo-image-picker";
 import "react-native-get-random-values";
-import { nanoid }from 'nanoid'
-import {ref, uploadBytes, getDownloadURL} from 'firebase/storage'
+import { v4 as uuid } from 'uuid';
+import {ref, uploadBytes, getDownloadURL ,uploadBytesResumable} from 'firebase/storage'
 import { storage } from "./src/firebase"
+import { Buffer } from "buffer";
+
 export async function pickImage(){
   
  // let result = await ImagePicker.launchCameraAsync(); 
@@ -11,6 +13,7 @@ export async function pickImage(){
     allowsEditing: true,
     aspect: [4, 4],
     quality: 1,
+    base64:true,
   });
   
   
@@ -25,6 +28,7 @@ export async function pickImageChat(){
      mediaTypes: ImagePicker.MediaTypeOptions.All,
      allowsEditing: false,
      quality: 1,
+     base64:true
    });
 
 
@@ -35,28 +39,55 @@ export async function askForPermission(){
   const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync()
   return status ; 
 }
-export async function uploadImage(uri, path, fName) {
-  const blob = await new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.onload = function () {
-      resolve(xhr.response);
-    };
-    xhr.onerror = function (e) {
-      console.log(e);
-      reject(new TypeError("Network request failed"));
-    };
-    xhr.responseType = "blob";
-    xhr.open("GET", uri, true);
-    xhr.send(null);
-  });
-  const fileName = fName || nanoid();
+
+
+
+export async function uploadImage(image, path, fName) {
+
+  const imageupload = await new Promise((resolve, reject) => {
+    
+  let imageByte = new Buffer.from(image.base64, "base64");
+  const fileName = fName || uuid();
   const imageRef = ref(storage, `${path}/${fileName}.jpeg`);
-  const snapshot = await uploadBytes(imageRef, blob, {
+  const uploadTask = uploadBytesResumable(imageRef, imageByte, {
     contentType: "image/jpeg",
   });
-  blob.close();
-  const url = await getDownloadURL(snapshot.ref);
-  return { url, fileName };
+  console.log('passed line 69')
+  
+  uploadTask.on('state_changed', 
+    (snapshot) => {
+      const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      console.log('Upload is ' + progress + '% done');
+      switch (snapshot.state) {
+        case 'paused':
+          console.log('Upload is paused');
+          break;
+        case 'running':
+          console.log('Upload is running');
+          break;
+      }
+    }, 
+    (error) => {
+      console.log(error)
+      reject(new TypeError(error))
+    }, 
+    () => {
+    
+      getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+        console.log('File available at', downloadURL);
+        const url = downloadURL
+
+        resolve({url,fileName})
+        
+      }).catch(err => {
+        reject(new TypeError(err))
+      });
+    }
+  );
+  })
+    
+  return imageupload
+ 
 }
 
 

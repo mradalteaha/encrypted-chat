@@ -5,7 +5,7 @@ import { Image, TouchableOpacity, View, StyleSheet, ImageBackground,Text } from 
 import GlobalContext from '../../Context/Context';//global variables to access via provider
 import { auth, db,GenAESKey } from "../firebase"; // firebase instance 
 import { useRoute } from "@react-navigation/native";
-import { collection, onSnapshot, doc, setDoc, addDoc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
 import { Ionicons, Fontisto } from "@expo/vector-icons";
 import { uploadImage, pickImageChat } from '../../utils'
@@ -181,7 +181,7 @@ function ChatScreen(props) {
     
       try{
         
-        const writes  = messages.map(m=>{
+        const writes  = messages.map(async(m)=>{
           console.log("printing key onSend")
           
 

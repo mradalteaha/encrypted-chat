@@ -39,16 +39,23 @@ export default function Profile(props) {
     }, [])
 
     async function handlePress() {
+        
 
         try{
-
+            console.log('clicked on handle preess for next button')
         
         const user = auth.currentUser;
         let photoURL
         if (selectImage) {
-            const { url } = await uploadImage(selectImage.uri, `Images/${user.uid}`, "profilePicture")
+            console.log('error on upload image')
+            //console.log(selectImage)
+            const { url } = await uploadImage(selectImage, `Images/${user.uid}`, "profilePicture")
+            console.log('photo uploaded')
+            console.log(url)
+
             photoURL = url;
         }
+        console.log('got here')
         const result = await GenKey()
             console.log("success")
             console.log(result.data)
@@ -76,9 +83,13 @@ export default function Profile(props) {
         }
         await Promise.all([settingItem,updateProfile(user, userData), setDoc(doc(db, 'users', user.uid), { ...userData, uid: user.uid })])
         console.log(userData)
+        console.log('i have updated the user necesserly profile elemens at Profile ')
         navigation.navigate('HomeScreen')
-
-    }catch(e){console.log(e)}
+       
+    }catch(e){
+        console.log('error occured')
+        console.log(e)
+    }
 
     }
 
@@ -156,8 +167,10 @@ export default function Profile(props) {
     }
 
     async function handleProfileImage() {
+        
         const result = await pickImage()
-        if (result.assets[0].uri) {
+        if (result.assets[0]) {
+            console.log('image has been successfully uploaded on handle profile picture')
             setSelectedImage(result.assets[0])
         }
     }
