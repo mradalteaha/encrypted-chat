@@ -3,14 +3,17 @@ import { useState } from "react";
 import { Image, Button, Text, View, SafeAreaView, StyleSheet, KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
 import { TextInput } from "react-native-gesture-handler";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // to avoid fields falling underneath the keyboard
-import { auth, db ,GenKey, GenAESKey} from '../firebase'
+import { auth, db ,GenKey, GenAESKey,storage} from '../firebase'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import Context from '../../Context/Context'
 import { pickImage, askForPermission, uploadImage } from '../../utils'
 import { theme } from '../../utils';
 import { updateProfile } from 'firebase/auth';
+import {ref, getDownloadURL ,uploadBytesResumable,uploadBytes} from 'firebase/storage'
+
 import { doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
+import * as Progress from 'react-native-progress';
 import {Buffer} from 'buffer'
 import CryptoJS from "react-native-crypto-js";
 import { async, map } from '@firebase/util';
@@ -27,6 +30,8 @@ export default function Profile(props) {
     const [permissionStatus, permissionStatusUpdate] = useState(null);
     const { theme: { colors } } = useContext(Context)
     const navigation = useNavigation()
+    const [imageUploadProgress, setImageUploadProgress]=useState(0)
+    
 
 
 
@@ -47,44 +52,114 @@ export default function Profile(props) {
         const user = auth.currentUser;
         let photoURL
         if (selectImage) {
-            console.log('error on upload image')
+           /*  console.log('error on upload image')
             //console.log(selectImage)
             const { url } = await uploadImage(selectImage, `Images/${user.uid}`, "profilePicture")
             console.log('photo uploaded')
-            console.log(url)
+            console.log(url) */
+            console.log("uploading image")
+  
+            let imageByte = new Buffer.from(selectImage.base64, "base64");
+            const fileName = "profilePicture" || uuid();
+            
+            const path = `Images/${user.uid}`
+            const imageRef = ref(storage, `${path}/${fileName}.jpeg`);
+            const uploadTask = uploadBytesResumable(imageRef, imageByte, {
+              contentType: "image/jpeg",
+            });
+/* 
+            const uploadProfileImage =  uploadBytes(imageRef, imageByte, {
+                contentType: "image/jpeg",
+              }).then(async (res) => {
 
-            photoURL = url;
-        }
-        console.log('got here')
-        const result = await GenKey()
-            console.log("success")
-            console.log(result.data)
-            const RsaKeys=result.data;
-            console.log(RsaKeys)
-           // EncryptedStorage.setItem(auth.currentUser.uid,JSON.stringify(RsaKeys));
+                photoURL = await getDownloadURL(res.ref)
 
-           //  EncryptedStorage.getItem("user_session");
-           let rooms = new Map();
-           const userLocal ={RsaKeys , rooms}
-          const settingItem = await  AsyncStorageStatic.setItem(auth.currentUser.uid,JSON.stringify(userLocal))
-            if(RsaKeys){
-                console.log(RsaKeys)
-                setRSAkeys(RsaKeys)
-            }
+                console.log('Generating Keys : \n')
+                const result = await GenKey()
+                    const RsaKeys=result.data;
+                    
+                   // EncryptedStorage.setItem(auth.currentUser.uid,JSON.stringify(RsaKeys));
+        
+                   //  EncryptedStorage.getItem("user_session");
+                   let rooms =  new Map();
+                   const userLocal ={RsaKeys , rooms}
+                  const settingItem =  AsyncStorageStatic.setItem(auth.currentUser.uid,JSON.stringify(userLocal))
+                    if(RsaKeys){
+                        console.log(RsaKeys)
+                        setRSAkeys(RsaKeys)
+                    }
+        
+                  const userData = {
+                    displayName,
+                    email: user.email,
+                    RSApublicKey:RsaKeys.publicKey
+                }
+               
+                if (photoURL) {
+                    userData.photoURL = photoURL
+                }
+                await Promise.all([settingItem,updateProfile(user, userData), setDoc(doc(db, 'users', user.uid), { ...userData, uid: user.uid })])
+                console.log('i have updated the user necesserly profile elemens at Profile ')
+                console.log(userData)
+                navigation.navigate('HomeScreen')
+              }) */
+            
+            uploadTask.on('state_changed', 
+              (snapshot) => {
+                const progress =(snapshot.bytesTransferred / snapshot.totalBytes)
+                //imageUploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log('Upload is ' + progress*100 + '% done');
+                switch (snapshot.state) {
+                  case 'paused':
+                    console.log('Upload is paused');
+                    break;
+                  case 'running':
+                    console.log('Upload is running');
+                    break;
+                }
+              }, 
+              (error) => {
+                console.log(error)
+              }, 
+              async() => {
+              
+                photoURL = await getDownloadURL(uploadTask.snapshot.ref)
 
-          const userData = {
-            displayName,
-            email: user.email,
-            RsaPk:RsaKeys.publicKey
+                console.log('Generating Keys : \n')
+                const result = await GenKey()
+                    const RsaKeys=result.data;
+                    
+                   // EncryptedStorage.setItem(auth.currentUser.uid,JSON.stringify(RsaKeys));
+        
+                   //  EncryptedStorage.getItem("user_session");
+                   let rooms =  new Map();
+                   const userLocal ={RsaKeys , rooms}
+                  const settingItem =  AsyncStorageStatic.setItem(auth.currentUser.uid,JSON.stringify(userLocal))
+                    if(RsaKeys){
+                        console.log(RsaKeys)
+                        setRSAkeys(RsaKeys)
+                    }
+        
+                  const userData = {
+                    displayName,
+                    email: user.email,
+                    RSApublicKey:RsaKeys.publicKey
+                }
+               
+                if (photoURL) {
+                    userData.photoURL = photoURL
+                }
+                await Promise.all([settingItem,updateProfile(user, userData), setDoc(doc(db, 'users', user.uid), { ...userData, uid: user.uid })])
+                console.log('i have updated the user necesserly profile elemens at Profile ')
+                console.log(userData)
+                navigation.navigate('HomeScreen')
+              }
+            );
+            
+           
+
         }
-       
-        if (photoURL) {
-            userData.photoURL = photoURL
-        }
-        await Promise.all([settingItem,updateProfile(user, userData), setDoc(doc(db, 'users', user.uid), { ...userData, uid: user.uid })])
-        console.log(userData)
-        console.log('i have updated the user necesserly profile elemens at Profile ')
-        navigation.navigate('HomeScreen')
+      
        
     }catch(e){
         console.log('error occured')
@@ -208,6 +283,10 @@ export default function Profile(props) {
                             <Button title={'Next'} onPress={() => handlePress(selectImage)} disabled={!displayName || !selectImage } />
                             <Button title={'Generate'} onPress={handlePress2}  />
 
+                        </View>
+
+                        <View style={{Padding:50 , justifyContent:'center' , marginBottom:20 , height:150}}>
+                        <Progress.Bar progress={imageUploadProgress} width={200} />
                         </View>
 
 
