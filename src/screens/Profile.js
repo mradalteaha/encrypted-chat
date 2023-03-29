@@ -10,7 +10,6 @@ import { pickImage, askForPermission, uploadImage } from '../../utils'
 import { theme } from '../../utils';
 import { updateProfile } from 'firebase/auth';
 import {ref, getDownloadURL ,uploadBytesResumable,uploadBytes} from 'firebase/storage'
-
 import { doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import * as Progress from 'react-native-progress';
@@ -58,11 +57,13 @@ export default function Profile(props) {
             console.log('photo uploaded')
             console.log(url) */
             console.log("uploading image")
+            console.log('printing the image base 64')
+            console.log(selectImage.base64)
   
             let imageByte = new Buffer.from(selectImage.base64, "base64");
             const fileName = "profilePicture" || uuid();
             
-            const path = `Images/${user.uid}`
+            const path = `images/${user.uid}`
             const imageRef = ref(storage, `${path}/${fileName}.jpeg`);
             const uploadTask = uploadBytesResumable(imageRef, imageByte, {
               contentType: "image/jpeg",
@@ -119,6 +120,7 @@ export default function Profile(props) {
                 }
               }, 
               (error) => {
+                console.log('error occured on uploading')
                 console.log(error)
               }, 
               async() => {
@@ -136,7 +138,7 @@ export default function Profile(props) {
                    const userLocal ={RsaKeys , rooms}
                   const settingItem =  AsyncStorageStatic.setItem(auth.currentUser.uid,JSON.stringify(userLocal))
                     if(RsaKeys){
-                        console.log(RsaKeys)
+                        console.log('rsa keys generated successfully on profile')
                         setRSAkeys(RsaKeys)
                     }
         

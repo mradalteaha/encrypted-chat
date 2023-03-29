@@ -110,7 +110,7 @@ function ContactPreview({ contact, image, usersCollection }) {
         const unsubscribe = onSnapshot(q,snapshot=>{
             if(snapshot.docs.length){
                 const userDoc = snapshot.docs[0].data()
-                setUser((prevUser)=>({...prevUser , userDoc}))
+                setUser((prevUser)=>({...prevUser , ...userDoc}))
             }
         })
         return () => unsubscribe()

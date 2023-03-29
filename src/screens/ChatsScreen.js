@@ -35,6 +35,7 @@ export default function ChatsScreen() {
         // console.log(`evaluating my contacts ${myContacts}`)
         if(myContacts){
             const userContact = myContacts.find((c)=>c.email ===user.email);
+            console.log(userContact)
             if(userContact && userContact.displayName ){
 
                 return userContact

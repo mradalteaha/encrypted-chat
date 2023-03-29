@@ -13,6 +13,7 @@ import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
 import CryptoJS from "react-native-crypto-js";
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
+import {EncryptAESkey,DecryptAESkey} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
 
 
@@ -88,31 +89,102 @@ function ChatScreen(props) {
         try {
             //initializing the room
 
-            GenAESKey().then(result =>{
+            GenAESKey().then(async (result) =>{
+
               //encrypt the ke
-              setDoc(roomRef, {...roomData,AESkey:result.data.AES}).then(() => {
-                return getDoc(roomRef);
+              console.log('generating the AES key passed key :')
+              console.log(contactedUser)
+              console.log(result.data.AES)
+               const encKey = await EncryptAESkey(contactedUser.RSApublicKey,result.data.AES) //encrypting the aes key before saving it in the database
+               console.log('encrypting  the AES key passed key :')
+               console.log(encKey)
+               const LoadLocalStorage = await AsyncStorageStatic.getItem(currentUser.uid) // getting the current saved data .
+               let userLocal = JSON.parse(LoadLocalStorage)
+               let userLocalrooms = userLocal.rooms
+               userLocalrooms[roomId] = result.data.AES
+               let finalizeLocalData = {...LoadLocalStorage , rooms:userLocalrooms}
+               console.log('generated keys')
+               const saveLocalData = await AsyncStorageStatic.setItem(currentUser.uid, JSON.stringify(finalizeLocalData))
+
+              setDoc(roomRef, {...roomData,AESkey:encKey}).then(() => {
+
+
+                AsyncStorageStatic.getItem(currentUser.uid).then(res =>{
+                  let userLocal = JSON.parse(res)
+                  console.log('printing the user local data')
+                  //console.log(userLocal)
+                  console.log('AESkey for the current room')
+                  console.log(userLocal.rooms[roomId])
+                  const localkey= userLocal.rooms[roomId]
+                  setAesKey((prev)=> localkey)
+                    setLoading(false)
+                    return
                 
-              }).then(res =>{
+              }).catch(err=>console.log(err))}).catch(err=>{console.log(err)})
+ 
+             
+        }).catch(err=>{
+          console.log(err)
+        }) 
+
+      }
+      catch(err){
+        console.log(err)
+      }
+    }
+      else{ //if the room exist we import it's key since it 
+        if(!AesKey){ //if the aes key is not setup this statement to prevent multiple access to the local storage and server storage
+
+          AsyncStorageStatic.getItem(currentUser.uid).then(result =>{
+            let userLocal = JSON.parse(result)
+            
+            console.log('AESkey for the current room')
+            console.log(userLocal.rooms[roomId])
+            if(userLocal.rooms[roomId]){ //if the key exist on the local storage meaning the current user created this room at the beganning
+              const localkey= userLocal.rooms[roomId]
+              setAesKey((prev)=> localkey) //set the room key from the local storage 
+                setLoading(false)
+            }else{//we need to import the encrypted key from the database and decrypt it.
+
+              getDoc(roomRef).then(async (res) => {//query to get the key from the room data
                 if (!res.exists) {
                   console.log("No such document!"); //Error
                 } else {
-                  console.log(res.data().AESkey)
-                  setAesKey((prev)=> res.data().AESkey)
-                  setLoading(false)
-                }
+                  
+                  const encryptedkey = res.data().AESkey
+                  const decryptedkey = await DecryptAESkey(userLocal.RsaKeys.privateKey,encryptedkey)
 
-              })
-            } ).catch(err=>console.log(err))
-           
-        
-             
-             
-        } catch (err) {
-          console.log(err)
+               
+                   setAesKey((prev)=> decryptedkey)
+                    setLoading(false)
+
+                 
+                }
+      
+              }).catch(err=>console.log(err))
+
+            }
+          
+  
+          })
+
+
         }
 
-      }else{ //if the room exist we import it's key since it 
+        /* AsyncStorageStatic.getItem(currentUser.uid).then(res =>{
+          let userLocal = JSON.parse(res)
+          
+          console.log('AESkey for the current room')
+          console.log(userLocal.rooms[roomId])
+          const localkey= userLocal.rooms[roomId]
+          setAesKey((prev)=> localkey)
+            setLoading(false)
+
+        }) // getting the current saved data .
+             /*   let userLocal = JSON.parse(LoadLocalStorage)
+               let userLocalrooms = userLocal.rooms
+
+
         getDoc(roomRef).then(res => {
           if (!res.exists) {
             console.log("No such document!"); //Error
@@ -122,9 +194,9 @@ function ChatScreen(props) {
             setLoading(false)
           }
 
-        }).catch(err=>console.log(err))
+        }).catch(err=>console.log(err)) 
 
-        setLoading(false)
+        setLoading(false) */
 
         
       }

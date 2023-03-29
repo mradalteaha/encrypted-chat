@@ -14,7 +14,7 @@ export async function pickImage(){
     mediaTypes: ImagePicker.MediaTypeOptions.All,
     allowsEditing: true,
     aspect: [4, 4],
-    quality: 1,
+    quality: 0.2,
     base64:true,
   });
   
@@ -29,7 +29,7 @@ export async function pickImageChat(){
    let result = await ImagePicker.launchImageLibraryAsync({
      mediaTypes: ImagePicker.MediaTypeOptions.All,
      allowsEditing: false,
-     quality: 1,
+     quality: 0.2,
      base64:true
    });
 
@@ -41,6 +41,8 @@ export async function askForPermission(){
   const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync()
   return status ; 
 }
+
+
 
 
 
@@ -131,7 +133,8 @@ export async function EncryptAESkey(contactedUserPK,roomAESkey){//function to en
 
       const data = roomAESkey
       const publicKey = contactedUserPK
-  
+      console.log('printing the public key :')
+      console.log(publicKey)
       const encryptedData = crypto.publicEncrypt(
         {
           key: publicKey,
@@ -151,6 +154,7 @@ export async function EncryptAESkey(contactedUserPK,roomAESkey){//function to en
          
          resolve(encryptedAESkey)
     }catch(err){
+      console.log('encryption failed')
       reject(err);
     }
 
