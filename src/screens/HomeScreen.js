@@ -6,6 +6,7 @@ import ChatsScreen from './ChatsScreen';
 import ContactScreen from './ContactScreen';
 import {AntDesign} from '@expo/vector-icons';
 import ManagerScreen from './ManagerScreen';
+import GroupChatsScreen from './GroupChatsScreen'
 
 
 
@@ -49,6 +50,7 @@ function HomeScreen(props) {
         >
           <Tab.Screen name="contacts" component={ContactScreen} />
           <Tab.Screen name="chats" component={ChatsScreen} />
+          <Tab.Screen name="Groups" component={GroupChatsScreen} />
           <Tab.Screen name="ManagerScreen" component={ManagerScreen} />
         </Tab.Navigator>
       );

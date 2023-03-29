@@ -64,10 +64,11 @@ function ContactScreen(props) {
     return (
         <SafeAreaView style={styles.container}>
             {usersCollection ?
+              
                 <FlatList style={{ flex: 1, padding: 10 }} data={myContacts} keyExtractor={(item, i) => item.email}
 
                     renderItem={({ item }) => <ContactPreview contact={item} image={image} usersCollection={usersCollection} />}
-                /> : null}
+                />  : null}
 
   
 
