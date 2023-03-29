@@ -8,7 +8,7 @@ import { useRoute } from "@react-navigation/native";
 import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
 import { Ionicons, Fontisto } from "@expo/vector-icons";
-import { uploadImage, pickImageChat } from '../../utils'
+import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission} from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
 import CryptoJS from "react-native-crypto-js";
@@ -31,6 +31,8 @@ function ChatScreen(props) {
   const [myrandID,setMyrandID]=useState(uuid())
   const [selectedImageView, setSeletedImageView] = useState("");
   const { theme: { colors } } = useContext(GlobalContext)
+  const [permissionStatus, permissionStatusUpdate] = useState(null);
+
   const route = useRoute();
   const room = route.params.room  ;
 
@@ -38,7 +40,12 @@ function ChatScreen(props) {
   const contactedUser = route.params.user;
 
 //console.log('chat screen is rendering ')
-
+    useEffect(() => {
+      (async () => {
+          const status = await askForPermission();
+          permissionStatusUpdate(status)
+      })()
+    }, [])
 
   const senderUser = currentUser.photoURL //asssigning the current user to the sender user
     ? {
@@ -98,18 +105,18 @@ function ChatScreen(props) {
                const encKey = await EncryptAESkey(contactedUser.RSApublicKey,result.data.AES) //encrypting the aes key before saving it in the database
                console.log('encrypting  the AES key passed key :')
                console.log(encKey)
-               const LoadLocalStorage = await AsyncStorageStatic.getItem(currentUser.uid) // getting the current saved data .
+               const LoadLocalStorage = await readUserData(currentUser.uid) // getting the current saved data .
                let userLocal = JSON.parse(LoadLocalStorage)
                let userLocalrooms = userLocal.rooms
                userLocalrooms[roomId] = result.data.AES
                let finalizeLocalData = {...LoadLocalStorage , rooms:userLocalrooms}
                console.log('generated keys')
-               const saveLocalData = await AsyncStorageStatic.setItem(currentUser.uid, JSON.stringify(finalizeLocalData))
+               const saveLocalData = await saveUserData(currentUser.uid, JSON.stringify(finalizeLocalData) )
 
               setDoc(roomRef, {...roomData,AESkey:encKey}).then(() => {
 
 
-                AsyncStorageStatic.getItem(currentUser.uid).then(res =>{
+                readUserData(currentUser.uid).then(res =>{
                   let userLocal = JSON.parse(res)
                   console.log('printing the user local data')
                   //console.log(userLocal)
@@ -129,44 +136,47 @@ function ChatScreen(props) {
 
       }
       catch(err){
+        console.log('error on initializing the room')
         console.log(err)
       }
     }
       else{ //if the room exist we import it's key since it 
         if(!AesKey){ //if the aes key is not setup this statement to prevent multiple access to the local storage and server storage
 
-          AsyncStorageStatic.getItem(currentUser.uid).then(result =>{
-            let userLocal = JSON.parse(result)
+          const data = await readUserData(currentUser.uid)
+          if(data){
             
-            console.log('AESkey for the current room')
-            console.log(userLocal.rooms[roomId])
-            if(userLocal.rooms[roomId]){ //if the key exist on the local storage meaning the current user created this room at the beganning
-              const localkey= userLocal.rooms[roomId]
+            let parsedData = JSON.parse(data)
+            if(parsedData.rooms[roomId]){
+              const localkey= parsedData.rooms[roomId]
               setAesKey((prev)=> localkey) //set the room key from the local storage 
-                setLoading(false)
-            }else{//we need to import the encrypted key from the database and decrypt it.
+              setLoading(false)
 
+
+            }else{//this room doesn't exist on the local storage 
               getDoc(roomRef).then(async (res) => {//query to get the key from the room data
                 if (!res.exists) {
                   console.log("No such document!"); //Error
                 } else {
                   
-                  const encryptedkey = res.data().AESkey
-                  const decryptedkey = await DecryptAESkey(userLocal.RsaKeys.privateKey,encryptedkey)
-
-               
-                   setAesKey((prev)=> decryptedkey)
+                    const encryptedkey = res.data().AESkey
+                    const decryptedkey = await DecryptAESkey(parsedData.RsaKeys.privateKey,encryptedkey)
+                      let userLocal = JSON.parse(data)
+                      console.log(data)
+                    let userLocalrooms = userLocal.rooms
+                  userLocalrooms[roomId] = decryptedkey
+                  let finalizeLocalData = {...parsedData , rooms:userLocalrooms}
+                  console.log('saving the new room into the local storage ')
+                  saveUserData(currentUser.uid,JSON.stringify(finalizeLocalData) ).then(()=>{
+                    setAesKey((prev)=> decryptedkey)
                     setLoading(false)
+                  })
 
-                 
                 }
       
               }).catch(err=>console.log(err))
-
             }
-          
-  
-          })
+          }
 
 
         }
@@ -315,6 +325,13 @@ function ChatScreen(props) {
     }
   }
 
+
+    if (!permissionStatus) {
+      return <Text>Loading ...</Text>
+  }
+  if (permissionStatus !== 'granted') {
+      return <Text> you need to grant permission </Text>
+  }
 
   return (Loading ?<Text>loading ...</Text>:<ImageBackground style={{ flex: 1 }} resizeMode="cover" source={require('../../assets/chatbg.png')}>
       <GiftedChat

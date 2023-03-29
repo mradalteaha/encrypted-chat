@@ -6,7 +6,7 @@ import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper"; // 
 import { auth, db ,GenKey, GenAESKey,storage} from '../firebase'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import Context from '../../Context/Context'
-import { pickImage, askForPermission, uploadImage } from '../../utils'
+import { pickImage, askForPermission, uploadImage,saveUserData } from '../../utils'
 import { theme } from '../../utils';
 import { updateProfile } from 'firebase/auth';
 import {ref, getDownloadURL ,uploadBytesResumable,uploadBytes} from 'firebase/storage'
@@ -129,14 +129,14 @@ export default function Profile(props) {
 
                 console.log('Generating Keys : \n')
                 const result = await GenKey()
-                    const RsaKeys=result.data;
+                    const RsaKeys=result.data;//object from the backend {publicKey ,privateKey}
                     
-                   // EncryptedStorage.setItem(auth.currentUser.uid,JSON.stringify(RsaKeys));
-        
-                   //  EncryptedStorage.getItem("user_session");
-                   let rooms =  new Map();
+                   
+                   let rooms = {};
                    const userLocal ={RsaKeys , rooms}
-                  const settingItem =  AsyncStorageStatic.setItem(auth.currentUser.uid,JSON.stringify(userLocal))
+
+                    const settingItem =  await saveUserData(auth.currentUser.uid,JSON.stringify(userLocal))
+                  
                     if(RsaKeys){
                         console.log('rsa keys generated successfully on profile')
                         setRSAkeys(RsaKeys)

@@ -4,6 +4,9 @@ import { v4 as uuid } from 'uuid';
 import {ref, uploadBytes, getDownloadURL ,uploadBytesResumable} from 'firebase/storage'
 import { storage } from "./src/firebase"
 import { Buffer } from "buffer";
+import {writeAsStringAsync,readAsStringAsync,documentDirectory,makeDirectoryAsync,getInfoAsync,StorageAccessFramework,EncodingType} from 'expo-file-system'
+import {createAssetAsync,usePermissions,createAlbumAsync} from 'expo-media-library'
+
 const crypto = require('./crypto-custom.js');
 
 
@@ -208,3 +211,48 @@ export async function DecryptAESkey(contactedUserPr,roomAESEnckey){ //function t
   return decryptedAESkey
 
 }
+
+
+
+export async function saveUserData(userid,datatoSave) { //this function saves a given data to local storage 
+  
+
+    const saved = new Promise(async (resovlve,reject)=>{
+     // const local = JSON.stringify(datatoSave)
+    let fileUri = documentDirectory + `${userid}.txt`;
+     writeAsStringAsync(fileUri, datatoSave, { encoding:EncodingType.UTF8 }).then(()=>{
+      console.log('data saved successffully saveUserData utils')
+      resovlve('data saved successfully')
+     }).catch(err=>{
+      console.log('data saved failed saveUserData utils ')
+      reject(err)
+    })
+
+    })
+    
+   return saved
+  
+}
+
+export async function readUserData(userid) { //this function saves a given data to local storage 
+  
+
+  const saved = new Promise(async (resovlve,reject)=>{
+    
+  let fileUri = documentDirectory + `${userid}.txt`;
+  readAsStringAsync(fileUri,{ encoding:EncodingType.UTF8 }).then((res)=>{
+    console.log('retrieved data successfully readUserData utils ')
+    
+    console.log(res)
+    resovlve(res)
+   }).catch(err=>{
+    console.log('retrieved data Failed readUserData utils')
+    reject(err)
+  })
+
+  })
+  
+ return saved
+
+}
+
