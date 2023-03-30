@@ -3,10 +3,14 @@ import { theme } from "../utils";
 
 const GlobalContext = React.createContext({
   theme,
-  room:[] ,
+  rooms:[] ,
   unfilteredRooms:[],
-  SetRoom:()=>{},
+  setRooms:()=>{},
   setUnfilteredRooms:()=>{},
+  groups:[] ,
+  unfilteredGroups:[],
+  setGroups:()=>{},
+  setUnfilteredGroups:()=>{},
   currentUser:null,
   setCurrentUser:()=>{},
   isLogged:false,

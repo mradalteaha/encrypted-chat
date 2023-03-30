@@ -116,7 +116,7 @@ function Main() {
 
 
 };
-AppRegistry.registerComponent('ChatApplication', () => Main);
+AppRegistry.registerComponent('encrypted-chat', () => Main);
 
 
 export default Main;

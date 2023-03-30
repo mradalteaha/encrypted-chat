@@ -7,11 +7,11 @@ import ItemList from '../components/ItemList';
 import useContacts from '../hooks/useHooks';
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 
-export default function ChatsScreen() {
+export default function GroupChatsScreen() {
     const {currentUser} = auth // grabing the current signed in user via firebase auth
-    const {rooms,setRooms,setUnfilteredRooms,myContacts } = useContext(GlobalContext) // getting the global context provider
+    const {rooms,setRooms,setUnfilteredRooms,myContacts,groups ,setUnfilteredGroups,setGroups} = useContext(GlobalContext) // getting the global context provider
     const chatsQuery = query(// query on firestore collection 
-        collection(db,'rooms'),
+        collection(db,'groups'),
         where('participantsArray','array-contains',currentUser.email)
     );
     useEffect(()=>{ //onloading the page require all the requested chats for this user
@@ -20,12 +20,11 @@ export default function ChatsScreen() {
                 (doc)=>({
                     ...doc.data(),
                     id:doc.id,
-                    AESkey:doc.data().AESkey,
-                    contactedUser:doc.data().participants.find(p=> p.email!== currentUser.email),
+                    AESkeys:doc.data().AESkeys,
                 })
             )
-            setUnfilteredRooms(parsedChats)
-            setRooms(parsedChats.filter((doc)=>doc.lastMessage));      
+            setUnfilteredGroups(parsedChats)
+            setGroups(parsedChats.filter((doc)=>doc.lastMessage));      
         });
 
         return ()=> unsubscribe();
@@ -35,7 +34,7 @@ export default function ChatsScreen() {
         // console.log(`evaluating my contacts ${myContacts}`)
         if(myContacts){
             const userContact = myContacts.find((c)=>c.email ===user.email);
-            //console.log(userContact)
+            
             if(userContact && userContact.displayName ){
 
                 return userContact
@@ -51,7 +50,8 @@ export default function ChatsScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            {rooms.map((room) => <ItemList type='ChatScreen' description={room.lastMessage.text}
+        <Text> Create Grpup</Text>
+            {groups.map((room) => <ItemList type='ChatScreen' description={room.lastMessage.text}
                 key={room.id}
                 room={room}
                 time={room.lastMessage.createdAt}
