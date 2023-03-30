@@ -1,11 +1,12 @@
 import { collection, onSnapshot, query, QuerySnapshot, where,getDocs,getDoc } from 'firebase/firestore';
 import React, { cloneElement, useContext, useEffect, useState } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, FlatList } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, FlatList, Touchable } from 'react-native';
 import GlobalContext from '../../Context/Context';
 import { auth, db } from '../firebase'
 import useContacts from '../hooks/useHooks';
 import ItemList from '../components/ItemList';
 import { useRoute } from '@react-navigation/native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 function ContactScreen(props) {
 
@@ -53,7 +54,9 @@ function ContactScreen(props) {
 
         })()
     }, [])
-
+function onpress(){
+    console.log('click')
+}
 
     if (!myContacts) {
         return (<SafeAreaView style={styles.container}>
@@ -62,13 +65,17 @@ function ContactScreen(props) {
         )
     }else{
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} >
+        <TouchableOpacity onPress={()=>{console.log('zzz')}} style={{backgroundColor:'red' ,height:75}} >
+      <Text style={styles.appButtonText}>Hey</Text>
+    </TouchableOpacity>
             {usersCollection ?
+           
               
                 <FlatList style={{ flex: 1, padding: 10 }} data={myContacts} keyExtractor={(item, i) => item.email}
 
                     renderItem={({ item }) => <ContactPreview contact={item} image={image} usersCollection={usersCollection} />}
-                />  : null}
+                /> : null}
 
   
 
