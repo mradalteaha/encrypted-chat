@@ -20,6 +20,7 @@ import ChatHeader from './src/components/ChatHeader';
 import LoadingContacts from './src/screens/LoadingContacts.js'
 import { AppRegistry } from 'react-native';
 import ForgotPassword from './src/screens/ForgotPassword';
+import CreateGroup from './src/screens/CreateGroup';
 LogBox.ignoreLogs([
   "Setting a timer",
   "AsyncStorage has been extracted from react-native core and will be removed in a future release.",
@@ -71,6 +72,8 @@ const App = () => {
             {!currentUser.displayName && <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />}
             <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ title: 'Secret-Chat' }} />
             <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerTitle: (props) => <ChatHeader {...props} /> }} />
+            <Stack.Screen name="CreateGroup" component={CreateGroup}  options={{ title: 'Secret-Chat' }} />
+
   
           </Stack.Navigator>
   

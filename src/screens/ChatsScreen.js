@@ -34,13 +34,13 @@ export default function ChatsScreen() {
     function getContactedUser(user){
         // console.log(`evaluating my contacts ${myContacts}`)
         if(myContacts){
-            console.log('printing myContacts user  at getContactedUser ')
+         /*    console.log('printing myContacts user  at getContactedUser ')
             console.log(rooms)
             console.log(user)
-            console.log(myContacts)
+            console.log(myContacts) */
             const userContact = myContacts.get(user.email);
-            console.log('printing contacted user  at getContactedUser ')
-            console.log(userContact)
+        /*     console.log('printing contacted user  at getContactedUser ')
+            console.log(userContact) */
             return userContact
            
         }

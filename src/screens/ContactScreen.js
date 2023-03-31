@@ -28,9 +28,7 @@ function ContactScreen(props) {
     
       },[])
     
-function onpress(){
-    console.log(first)
-}
+
 
     if (!myContacts) {
         return (<SafeAreaView style={styles.container}>
@@ -42,9 +40,7 @@ function onpress(){
         console.log(Array.from(myContacts.values())) */
         return (
         <SafeAreaView style={styles.container} >
-        <TouchableOpacity onPress={()=>{console.log('zzz')}} style={{backgroundColor:'rgb(15, 52, 96)' ,height:50 ,borderRadius:30, alignContent:'center',alignItems:"center"}} >
-      <Text style={{fontSize:25,textAlignVertical:'center',marginTop:5 ,color:'#ffff'}}>Create GroupChat</Text>
-    </TouchableOpacity>
+      
             {myContacts ?    
                 <FlatList style={{ flex: 1, padding: 10 }} data={Array.from(myContacts.values() ).filter((c)=> c.email!=currentUser.email )} keyExtractor={(item, i) => item.email}
 
