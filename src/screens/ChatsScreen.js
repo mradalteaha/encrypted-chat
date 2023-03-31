@@ -31,15 +31,18 @@ export default function ChatsScreen() {
         return ()=> unsubscribe();
     },[])
 
-    function getContactedUser(user , myContacts){
+    function getContactedUser(user){
         // console.log(`evaluating my contacts ${myContacts}`)
         if(myContacts){
-            const userContact = myContacts.find((c)=>c.email ===user.email);
-            //console.log(userContact)
-            if(userContact && userContact.displayName ){
-
-                return userContact
-            }
+            console.log('printing myContacts user  at getContactedUser ')
+            console.log(rooms)
+            console.log(user)
+            console.log(myContacts)
+            const userContact = myContacts.get(user.email);
+            console.log('printing contacted user  at getContactedUser ')
+            console.log(userContact)
+            return userContact
+           
         }
        
 
@@ -51,12 +54,20 @@ export default function ChatsScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            {rooms.map((room) => <ItemList type='ChatScreen' description={room.lastMessage.text}
+            {rooms.map((room) => {
+                if(typeof(room.contactedUser) !=='undefined'){
+
+                    return(
+                <ItemList type='ChatScreen' description={room.lastMessage.text}
                 key={room.id}
                 room={room}
                 time={room.lastMessage.createdAt}
                 user={getContactedUser(room.contactedUser,myContacts)}
-            />)}
+            />
+               ) 
+                }
+               
+            })}
 
 
 

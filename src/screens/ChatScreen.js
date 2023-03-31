@@ -82,7 +82,7 @@ function ChatScreen(props) {
           currentUserData.photoURL = currentUser.photoURL
         }
         const contactedUserData = {
-          displayName: contactedUser.displayName || '',
+          displayName: contactedUser.displayName ,
           email: contactedUser.email,
 
         }

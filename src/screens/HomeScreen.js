@@ -44,7 +44,7 @@ function HomeScreen(props) {
               },
             };
           }}
-          initialRouteName="chats" // this route is the default after login
+          initialRouteName="contacts" // this route is the default after login
           //initialRouteName="contacts" // testing for the contact page 
 
         >
