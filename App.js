@@ -72,7 +72,7 @@ const App = () => {
             {!currentUser.displayName && <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />}
             <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ title: 'Secret-Chat' }} />
             <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerTitle: (props) => <ChatHeader {...props} /> }} />
-            <Stack.Screen name="CreateGroup" component={CreateGroup}  options={{ title: 'Secret-Chat' }} />
+            <Stack.Screen name="CreateGroup" component={CreateGroup}  options={{ title: 'Create Group' ,headerTitleStyle:{color:'white'} }} />
 
   
           </Stack.Navigator>

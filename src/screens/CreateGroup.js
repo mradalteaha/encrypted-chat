@@ -1,15 +1,12 @@
 import React, { useContext, useState ,useEffect} from 'react';
-import MyButton from '../components/MyButton'
 import GlobalContext from '../../Context/Context';
-import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
-import {createAssetAsync,usePermissions,createAlbumAsync} from 'expo-media-library'
-import {writeAsStringAsync,readAsStringAsync,documentDirectoryEncodingType} from 'expo-file-system'
-import * as Permissions from 'expo-permissions';
-import { Image, Button, Text, View, SafeAreaView, StyleSheet, KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
+import { Image, Button, Text, View, SafeAreaView, StyleSheet, KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, TouchableOpacity,TextInput ,Platform,FlatList } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { pickImage, askForPermission ,uploadImagetwo,theme} from '../../utils'
-import { TextInput } from "react-native-gesture-handler";
+import ItemList from '../components/ItemList';
+import { VirtualizedList } from 'react-native-web';
+
 
 
 
@@ -17,7 +14,8 @@ export default function CreateGroup(props){
 
     const {currentUser}=auth 
 
-    const {theme:{colors},setCurrentUser} = useContext(GlobalContext)
+    const {theme:{colors},setCurrentUser,myContacts,setMyContacts,setLoadingContacts} = useContext(GlobalContext)
+    
 
 
     const [selectImage, setSelectedImage] = useState(null);
@@ -36,6 +34,8 @@ export default function CreateGroup(props){
         })()
     }, [])
 
+
+   
 
 
     async function uploadImage(){
@@ -81,31 +81,67 @@ export default function CreateGroup(props){
     }
 
 
-    return( <SafeAreaView style={{flex:1,flexDirection:'column'}}>
-    <View style={{flex:1,backgroundColor:'red',flexDirection:'row' ,height:50}}>
-    <TouchableOpacity onPress={handleProfileImage} style={{ marginTop: 25,marginLeft:15, borderRadius: 120, width: 120, height: 120, backgroundColor: colors.foreground, alignItems: 'center', justifyContent: 'center'  ,alignSelf:'flex-start' }}>
-            {!selectImage ? (<MaterialCommunityIcons name='camera-plus' color={colors.iconGray} size={45} />) :
-                <Image source={{ uri: selectImage.uri }} style={{ width: '100%', height: '100%', borderRadius: 120 }} />}
-        </TouchableOpacity> 
-        <KeyboardAvoidingView style={{borderBottomColor:'red',alignSelf:'center',marginTop:0,borderColor:'black',borderWidth:10,marginLeft:20}} >
-        <TextInput value={groupName} onChangeText={setGroupName}   placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'Enter Group Name'} />
-        </KeyboardAvoidingView>
+    if (!myContacts) {
+        return (<SafeAreaView style={styles.container}>
+            <Text>Loading contacts...</Text>
+        </SafeAreaView>
+        )}else{
+            return( <View style={{flex:1,flexDirection:'column'}}>
+            <View style={{flex:0.5,backgroundColor:'red',flexDirection:'column' ,height:300 ,alignContent:'flex-start'}}>
+            <View style={{backgroundColor:"blue" ,flex:0.5 ,flexDirection:'row',height:400}}>
+            <TouchableOpacity onPress={handleProfileImage} style={{ marginTop: 25,marginLeft:15, borderRadius: 120, width: 120, height: 120, backgroundColor: colors.foreground, alignItems: 'center', justifyContent: 'center'  ,alignSelf:'flex-start' }}>
+                    {!selectImage ? (<MaterialCommunityIcons name='camera-plus' color={colors.iconGray} size={45} />) :
+                        <Image source={{ uri: selectImage.uri }} style={{ width: '100%', height: '100%', borderRadius: 120 }} />}
+                </TouchableOpacity> 
+                <KeyboardAvoidingView style={{alignSelf:'flex-start',marginTop:60,borderColor:'black',borderWidth:3,marginLeft:20,width:170}} >
+                <TextInput value={groupName} onChangeText={setGroupName}   placeholderTextColor ={'rgb(185, 255, 248)'} placeholder={'Enter Group Name'} />
+                </KeyboardAvoidingView>
         
-       <View style={{marginBottom:0,alignSelf:'flex-end',flex:1,flexDirection:'row' ,height:35}}>
-       <Button style={{height:20,width:20 }} title={'uploadImage'} onPress={uploadImage}/>
-        <Button title={'goback'} onPress={goBack}/>
-       </View>
-    </View>
-         
-       <View style={{flex:1,height:300,backgroundColor:'green'}}>
+                </View>
+        
+                <View style={{ flex:0.25,marginTop:0,alignSelf:'flex-end',flexDirection:'row' ,height:0 ,backgroundColor:'white',alignContent:'center',alignItems:'flex-start',height:200,}}>
+                <Button title={'Cancel'} onPress={goBack}/>
+               <Button  title={'uploadImage'} onPress={uploadImage}/>
+                
+               </View>
+               <View style={{ flex:0.25,marginTop:0,alignSelf:'center',flexDirection:'row' ,height:0 ,backgroundColor:'white',alignContent:'center',alignItems:'flex-start',height:200,}}>
+               <Text style={{fontSize:25 ,marginTop:15}}>Select participants</Text>
+               </View>
+               
+              
+            </View>
+           
+               <View style={{flex:1,backgroundColor:'green'}}>
+               
+
+               {myContacts ?    
+                        <FlatList nestedScrollEnabled={true} style={{ flex: 1, padding: 10 }} data={Array.from(myContacts.values() ).filter((c)=> c.email!=currentUser.email )} keyExtractor={(item, i) => item.email}
+        
+                            renderItem={({ item }) => <ContactPreview contact={item}  />}
+                        /> : null}
+                       
+
+        
+               </View>
+          
+                
+          
+                
+        
+            </View>)
+        }
 
 
-       </View>
+}
+
+
+
+function ContactPreview({ contact}) {
+    const { unfilteredRooms } = useContext(GlobalContext);
+
   
-        
-  
-        
-
-    </SafeAreaView>)
+    return (
+    <ItemList style={{marginTop:7}} type='contacts' user={contact} image={contact.photoURL} room={unfilteredRooms.find((room) => room.participantsArray.includes(contact.email))} />
+    )
 
 }
