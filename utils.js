@@ -276,12 +276,12 @@ export async function readUserData(userid) { //this function saves a given data 
     
   let fileUri = documentDirectory + `${userid}.txt`;
   getInfoAsync(fileUri).then(res=>{
-    console.log(res)
+    //console.log(res)
   })
   readAsStringAsync(fileUri,{ encoding:EncodingType.UTF8 }).then((res)=>{
     console.log('retrieved data successfully readUserData utils ')
     
-    console.log(res)
+    //console.log(res)
     resovlve(res)
    }).catch(err=>{
     console.log('retrieved data Failed readUserData utils')

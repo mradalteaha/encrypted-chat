@@ -317,7 +317,7 @@ function ChatScreen(props) {
 
 
 
-  function pickSendTypeFunction(){
+  function pickSendTypeFunction(){//this functoi
     console.log('paperclip clicked')
     setPickSendType(pre => pre=='none'?'flex':'none')
   }
