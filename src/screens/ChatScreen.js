@@ -13,7 +13,7 @@ import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
 import CryptoJS from "react-native-crypto-js";
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
-import {EncryptAESkey,DecryptAESkey} from '../../utils.js'
+import {EncryptAESkey,DecryptAESkey,uploadImagetwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
 
 
@@ -32,6 +32,7 @@ function ChatScreen(props) {
   const [selectedImageView, setSeletedImageView] = useState("");
   const { theme: { colors } } = useContext(GlobalContext)
   const [permissionStatus, permissionStatusUpdate] = useState(null);
+  const [pickSendType,setPickSendType] =useState('none')
 
   const route = useRoute();
   const room = route.params.room  ;
@@ -82,7 +83,7 @@ function ChatScreen(props) {
           currentUserData.photoURL = currentUser.photoURL
         }
         const contactedUserData = {
-          displayName: contactedUser.displayName || '',
+          displayName: contactedUser.displayName ,
           email: contactedUser.email,
 
         }
@@ -294,9 +295,9 @@ function ChatScreen(props) {
 
 
 
-  //send image to chat //older implementation // currently doesn't work needs to be fixed after adding the graphql implementation 
+  //need to be fixed to the new  
   async function sendImage(uri, roomPath) {
-    const { url, fileName } = await uploadImage(
+    const { url, fileName } = await uploadImagetwo(
       uri,
       `images/rooms/${roomPath || roomHash}`
     );
@@ -316,7 +317,10 @@ function ChatScreen(props) {
 
 
 
-
+  function pickSendTypeFunction(){//this functoi
+    console.log('paperclip clicked')
+    setPickSendType(pre => pre=='none'?'flex':'none')
+  }
 
   async function handlePhotoPicker() {//just help function uses expo client to pick image from gallery
     const result = await pickImageChat();
@@ -348,7 +352,7 @@ function ChatScreen(props) {
               bottom: 5,
               zIndex: 9999,
             }}
-            onPressActionButton={handlePhotoPicker}
+            onPressActionButton={pickSendTypeFunction}
             icon={() => (
               <Fontisto name="paperclip" size={25} color={colors.iconGray} />
             )}
@@ -447,6 +451,10 @@ function ChatScreen(props) {
           );
         }}
       />
+      <View style={{backgroundColor:'white' , flex:1 ,  height:150,display:pickSendType}} >
+        <Text>HEllo</Text>
+      </View>
+      
 
     </ImageBackground>
 

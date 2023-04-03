@@ -9,7 +9,7 @@ export default function ContextWrapper(props) {
   const [unfilteredGroups, setUnfilteredGroups] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLogged,setIsLogged]=useState(false);
-  const [myContacts,setMyContacts] = useState([]);
+  const [myContacts,setMyContacts] = useState(new Map());
   const [loadingContacts,setLoadingContacts]=useState(true)
 
 

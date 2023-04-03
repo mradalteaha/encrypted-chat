@@ -1,13 +1,13 @@
 import { collection, onSnapshot, query, QuerySnapshot, where } from 'firebase/firestore';
 import React, { useContext, useEffect } from 'react';
-import { SafeAreaView ,View ,Text ,StyleSheet } from 'react-native';
+import { SafeAreaView ,View ,Text ,StyleSheet ,TouchableOpacity} from 'react-native';
 import GlobalContext from '../../Context/Context';
 import {auth, db} from '../firebase'
 import ItemList from '../components/ItemList';
 import useContacts from '../hooks/useHooks';
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 
-export default function GroupChatsScreen() {
+export default function GroupChatsScreen(props) {
     const {currentUser} = auth // grabing the current signed in user via firebase auth
     const {rooms,setRooms,setUnfilteredRooms,myContacts,groups ,setUnfilteredGroups,setGroups} = useContext(GlobalContext) // getting the global context provider
     const chatsQuery = query(// query on firestore collection 
@@ -46,11 +46,17 @@ export default function GroupChatsScreen() {
     useEffect(()=>{},[rooms])
 
 
-    //need to initialize the room with reciever photo `
+    function CreateGroupChat(){
+        console.log('navigating to create groupchat')
+        props.navigation.navigate('CreateGroup')
+
+    }
 
     return (
         <SafeAreaView style={styles.container}>
-        <Text> Create Grpup</Text>
+          <TouchableOpacity onPress={()=>CreateGroupChat()} style={{backgroundColor:'rgb(15, 52, 96)' ,height:50 ,borderRadius:30, alignContent:'center',alignItems:"center"}} >
+      <Text style={{fontSize:25,textAlignVertical:'center',marginTop:5 ,color:'#ffff'}}>Create GroupChat</Text>
+    </TouchableOpacity>
             {groups.map((room) => <ItemList type='ChatScreen' description={room.lastMessage.text}
                 key={room.id}
                 room={room}

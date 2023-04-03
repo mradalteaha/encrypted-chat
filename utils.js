@@ -1,7 +1,7 @@
 import * as ImagePicker from "expo-image-picker";
 import "react-native-get-random-values";
 import { v4 as uuid } from 'uuid';
-import {ref, uploadBytes, getDownloadURL ,uploadBytesResumable} from 'firebase/storage'
+import {ref, uploadBytes, getDownloadURL ,uploadBytesResumable,uploadString} from 'firebase/storage'
 import { storage } from "./src/firebase"
 import { Buffer } from "buffer";
 import {writeAsStringAsync,readAsStringAsync,documentDirectory,makeDirectoryAsync,getInfoAsync,StorageAccessFramework,EncodingType} from 'expo-file-system'
@@ -33,7 +33,8 @@ export async function pickImageChat(){
      mediaTypes: ImagePicker.MediaTypeOptions.All,
      allowsEditing: false,
      quality: 0.2,
-     base64:true
+     base64:true,
+     
    });
 
 
@@ -96,6 +97,40 @@ export async function uploadImage(image, path, fName) {
   return imageupload
  
 }
+
+
+
+export async function uploadImagetwo(image, path, fName) {
+
+
+  const fileName = fName || nanoid();
+  const imageRef = ref(storage, `${path}/${fileName}.jpeg`);
+  console.log('print in uploadImagetwo')
+//  console.log(image)
+  /*const imag =  image.base64.replace(/(?:\r\n|\r|\n)/g, '');
+  console.log(imag)
+  
+
+  const snapshot = await uploadString(imageRef, imag,'base64', {
+    contentType: "image/jpeg",
+  }); */
+ /*  await putString(imageRef,image, 'data_url', {contentType:'image/jpg'}).then(() => {
+    console.log('Image uploaded');
+  }); */
+
+  const response = await fetch(image.uri);
+
+    const blob = await response.blob();
+
+    const snapshot = await uploadBytes(imageRef, blob, {
+      contentType: "image/jpeg",
+    }); 
+  const url = await getDownloadURL(snapshot.ref);
+    
+  return { url, fileName };
+ 
+}
+
 
 
 const palette = {
@@ -240,10 +275,13 @@ export async function readUserData(userid) { //this function saves a given data 
   const saved = new Promise(async (resovlve,reject)=>{
     
   let fileUri = documentDirectory + `${userid}.txt`;
+  getInfoAsync(fileUri).then(res=>{
+    //console.log(res)
+  })
   readAsStringAsync(fileUri,{ encoding:EncodingType.UTF8 }).then((res)=>{
     console.log('retrieved data successfully readUserData utils ')
     
-    console.log(res)
+    //console.log(res)
     resovlve(res)
    }).catch(err=>{
     console.log('retrieved data Failed readUserData utils')
@@ -256,3 +294,22 @@ export async function readUserData(userid) { //this function saves a given data 
 
 }
 
+
+
+function decode(input) {
+  // Replace non-url compatible chars with base64 standard chars
+  input = input
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+
+  // Pad out with standard base64 required padding characters
+  var pad = input.length % 4;
+  if(pad) {
+    if(pad === 1) {
+      throw new Error('InvalidLengthError: Input base64url string is the wrong length to determine padding');
+    }
+    input += new Array(5-pad).join('=');
+  }
+
+  return input;
+}
