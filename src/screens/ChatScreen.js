@@ -15,6 +15,8 @@ import CryptoJS from "react-native-crypto-js";
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 import {EncryptAESkey,DecryptAESkey,uploadImagetwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
+import { usePreventScreenCapture } from 'expo-screen-capture';
+
 
 
 
@@ -23,6 +25,7 @@ import { v4 as uuid } from 'uuid';
 //import { v4 as uuid } from 'uuid'; //deprecated causing errors with expo SDK 48 ...
 
 function ChatScreen(props) {
+  usePreventScreenCapture();
   const {currentUser} = auth;
   const [roomHash, setroomHash] = useState('');//for generating path in the database 
   const [messages, setMessages] = useState([]);//to be able to access the data and manipulate the messages

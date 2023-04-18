@@ -60,7 +60,7 @@ export async function uploadImage(image, path, fName) {
   const uploadTask = uploadBytesResumable(imageRef, imageByte, {
     contentType: "image/jpeg",
   });
-  console.log('passed line 69')
+  
   
   uploadTask.on('state_changed', 
     (snapshot) => {
@@ -280,7 +280,7 @@ export async function readUserData(userid) { //this function saves a given data 
   })
   readAsStringAsync(fileUri,{ encoding:EncodingType.UTF8 }).then((res)=>{
     console.log('retrieved data successfully readUserData utils ')
-    console.log(res)
+   // console.log(res)
     resovlve(res)
    }).catch(err=>{
     console.log('retrieved data Failed readUserData utils')

@@ -15,6 +15,8 @@ import CryptoJS from "react-native-crypto-js";
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 import {EncryptAESkey,DecryptAESkey} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
+import * as ScreenCapture from 'expo-screen-capture';
+
 
 
 
@@ -23,7 +25,8 @@ import { v4 as uuid } from 'uuid';
 //import { v4 as uuid } from 'uuid'; //deprecated causing errors with expo SDK 48 ...
 
 export default function GroupChat(props) {
-  const {currentUser} = auth;
+  ScreenCapture.usePreventScreenCapture()
+    const {currentUser} = auth;
   const [roomHash, setroomHash] = useState('');//for generating path in the database 
   const [messages, setMessages] = useState([]);//to be able to access the data and manipulate the messages
   //these two states are related to view images 
@@ -39,6 +42,21 @@ export default function GroupChat(props) {
   const selectedImage = route.params.image;
 
   const {groupImage,groupName,groupID,Aeskeys,participantsUsers,participantsArray} =room //destructuring the room
+  //this section is for screenshot prevention 
+
+  useEffect(() => {
+    if (permissionStatus) {
+      console.log('removing the screenshot')
+      const subscription = ScreenCapture.addScreenshotListener(() => {
+        alert('hehe no screenshot 😊');
+      });
+      return () => subscription.remove();
+    }
+  }, []);
+
+  const activate = async () => {
+    await ScreenCapture.preventScreenCaptureAsync();
+  };
 
 
 //console.log('chat screen is rendering ')
@@ -46,8 +64,11 @@ export default function GroupChat(props) {
       (async () => {
           const status = await askForPermission();
           permissionStatusUpdate(status)
+          await activate()
       })()
     }, [])
+
+  
 
   const senderUser = participantsUsers.filter(e => e.email ===currentUser.email)[0]
 
@@ -65,14 +86,14 @@ export default function GroupChat(props) {
 
             console.log('no AES KEY')
             const data = await readUserData(currentUser.uid)
-            console.log(data)
+           /*  console.log(data) */
             if(data){
-              console.log('data')
-              console.log(data)
+              /* console.log('data')
+              console.log(data) */
               
               let parsedData = JSON.parse(data)
-              console.log('parsedData')
-              console.log(parsedData)
+             /*  console.log('parsedData')
+              console.log(parsedData) */
               if(parsedData.rooms[groupID]){
                 console.log('the room key already saved in here')
                 const localkey= parsedData.rooms[groupID]
@@ -84,18 +105,18 @@ export default function GroupChat(props) {
                 let userLocal = JSON.parse(data)
                 const encryptedkey = Aeskeys[currentUser.email]
                 const decryptedkey = await DecryptAESkey(userLocal.RsaKeys.privateKey,encryptedkey)
-                console.log(userLocal)
+                //console.log(userLocal)
               let RsaKeys =userLocal.RsaKeys
               let userLocalrooms = userLocal.rooms
               userLocalrooms[groupID] = decryptedkey
-              console.log('rsa keys on else this room doesnt exist on the local storage ')
+              /* console.log('rsa keys on else this room doesnt exist on the local storage ')
               console.log(RsaKeys)
               console.log('type of rsa keyss')
-              console.log(typeof(RsaKeys))
+              console.log(typeof(RsaKeys)) */
               let finalizeLocalData = {RsaKeys:RsaKeys , rooms:userLocalrooms}
-              console.log('type of finalized data')
+       /*        console.log('type of finalized data')
               console.log(typeof(finalizeLocalData))
-              console.log('saving the new room into the local storage ')
+              console.log('saving the new room into the local storage ') */
               saveUserData(currentUser.uid,JSON.stringify(finalizeLocalData) ).then(()=>{
                 setAesKey((prev)=> decryptedkey)
                 setLoading(false)
