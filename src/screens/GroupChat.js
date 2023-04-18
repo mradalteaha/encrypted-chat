@@ -243,8 +243,9 @@ export default function GroupChat(props) {
       <GiftedChat
         onSend={onSend}
         messages={messages} //the messages needs to be rendered
-        user={senderUser}
-        renderAvatar={null}
+        user={{_id:senderUser.uid ,avatar:senderUser.photoURL ,name:senderUser.displayName}}
+
+        renderUsernameOnMessage={true}
         renderActions={(props) => (
           <Actions
             {...props}
