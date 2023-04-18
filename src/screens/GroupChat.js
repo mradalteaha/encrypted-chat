@@ -67,24 +67,34 @@ export default function GroupChat(props) {
             const data = await readUserData(currentUser.uid)
             console.log(data)
             if(data){
+              console.log('data')
               console.log(data)
               
               let parsedData = JSON.parse(data)
+              console.log('parsedData')
               console.log(parsedData)
               if(parsedData.rooms[groupID]){
+                console.log('the room key already saved in here')
                 const localkey= parsedData.rooms[groupID]
                 setAesKey((prev)=> localkey) //set the room key from the local storage 
                 setLoading(false)
   
   
               }else{//this room doesn't exist on the local storage 
-                const encryptedkey = Aeskeys[currentUser.email]
-                const decryptedkey = await DecryptAESkey(parsedData.RsaKeys.privateKey,encryptedkey)
                 let userLocal = JSON.parse(data)
-                console.log(data)
+                const encryptedkey = Aeskeys[currentUser.email]
+                const decryptedkey = await DecryptAESkey(userLocal.RsaKeys.privateKey,encryptedkey)
+                console.log(userLocal)
+              let RsaKeys =userLocal.RsaKeys
               let userLocalrooms = userLocal.rooms
               userLocalrooms[groupID] = decryptedkey
-              let finalizeLocalData = {...parsedData , rooms:userLocalrooms}
+              console.log('rsa keys on else this room doesnt exist on the local storage ')
+              console.log(RsaKeys)
+              console.log('type of rsa keyss')
+              console.log(typeof(RsaKeys))
+              let finalizeLocalData = {RsaKeys:RsaKeys , rooms:userLocalrooms}
+              console.log('type of finalized data')
+              console.log(typeof(finalizeLocalData))
               console.log('saving the new room into the local storage ')
               saveUserData(currentUser.uid,JSON.stringify(finalizeLocalData) ).then(()=>{
                 setAesKey((prev)=> decryptedkey)
@@ -105,10 +115,6 @@ export default function GroupChat(props) {
 
 
         }
-
-
-
-        
       
       const emailHash = groupID
 

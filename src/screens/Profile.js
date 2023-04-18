@@ -47,11 +47,11 @@ export default function Profile(props) {
 
         try{
             console.log('clicked on handle preess for next button')
+            await saveUserData(auth.currentUser.uid,JSON.stringify({test:"hehe"}))
         
         const user = auth.currentUser;
         let photoURL
         if (selectImage) {
-            console.log('error on upload image')
             //console.log(selectImage)
             
             const { url } = await uploadImagetwo(selectImage, `Images/${user.uid}`, "profilePicture")
@@ -62,7 +62,9 @@ export default function Profile(props) {
                 
                
                let rooms = {};
-               const userLocal ={RsaKeys , rooms}
+               const userLocal ={RsaKeys:RsaKeys,rooms}
+              
+
 
                 const settingItem =  await saveUserData(auth.currentUser.uid,JSON.stringify(userLocal))
               

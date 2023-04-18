@@ -101,16 +101,19 @@ function ChatScreen(props) {
 
               //encrypt the ke
               console.log('generating the AES key passed key :')
-              console.log(contactedUser)
-              console.log(result.data.AES)
+            /*   console.log(contactedUser)
+              console.log(result.data.AES) */
                const encKey = await EncryptAESkey(contactedUser.RSApublicKey,result.data.AES) //encrypting the aes key before saving it in the database
                console.log('encrypting  the AES key passed key :')
-               console.log(encKey)
+               /* console.log(encKey) */
                const LoadLocalStorage = await readUserData(currentUser.uid) // getting the current saved data .
+               if(LoadLocalStorage){
                let userLocal = JSON.parse(LoadLocalStorage)
                let userLocalrooms = userLocal.rooms
+               let RsaKeys =userLocal.RsaKeys
+               
                userLocalrooms[roomId] = result.data.AES
-               let finalizeLocalData = {...LoadLocalStorage , rooms:userLocalrooms}
+               let finalizeLocalData = {RsaKeys:RsaKeys  , rooms:userLocalrooms}
                console.log('generated keys')
                const saveLocalData = await saveUserData(currentUser.uid, JSON.stringify(finalizeLocalData) )
 
@@ -130,7 +133,7 @@ function ChatScreen(props) {
                 
               }).catch(err=>console.log(err))}).catch(err=>{console.log(err)})
  
-             
+            }
         }).catch(err=>{
           console.log(err)
         }) 
@@ -165,8 +168,9 @@ function ChatScreen(props) {
                       let userLocal = JSON.parse(data)
                       console.log(data)
                     let userLocalrooms = userLocal.rooms
+                    let RsaKeys =userLocal.RsaKeys
                   userLocalrooms[roomId] = decryptedkey
-                  let finalizeLocalData = {...parsedData , rooms:userLocalrooms}
+                  let finalizeLocalData = {RsaKeys:RsaKeys  , rooms:userLocalrooms}
                   console.log('saving the new room into the local storage ')
                   saveUserData(currentUser.uid,JSON.stringify(finalizeLocalData) ).then(()=>{
                     setAesKey((prev)=> decryptedkey)
@@ -181,33 +185,6 @@ function ChatScreen(props) {
 
 
         }
-
-        /* AsyncStorageStatic.getItem(currentUser.uid).then(res =>{
-          let userLocal = JSON.parse(res)
-          
-          console.log('AESkey for the current room')
-          console.log(userLocal.rooms[roomId])
-          const localkey= userLocal.rooms[roomId]
-          setAesKey((prev)=> localkey)
-            setLoading(false)
-
-        }) // getting the current saved data .
-             /*   let userLocal = JSON.parse(LoadLocalStorage)
-               let userLocalrooms = userLocal.rooms
-
-
-        getDoc(roomRef).then(res => {
-          if (!res.exists) {
-            console.log("No such document!"); //Error
-          } else {
-            console.log(res.data().AESkey)
-            setAesKey((prev)=> res.data().AESkey)
-            setLoading(false)
-          }
-
-        }).catch(err=>console.log(err)) 
-
-        setLoading(false) */
 
         
       }

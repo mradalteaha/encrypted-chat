@@ -101,8 +101,9 @@ export default function CreateGroup(props){
                         const LoadLocalStorage = await readUserData(currentUser.uid) // getting the current saved data .
                         let userLocal = JSON.parse(LoadLocalStorage)
                         let userLocalrooms = userLocal.rooms
+                        let RsaKeys =userLocal.RsaKeys
                         userLocalrooms[groupID] = roomAESkey.data.AES
-                        let finalizeLocalData = {...LoadLocalStorage , rooms:userLocalrooms}
+                        let finalizeLocalData = {RsaKeys:RsaKeys , rooms:userLocalrooms}
                         const saveLocalData = await saveUserData(currentUser.uid, JSON.stringify(finalizeLocalData) )
                         const groupChatData={
                             groupImage:url,
