@@ -51,113 +51,39 @@ export default function Profile(props) {
         const user = auth.currentUser;
         let photoURL
         if (selectImage) {
-           /*  console.log('error on upload image')
+            console.log('error on upload image')
             //console.log(selectImage)
-            const { url } = await uploadImage(selectImage, `Images/${user.uid}`, "profilePicture")
-            console.log('photo uploaded')
-            console.log(url) */
-            console.log("uploading image")
             
-  
-            let imageByte = new Buffer.from(selectImage.base64, "base64");
-            const fileName = "profilePicture" || uuid();
-            
-            const path = `images/${user.uid}`
-            const imageRef = ref(storage, `${path}/${fileName}.jpeg`);
-
-         
-            const uploadTask = uploadBytesResumable(imageRef, imageByte, {
-              contentType: "image/jpeg",
-            });
-/* 
-            const uploadProfileImage =  uploadBytes(imageRef, imageByte, {
-                contentType: "image/jpeg",
-              }).then(async (res) => {
-
-                photoURL = await getDownloadURL(res.ref)
-
-                console.log('Generating Keys : \n')
-                const result = await GenKey()
-                    const RsaKeys=result.data;
-                    
-                   // EncryptedStorage.setItem(auth.currentUser.uid,JSON.stringify(RsaKeys));
-        
-                   //  EncryptedStorage.getItem("user_session");
-                   let rooms =  new Map();
-                   const userLocal ={RsaKeys , rooms}
-                  const settingItem =  AsyncStorageStatic.setItem(auth.currentUser.uid,JSON.stringify(userLocal))
-                    if(RsaKeys){
-                        console.log(RsaKeys)
-                        setRSAkeys(RsaKeys)
-                    }
-        
-                  const userData = {
-                    displayName,
-                    email: user.email,
-                    RSApublicKey:RsaKeys.publicKey
-                }
+            const { url } = await uploadImagetwo(selectImage, `Images/${user.uid}`, "profilePicture")
+          
+            console.log('Generating Keys : \n')
+            const result = await GenKey()
+                const RsaKeys=result.data;//object from the backend {publicKey ,privateKey}
+                
                
-                if (photoURL) {
-                    userData.photoURL = photoURL
-                }
-                await Promise.all([settingItem,updateProfile(user, userData), setDoc(doc(db, 'users', user.uid), { ...userData, uid: user.uid })])
-                console.log('i have updated the user necesserly profile elemens at Profile ')
-                console.log(userData)
-                navigation.navigate('HomeScreen')
-              }) */
-            
-            uploadTask.on('state_changed', 
-              (snapshot) => {
-                const progress =(snapshot.bytesTransferred / snapshot.totalBytes)
-                //imageUploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Upload is ' + progress*100 + '% done');
-                switch (snapshot.state) {
-                  case 'paused':
-                    console.log('Upload is paused');
-                    break;
-                  case 'running':
-                    console.log('Upload is running');
-                    break;
-                }
-              }, 
-              (error) => {
-                console.log('error occured on uploading')
-                console.log(error)
-              }, 
-              async() => {
+               let rooms = {};
+               const userLocal ={RsaKeys , rooms}
+
+                const settingItem =  await saveUserData(auth.currentUser.uid,JSON.stringify(userLocal))
               
-                photoURL = await getDownloadURL(uploadTask.snapshot.ref)
-
-                console.log('Generating Keys : \n')
-                const result = await GenKey()
-                    const RsaKeys=result.data;//object from the backend {publicKey ,privateKey}
-                    
-                   
-                   let rooms = {};
-                   const userLocal ={RsaKeys , rooms}
-
-                    const settingItem =  await saveUserData(auth.currentUser.uid,JSON.stringify(userLocal))
-                  
-                    if(RsaKeys){
-                        console.log('rsa keys generated successfully on profile')
-                        setRSAkeys(RsaKeys)
-                    }
-        
-                  const userData = {
-                    displayName,
-                    email: user.email,
-                    RSApublicKey:RsaKeys.publicKey
+                if(RsaKeys){
+                    console.log('rsa keys generated successfully on profile')
+                    setRSAkeys(RsaKeys)
                 }
-               
-                if (photoURL) {
-                    userData.photoURL = photoURL
-                }
-                await Promise.all([settingItem,updateProfile(user, userData), setDoc(doc(db, 'users', user.uid), { ...userData, uid: user.uid })])
-                console.log('i have updated the user necesserly profile elemens at Profile ')
-                console.log(userData)
-                navigation.navigate('HomeScreen')
-              }
-            );
+    
+              const userData = {
+                displayName,
+                email: user.email,
+                RSApublicKey:RsaKeys.publicKey
+            }
+           
+            if (url) {
+                userData.photoURL = url
+            }
+            await Promise.all([settingItem,updateProfile(user, userData), setDoc(doc(db, 'users', user.uid), { ...userData, uid: user.uid })])
+            console.log('i have updated the user necesserly profile elemens at Profile ')
+            //console.log(userData)
+            navigation.navigate('HomeScreen')
             
            
 
