@@ -57,13 +57,13 @@ export default function ChatsScreen() {
             {rooms.map((room) => {
                 if(typeof(room.contactedUser) !=='undefined'){
 
-                    return(
+                    return( typeof(room) !=='undefined' &&
                 <ItemList type='ChatScreen' description={room.lastMessage.text}
                 key={room.id}
                 room={room}
                 time={room.lastMessage.createdAt}
-                user={getContactedUser(room.contactedUser,myContacts)}
-            />
+                user={getContactedUser(room.contactedUser,myContacts)} 
+            /> 
                ) 
                 }
                
@@ -74,6 +74,9 @@ export default function ChatsScreen() {
         </SafeAreaView>
     )
 }
+
+
+
 
 const styles = StyleSheet.create({
     container: {

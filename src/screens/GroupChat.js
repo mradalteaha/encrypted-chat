@@ -6,7 +6,7 @@ import GlobalContext from '../../Context/Context';//global variables to access v
 import { auth, db,GenAESKey } from "../firebase"; // firebase instance 
 import { useRoute } from "@react-navigation/native";
 import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
-import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
+import { GiftedChat, Actions, Bubble, InputToolbar  ,GiftedAvatar} from 'react-native-gifted-chat'
 import { Ionicons, Fontisto ,EvilIcons } from "@expo/vector-icons";
 import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission} from '../../utils'
 import ImageView from "react-native-image-viewing";
@@ -32,7 +32,7 @@ export default function GroupChat(props) {
   //these two states are related to view images 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImageView, setSeletedImageView] = useState("");
-  const { theme: { colors } } = useContext(GlobalContext)
+  const { theme: { colors } , myContacts } = useContext(GlobalContext)
   const [permissionStatus, permissionStatusUpdate] = useState(null);
   const [AesKey,setAesKey] = useState(null)
   const [Loading,setLoading] = useState(true)
@@ -259,7 +259,10 @@ export default function GroupChat(props) {
    
   }
 
-
+  function handleAvatar(props){
+    console.log('handle avatar')
+    console.log(props)
+  } 
 
 
 
@@ -280,10 +283,14 @@ export default function GroupChat(props) {
 
   return (Loading ?<Text>loading ...</Text>:<ImageBackground  style={{ flex: 1 }} resizeMode="cover" source={require('../../assets/chatbg.png')}>
       <GiftedChat
+        showUserAvatar={true}
         
         onSend={onSend}
         messages={messages} //the messages needs to be rendered
-        user={{_id:senderUser.uid ,avatar:senderUser.photoURL ,name:senderUser.displayName}}
+        user={{_id:senderUser.uid ,avatar:senderUser.photoURL ,name:senderUser.displayName ,email:senderUser.email}}
+        renderAvatar={(props)=>(
+          <GiftedAvatar {...props}  user={{_id: myContacts.get(props.currentMessage.user.email).uid,avatar: myContacts.get(props.currentMessage.user.email).photoURL ,name:myContacts.get(props.currentMessage.user.email).displayName }}/>
+        )}
 
         renderUsernameOnMessage={true}
         renderActions={(props) => (

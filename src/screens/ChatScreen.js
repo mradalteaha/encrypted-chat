@@ -36,6 +36,8 @@ function ChatScreen(props) {
   const { theme: { colors } } = useContext(GlobalContext)
   const [permissionStatus, permissionStatusUpdate] = useState(null);
   const [pickSendType,setPickSendType] =useState('none')
+    const [selectedItem,setSelectedItem] = useState(null)
+
 
   const route = useRoute();
   const room = route.params.room  ;
@@ -309,6 +311,21 @@ function ChatScreen(props) {
     }
   }
 
+   function onLongpressHandler(context,message){
+    setSelectedItem(message)
+  }
+
+ async function deleteMessage(message){
+    console.log('message to delete')
+    console.log(message)
+    deleteDoc(doc(roomMessagesRef,message._id)).then(()=>{
+      setMessages((previousMessaged) => previousMessaged.filter(m => m._id !==message._id)) // deletes the message locally after removing it from the database
+      setSelectedItem(null)
+      console.log('deleted successfully')
+    })
+   
+  }
+
 
     if (!permissionStatus) {
       return <Text>Loading ...</Text>
@@ -384,16 +401,24 @@ function ChatScreen(props) {
 
           />
         )}
+        extraData={selectedItem}
+        shouldUpdateMessage={(props, nextProps) =>props.extraData !== nextProps.extraData}
+        isCustomViewBottom={true}
+
         renderBubble={(props) => (
-          <Bubble
-            {...props}
+          <Bubble {...props}
+           renderCustomView={()=>selectedItem === props.currentMessage ? <EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/> : null}
+           onPress={()=>{setSelectedItem(null)}}
+            onLongPress={(context , message)=> onLongpressHandler(context,message)}
             textStyle={{ right: { color: colors.text } }} //right for sender side and left for the reciever
             wrapperStyle={{
+
+            
               left: {
-                backgroundColor: colors.white,
+                backgroundColor: selectedItem === props.currentMessage ? 'red': colors.white,
               },
               right: {
-                backgroundColor: colors.tertiary,
+                backgroundColor: selectedItem === props.currentMessage ? 'red': colors.tertiary,
               },
             }}
           />
