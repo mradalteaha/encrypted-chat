@@ -256,7 +256,7 @@ function ChatScreen(props) {
           };
           
           
-          addDoc(roomMessagesRef,encryptedMessage)
+          setDoc(doc(roomMessagesRef,encryptedMessage._id),encryptedMessage)
         
         }) //adding the new message to the firestore
         const lastMessage= messages[messages.length -1]

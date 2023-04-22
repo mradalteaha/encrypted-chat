@@ -5,9 +5,9 @@ import { Image, TouchableOpacity, View, StyleSheet, ImageBackground,Text } from 
 import GlobalContext from '../../Context/Context';//global variables to access via provider
 import { auth, db,GenAESKey } from "../firebase"; // firebase instance 
 import { useRoute } from "@react-navigation/native";
-import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc} from 'firebase/firestore';
+import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
-import { Ionicons, Fontisto } from "@expo/vector-icons";
+import { Ionicons, Fontisto ,EvilIcons } from "@expo/vector-icons";
 import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission} from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
@@ -36,6 +36,9 @@ export default function GroupChat(props) {
   const [permissionStatus, permissionStatusUpdate] = useState(null);
   const [AesKey,setAesKey] = useState(null)
   const [Loading,setLoading] = useState(true)
+  const [selectedItem,setSelectedItem] = useState(null)
+
+
 
   const route = useRoute();
   const room = route.params.room  ;
@@ -202,7 +205,7 @@ export default function GroupChat(props) {
           };
           
           
-          addDoc(roomMessagesRef,encryptedMessage)
+          setDoc(doc(roomMessagesRef,encryptedMessage._id),encryptedMessage)
         
         }) //adding the new message to the firestore
         const lastMessage= messages[messages.length -1]
@@ -241,6 +244,21 @@ export default function GroupChat(props) {
     ]);
   }
 
+  function onLongpressHandler(context,message){
+    setSelectedItem(message)
+  }
+
+ async function deleteMessage(message){
+    console.log('message to delete')
+    console.log(message)
+    deleteDoc(doc(roomMessagesRef,message._id)).then(()=>{
+      setMessages((previousMessaged) => previousMessaged.filter(m => m._id !==message._id)) // deletes the message locally after removing it from the database
+      setSelectedItem(null)
+      console.log('deleted successfully')
+    })
+   
+  }
+
 
 
 
@@ -260,8 +278,9 @@ export default function GroupChat(props) {
       return <Text> you need to grant permission </Text>
   }
 
-  return (Loading ?<Text>loading ...</Text>:<ImageBackground style={{ flex: 1 }} resizeMode="cover" source={require('../../assets/chatbg.png')}>
+  return (Loading ?<Text>loading ...</Text>:<ImageBackground  style={{ flex: 1 }} resizeMode="cover" source={require('../../assets/chatbg.png')}>
       <GiftedChat
+        
         onSend={onSend}
         messages={messages} //the messages needs to be rendered
         user={{_id:senderUser.uid ,avatar:senderUser.photoURL ,name:senderUser.displayName}}
@@ -328,16 +347,24 @@ export default function GroupChat(props) {
 
           />
         )}
+        extraData={selectedItem}
+        shouldUpdateMessage={(props, nextProps) =>props.extraData !== nextProps.extraData}
+        isCustomViewBottom={true}
+
         renderBubble={(props) => (
-          <Bubble
-            {...props}
+          <Bubble {...props}
+           renderCustomView={()=>selectedItem === props.currentMessage ? <EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/> : null}
+           onPress={()=>{setSelectedItem(null)}}
+            onLongPress={(context , message)=> onLongpressHandler(context,message)}
             textStyle={{ right: { color: colors.text } }} //right for sender side and left for the reciever
             wrapperStyle={{
+
+            
               left: {
-                backgroundColor: colors.white,
+                backgroundColor: selectedItem === props.currentMessage ? 'red': colors.white,
               },
               right: {
-                backgroundColor: colors.tertiary,
+                backgroundColor: selectedItem === props.currentMessage ? 'red': colors.tertiary,
               },
             }}
           />
@@ -374,6 +401,9 @@ export default function GroupChat(props) {
             </View>
           );
         }}
+
+        
+       
       />
 
     </ImageBackground>
