@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native'
 import {Grid,Row,Col} from 'react-native-easy-grid'
 import Avatar from '../components/Avatar';
 import {auth, db} from '../firebase'
-import {EvilIcons } from "@expo/vector-icons";
+import {EvilIcons,Octicons } from "@expo/vector-icons";
 
 import ItemList from '../components/ItemList';
 import useContacts from '../hooks/useHooks';
@@ -67,6 +67,7 @@ export default function ChatsScreen() {
                 key={room.id}
                 room={room}
                 time={room.lastMessage.createdAt}
+                unreadMessages={room.unreadMessages[currentUser.uid]}
                 user={getContactedUser(room.contactedUser,myContacts)} 
             /> 
                ) 
@@ -83,7 +84,7 @@ export default function ChatsScreen() {
 
 
 
-function ChatItemList({type,description,user,style,time ,room ,image,}) {
+function ChatItemList({type,description,user,style,time ,room ,image,unreadMessages}) {
       const [unread , setUnread] =useState(0)
       const navigation = useNavigation()
       const {theme:{colors} ,setRooms} = useContext(GlobalContext)
@@ -134,6 +135,11 @@ function ChatItemList({type,description,user,style,time ,room ,image,}) {
                     {selected &&(
                         <Col style={{alignItems:"flex-end", }}>
                    <EvilIcons onPress={()=>deleteGroup()} style={{display: selected ? 'flex':'none'}} name='trash' size={35}/>
+                  </Col>
+                    )}
+                    {(unreadMessages>0) && !selected &&(
+                        <Col style={{alignItems:"flex-end", }}>
+                   <Text style={{display:'flex' ,marginRight:30 ,backgroundColor:'rgba(0, 252, 185,0.8)',borderRadius: 120,width:35,height:25,justifyContent:'center',textAlign:'center',flexDirection:'column',}} size={55}>{unreadMessages}</Text>
                   </Col>
                     )}
                    

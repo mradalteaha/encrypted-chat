@@ -41,10 +41,18 @@ function ChatScreen(props) {
 
   const route = useRoute();
   const room = route.params.room  ;
-  const {backGround}=room
+  
   const selectedImage = route.params.image;
   const contactedUser = route.params.user;
-  const localbackGround = typeof(backGround)!=='undefined' ? backGround: require('../../assets/chatbg.png')
+  const contactedUserUid=contactedUser.uid
+
+
+  const unreadMessages=new Map()
+  unreadMessages.set(contactedUser.uid,0)
+  unreadMessages.set(currentUser.uid,0)
+  
+  const currentUserUid=currentUser.uid
+  const localbackGround = room ? room.backGround: require('../../assets/chatbg.png')
 
 //console.log('chat screen is rendering ')
     useEffect(() => {
@@ -94,10 +102,13 @@ function ChatScreen(props) {
         if (contactedUser.photoURL) {
           contactedUserData.photoURL = contactedUser.photoURL
         }
-        let roomData = {
+        
+        const roomData = {
           participants: [currentUserData, contactedUserData],
           participantsArray: [currentUserData.email, contactedUserData.email],
-          roomId:roomId
+          unreadMessages:Object.fromEntries(unreadMessages) ,
+          roomId:roomId,
+          backGround:null
         }
         try {
             //initializing the room
@@ -230,6 +241,27 @@ function ChatScreen(props) {
 
   },[AesKey])
 
+  useEffect(()=>{
+    const fetchData = async () => {
+    
+    try{
+      const currentdocData = await getDoc(roomRef)
+      let {unreadMessages} =  currentdocData.data()
+      unreadMessages[currentUser.uid]=0;
+      updateDoc(roomRef, { unreadMessages })
+  
+    }
+    catch(e){
+      console.log(e)
+    }
+
+    };
+
+    fetchData();
+    
+    
+   
+  },[])
 
   const appendMessages = useCallback((messages) => { // help function to append messages
     
@@ -262,7 +294,11 @@ function ChatScreen(props) {
         
         }) //adding the new message to the firestore
         const lastMessage= messages[messages.length -1]
-        writes.push(updateDoc(roomRef,{lastMessage}))//updating the last message for the look of chats screen
+        const currentdocData = await getDoc(roomRef)
+        let {unreadMessages} =  currentdocData.data()
+        unreadMessages[contactedUser.uid]=unreadMessages[contactedUser.uid] +1
+        
+        writes.push(updateDoc(roomRef,{lastMessage ,unreadMessages}))//updating the last message for the look of chats screen
         await Promise.all(writes)
      
       }catch(err){
@@ -334,7 +370,7 @@ function ChatScreen(props) {
       return <Text> you need to grant permission </Text>
   }
 
-  return (Loading ?<Text>loading ...</Text>:<ImageBackground style={{ flex: 1 }} resizeMode="cover" source={{uri:backGround ? backGround :require('../../assets/chatbg.png')}}>
+  return (Loading ?<Text>loading ...</Text>:<ImageBackground style={{ flex: 1 }} resizeMode="cover" source={room?{uri: room.backGround} :require('../../assets/chatbg.png')}>
       <GiftedChat
         onSend={onSend}
         messages={messages} //the messages needs to be rendered
