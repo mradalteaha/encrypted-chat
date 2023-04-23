@@ -9,7 +9,6 @@ import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc} from 'f
 
 
 export default function ItemList({type,description,user,style,time ,room ,image,}) {
-  const roomMessagesRef = collection(db, "rooms", room.id, "messages");//refrecnce for the messegaes on particular room
 
     const [unread , setUnread] =useState(0)
     const navigation = useNavigation()

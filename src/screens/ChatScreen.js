@@ -5,9 +5,9 @@ import { Image, TouchableOpacity, View, StyleSheet, ImageBackground,Text } from 
 import GlobalContext from '../../Context/Context';//global variables to access via provider
 import { auth, db,GenAESKey } from "../firebase"; // firebase instance 
 import { useRoute } from "@react-navigation/native";
-import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc} from 'firebase/firestore';
+import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
-import { Ionicons, Fontisto } from "@expo/vector-icons";
+import { Ionicons, Fontisto ,EvilIcons} from "@expo/vector-icons";
 import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission} from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
