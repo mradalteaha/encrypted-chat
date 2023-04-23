@@ -44,7 +44,7 @@ export default function GroupChat(props) {
   const room = route.params.room  ;
   const selectedImage = route.params.image;
 
-  const {groupImage,groupName,groupID,Aeskeys,participantsUsers,participantsArray} =room //destructuring the room
+  const {groupImage,groupName,groupID,Aeskeys,participantsUsers,participantsArray,backGround} =room //destructuring the room
   //this section is for screenshot prevention 
 
   useEffect(() => {
@@ -281,7 +281,7 @@ export default function GroupChat(props) {
       return <Text> you need to grant permission </Text>
   }
 
-  return (Loading ?<Text>loading ...</Text>:<ImageBackground  style={{ flex: 1 }} resizeMode="cover" source={require('../../assets/chatbg.png')}>
+  return (Loading ?<Text>loading ...</Text>:<ImageBackground  style={{ flex: 1 }} resizeMode="cover" source={{uri:backGround ? backGround :require('../../assets/chatbg.png')}}>
       <GiftedChat
         showUserAvatar={true}
         

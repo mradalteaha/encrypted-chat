@@ -41,9 +41,10 @@ function ChatScreen(props) {
 
   const route = useRoute();
   const room = route.params.room  ;
-
+  const {backGround}=room
   const selectedImage = route.params.image;
   const contactedUser = route.params.user;
+  const localbackGround = typeof(backGround)!=='undefined' ? backGround: require('../../assets/chatbg.png')
 
 //console.log('chat screen is rendering ')
     useEffect(() => {
@@ -69,9 +70,7 @@ function ChatScreen(props) {
   const roomRef = doc(db, "rooms", roomId); //document of the room based on it's id
   const roomMessagesRef = collection(db, "rooms", roomId, "messages");//refrecnce for the messegaes on particular room
 
-    const [AesKey,setAesKey] = useState(null)
-  
-  
+  const [AesKey,setAesKey] = useState(null)
   const [Loading,setLoading] = useState(true)
 
 
@@ -97,7 +96,8 @@ function ChatScreen(props) {
         }
         let roomData = {
           participants: [currentUserData, contactedUserData],
-          participantsArray: [currentUserData.email, contactedUserData.email]
+          participantsArray: [currentUserData.email, contactedUserData.email],
+          roomId:roomId
         }
         try {
             //initializing the room
@@ -334,7 +334,7 @@ function ChatScreen(props) {
       return <Text> you need to grant permission </Text>
   }
 
-  return (Loading ?<Text>loading ...</Text>:<ImageBackground style={{ flex: 1 }} resizeMode="cover" source={require('../../assets/chatbg.png')}>
+  return (Loading ?<Text>loading ...</Text>:<ImageBackground style={{ flex: 1 }} resizeMode="cover" source={{uri:backGround ? backGround :require('../../assets/chatbg.png')}}>
       <GiftedChat
         onSend={onSend}
         messages={messages} //the messages needs to be rendered
