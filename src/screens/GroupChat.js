@@ -7,7 +7,7 @@ import { auth, db,GenAESKey } from "../firebase"; // firebase instance
 import { useRoute } from "@react-navigation/native";
 import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar  ,GiftedAvatar} from 'react-native-gifted-chat'
-import { Ionicons, Fontisto ,EvilIcons } from "@expo/vector-icons";
+import { Ionicons, Fontisto ,EvilIcons,AntDesign ,Entypo,FontAwesome5} from "@expo/vector-icons";
 import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission} from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
@@ -225,10 +225,10 @@ export default function GroupChat(props) {
 
 
   //send image to chat //older implementation // currently doesn't work needs to be fixed after adding the graphql implementation 
-  async function sendImage(uri, roomPath) {
-    const { url, fileName } = await uploadImage(
+ async function sendImage(uri, roomPath) {
+    const { url, fileName } = await uploadImagetwo(
       uri,
-      `images/groups/${groupID}`
+      `images/rooms/${roomPath || roomHash}`
     );
     const message = {
       _id: fileName,
@@ -239,7 +239,7 @@ export default function GroupChat(props) {
     };
     const lastMessage = { ...message, text: "Image" };
     await Promise.all([
-      addDoc(roomMessagesRef, message),
+      setDoc(doc(roomMessagesRef,message._id),message),
       updateDoc(roomRef, { lastMessage }),
     ]);
   }
@@ -268,8 +268,8 @@ export default function GroupChat(props) {
 
   async function handlePhotoPicker() {//just help function uses expo client to pick image from gallery
     const result = await pickImageChat();
-    if (result.assets[0].uri) {
-      await sendImage(result.assets[0].uri);
+    if (result.assets[0]) {
+      await sendImage(result.assets[0],groupID);
     }
   }
 
@@ -281,7 +281,7 @@ export default function GroupChat(props) {
       return <Text> you need to grant permission </Text>
   }
 
-  return (Loading ?<Text>loading ...</Text>:<ImageBackground  style={{ flex: 1 }} resizeMode="cover" source={backGround?{uri: backGround} :require('../../assets/chatbg.png')}>
+  return (Loading ?<Text>loading ...</Text>:<ImageBackground  style={{ flex: 1 }} resizeMode="cover" source={backGround?{uri: room.backGround} :require('../../assets/chatbg.png')}>
       <GiftedChat
         showUserAvatar={true}
         
@@ -408,10 +408,13 @@ export default function GroupChat(props) {
             </View>
           );
         }}
-
-        
-       
       />
+      <View style={{backgroundColor:'white',flexDirection:'row' , flex:0.25  ,display:pickSendType ,justifyContent:'space-evenly' ,alignItems:'center', borderRadius:30,
+      wrap:'nowrap'}} >
+        <AntDesign onPress={()=>handlePhotoPicker()} name='picture' size={45} />
+        <Entypo name='video' size={45} />
+        <FontAwesome5 name='file' size={45} />
+      </View>
 
     </ImageBackground>
 

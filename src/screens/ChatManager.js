@@ -4,7 +4,6 @@ import GlobalContext from '../../Context/Context';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { collection, onSnapshot, query, QuerySnapshot, where ,deleteDoc,doc,updateDoc} from 'firebase/firestore';
-import {createAssetAsync,usePermissions,createAlbumAsync} from 'expo-media-library'
 import {writeAsStringAsync,readAsStringAsync,documentDirectoryEncodingType} from 'expo-file-system'
 import * as Permissions from 'expo-permissions';
 import { Image, Button, Text, View, SafeAreaView, StyleSheet, KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';

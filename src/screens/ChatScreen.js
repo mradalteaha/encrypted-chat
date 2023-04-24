@@ -7,7 +7,7 @@ import { auth, db,GenAESKey } from "../firebase"; // firebase instance
 import { useRoute } from "@react-navigation/native";
 import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
-import { Ionicons, Fontisto ,EvilIcons} from "@expo/vector-icons";
+import { Ionicons, Fontisto ,EvilIcons,AntDesign ,Entypo,FontAwesome5} from "@expo/vector-icons";
 import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission} from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
@@ -209,7 +209,7 @@ function ChatScreen(props) {
 
       setroomHash(emailHash);
        if (selectedImage && selectedImage.uri) {
-         await sendImage(selectedImage.uri, emailHash);
+         await sendImage(selectedImage, emailHash);
        }
     })()
   }, [])
@@ -330,7 +330,7 @@ function ChatScreen(props) {
     };
     const lastMessage = { ...message, text: "Image" };
     await Promise.all([
-      addDoc(roomMessagesRef, message),
+      setDoc(doc(roomMessagesRef,message._id),message),
       updateDoc(roomRef, { lastMessage }),
     ]);
   }
@@ -346,8 +346,8 @@ function handleSendImagePress(){
 
   async function handlePhotoPicker() {//just help function uses expo client to pick image from gallery
     const result = await pickImageChat();
-    if (result.assets[0].uri) {
-      await sendImage(result.assets[0].uri);
+    if (result.assets[0]) {
+      await sendImage(result.assets[0],roomId);
     }
   }
 
@@ -496,8 +496,11 @@ function handleSendImagePress(){
           );
         }}
       />
-      <View style={{backgroundColor:'white' , flex:1 ,  height:150,display:pickSendType}} >
-          <AntDesign onPress={()=>handlePhotoPicker()} name="picture" size={24} color="red"/>
+      <View style={{backgroundColor:'white',flexDirection:'row' , flex:0.25  ,display:pickSendType ,justifyContent:'space-evenly' ,alignItems:'center', borderRadius:30,
+      wrap:'nowrap'}} >
+        <AntDesign onPress={()=>handlePhotoPicker()} name='picture' size={45} />
+        <Entypo name='video' size={45} />
+        <FontAwesome5 name='file' size={45} />
       </View>
       
 

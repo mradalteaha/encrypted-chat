@@ -6,7 +6,7 @@ import { storage } from "./src/firebase"
 import { Buffer } from "buffer";
 import {writeAsStringAsync,readAsStringAsync,documentDirectory,makeDirectoryAsync,getInfoAsync,StorageAccessFramework,EncodingType} from 'expo-file-system'
 import {createAssetAsync,usePermissions,createAlbumAsync} from 'expo-media-library'
-
+import { nanoid } from "nanoid";
 const crypto = require('./crypto-custom.js');
 
 
@@ -50,7 +50,7 @@ export async function askForPermission(){
 
 
 
-export async function uploadImage(image, path, fName) {
+/* export async function uploadImage(image, path, fName) {
 
   const imageupload = await new Promise((resolve, reject) => {
     
@@ -97,13 +97,13 @@ export async function uploadImage(image, path, fName) {
   return imageupload
  
 }
-
+ */
 
 
 export async function uploadImagetwo(image, path, fName) {
 
 
-  const fileName = fName || nanoid();
+  const fileName = fName ||nanoid();
   const imageRef = ref(storage, `${path}/${fileName}.jpeg`);
   console.log('print in uploadImagetwo')
 //  console.log(image)
