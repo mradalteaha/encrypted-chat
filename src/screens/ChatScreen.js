@@ -15,7 +15,7 @@ import CryptoJS from "react-native-crypto-js";
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 import {EncryptAESkey,DecryptAESkey,uploadImagetwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
-
+import { AntDesign } from '@expo/vector-icons';
 
 
 
@@ -317,7 +317,7 @@ function ChatScreen(props) {
 
 
 
-  function pickSendTypeFunction(){//this functoi
+  function pickSendTypeFunction(){//this functoin
     console.log('paperclip clicked')
     setPickSendType(pre => pre=='none'?'flex':'none')
   }
@@ -452,7 +452,7 @@ function ChatScreen(props) {
         }}
       />
       <View style={{backgroundColor:'white' , flex:1 ,  height:150,display:pickSendType}} >
-        <Text>HEllo</Text>
+          <AntDesign name="picture" size={24} color="red"/>
       </View>
       
 
@@ -465,6 +465,24 @@ function ChatScreen(props) {
 
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  touchableOpacity: {
+    backgroundColor: 'white',
+    borderRadius: 50,
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  icon: {
+    marginLeft: 5,
+  },
   container: {
     marginTop: 10,
     width: '100%',
