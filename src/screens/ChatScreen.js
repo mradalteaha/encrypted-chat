@@ -8,7 +8,7 @@ import { useRoute } from "@react-navigation/native";
 import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
 import { Ionicons, Fontisto ,EvilIcons,AntDesign ,Entypo,FontAwesome5} from "@expo/vector-icons";
-import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission} from '../../utils'
+import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission,uploadFile} from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
 import CryptoJS from "react-native-crypto-js";
@@ -350,6 +350,39 @@ function ChatScreen(props) {
    function onLongpressHandler(context,message){
     setSelectedItem(message)
   }
+
+  
+  async function sendFile(uri, roomPath) {
+    const { url, fileName } = await uploadFile(
+      uri,
+      `images/rooms/${roomPath || roomHash}`
+    );
+    const message = {
+      _id: fileName,
+      text: "",
+      createdAt: new Date(),
+      user: senderUser,
+      
+      
+    };
+    const lastMessage = { ...message, text: "File" };
+    await Promise.all([
+      setDoc(doc(roomMessagesRef,message._id),message),
+      updateDoc(roomRef, { lastMessage }),
+    ]);
+  }
+
+ async function filePicker(){
+  try{
+    const result = await pickImageChat();
+    if (result.assets[0]) {
+      await sendFile(result.assets[0],roomId);
+    }
+    
+  }catch(err){
+    console.log(err)
+  }
+ }
 
  async function deleteMessage(message){
     console.log('message to delete')

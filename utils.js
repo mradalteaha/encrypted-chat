@@ -106,17 +106,6 @@ export async function uploadImagetwo(image, path, fName) {
   const fileName = fName ||nanoid();
   const imageRef = ref(storage, `${path}/${fileName}.jpeg`);
   console.log('print in uploadImagetwo')
-//  console.log(image)
-  /*const imag =  image.base64.replace(/(?:\r\n|\r|\n)/g, '');
-  console.log(imag)
-  
-
-  const snapshot = await uploadString(imageRef, imag,'base64', {
-    contentType: "image/jpeg",
-  }); */
- /*  await putString(imageRef,image, 'data_url', {contentType:'image/jpg'}).then(() => {
-    console.log('Image uploaded');
-  }); */
 
   const response = await fetch(image.uri);
 
@@ -131,6 +120,28 @@ export async function uploadImagetwo(image, path, fName) {
  
 }
 
+
+
+export async function uploadFile(file, path, fName) {
+
+  console.log(file)
+  /* const fileName = fName ||nanoid();
+  const imageRef = ref(storage, `${path}/${fileName}.jpeg`);
+  console.log('print in uploadImagetwo')
+
+  const response = await fetch(file.uri);
+  
+
+    const blob = await response.blob();
+
+    const snapshot = await uploadBytes(imageRef, blob, {
+      contentType: "image/jpeg",
+    }); 
+  const url = await getDownloadURL(snapshot.ref);
+    
+  return { url, fileName }; */
+ 
+}
 
 
 const palette = {
