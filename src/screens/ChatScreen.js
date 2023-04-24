@@ -7,7 +7,7 @@ import { auth, db,GenAESKey } from "../firebase"; // firebase instance
 import { useRoute } from "@react-navigation/native";
 import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
-import { Ionicons, Fontisto ,EvilIcons} from "@expo/vector-icons";
+import { Ionicons, Fontisto ,EvilIcons,AntDesign ,Entypo,FontAwesome5} from "@expo/vector-icons";
 import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission} from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
@@ -492,8 +492,11 @@ function ChatScreen(props) {
           );
         }}
       />
-      <View style={{backgroundColor:'white' , flex:1 ,  height:150,display:pickSendType}} >
-        <Text>HEllo</Text>
+      <View style={{backgroundColor:'white',flexDirection:'row' , flex:0.25  ,display:pickSendType ,justifyContent:'space-evenly' ,alignItems:'center', borderRadius:30,
+      wrap:'nowrap'}} >
+        <AntDesign name='picture' size={45} />
+        <Entypo name='video' size={45} />
+        <FontAwesome5 name='file' size={45} />
       </View>
       
 
