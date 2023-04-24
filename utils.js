@@ -30,7 +30,22 @@ export async function pickImageChat(){
   // let result = await ImagePicker.launchCameraAsync(); 
 
    let result = await ImagePicker.launchImageLibraryAsync({
-     mediaTypes: ImagePicker.MediaTypeOptions.All,
+     mediaTypes: ImagePicker.MediaTypeOptions.Images,
+     allowsEditing: false,
+     quality: 0.2,
+     base64:true,
+     
+   });
+
+
+   return result ; 
+ }
+ export async function pickVideoChat(){
+
+  // let result = await ImagePicker.launchCameraAsync(); 
+
+   let result = await ImagePicker.launchImageLibraryAsync({
+     mediaTypes: ImagePicker.MediaTypeOptions.Videos,
      allowsEditing: false,
      quality: 0.2,
      base64:true,
@@ -99,7 +114,36 @@ export async function askForPermission(){
 }
  */
 
+export async function uploadVideotwo(video, path, fName) {
 
+
+  const fileName = fName ||nanoid();
+  const imageRef = ref(storage, `${path}/${fileName}.jpeg`);
+  console.log('print in uploadImagetwo')
+//  console.log(image)
+  /*const imag =  image.base64.replace(/(?:\r\n|\r|\n)/g, '');
+  console.log(imag)
+  
+
+  const snapshot = await uploadString(imageRef, imag,'base64', {
+    contentType: "image/jpeg",
+  }); */
+ /*  await putString(imageRef,image, 'data_url', {contentType:'image/jpg'}).then(() => {
+    console.log('Image uploaded');
+  }); */
+
+  const response = await fetch(video.uri);
+
+    const blob = await response.blob();
+
+    const snapshot = await uploadBytes(imageRef, blob, {
+      contentType: "image/jpeg",
+    }); 
+  const url = await getDownloadURL(snapshot.ref);
+    
+  return { url, fileName };
+ 
+}
 export async function uploadImagetwo(image, path, fName) {
 
 
