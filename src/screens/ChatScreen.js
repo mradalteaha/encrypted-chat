@@ -15,13 +15,10 @@ import CryptoJS from "react-native-crypto-js";
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 import {EncryptAESkey,DecryptAESkey,uploadImagetwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
-<<<<<<< HEAD
 import { AntDesign } from '@expo/vector-icons';
-=======
 import { usePreventScreenCapture } from 'expo-screen-capture';
 
 
->>>>>>> master
 
 
 
@@ -245,9 +242,7 @@ function ChatScreen(props) {
 
   },[AesKey])
 
-<<<<<<< HEAD
 //encrypt the message
-=======
   useEffect(()=>{
     const updateUnreadMessages = async () => {
     
@@ -270,7 +265,6 @@ function ChatScreen(props) {
    
   },[])
 
->>>>>>> master
   const appendMessages = useCallback((messages) => { // help function to append messages
     
 //console.log('messages from firestore')
@@ -341,7 +335,9 @@ function ChatScreen(props) {
     ]);
   }
 
-
+function handleSendImagePress(){
+  console.log('sadasd')
+}
 
   function pickSendTypeFunction(){//this functoin
     console.log('paperclip clicked')
@@ -501,7 +497,7 @@ function ChatScreen(props) {
         }}
       />
       <View style={{backgroundColor:'white' , flex:1 ,  height:150,display:pickSendType}} >
-          <AntDesign name="picture" size={24} color="red"/>
+          <AntDesign onPress={()=>handlePhotoPicker()} name="picture" size={24} color="red"/>
       </View>
       
 

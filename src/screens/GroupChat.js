@@ -281,7 +281,7 @@ export default function GroupChat(props) {
       return <Text> you need to grant permission </Text>
   }
 
-  return (Loading ?<Text>loading ...</Text>:<ImageBackground  style={{ flex: 1 }} resizeMode="cover" source={{uri:backGround ? backGround :require('../../assets/chatbg.png')}}>
+  return (Loading ?<Text>loading ...</Text>:<ImageBackground  style={{ flex: 1 }} resizeMode="cover" source={backGround?{uri: backGround} :require('../../assets/chatbg.png')}>
       <GiftedChat
         showUserAvatar={true}
         
