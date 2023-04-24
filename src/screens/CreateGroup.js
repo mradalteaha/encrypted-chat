@@ -234,7 +234,7 @@ export default function CreateGroup(props){
                     {!selectImage ? (<MaterialCommunityIcons name='camera-plus' color={colors.iconGray} size={45} />) :
                         <Image source={{ uri: selectImage.uri }} style={{ width: '100%', height: '100%', borderRadius: 120 }} />}
                 </TouchableOpacity> 
-                <KeyboardAvoidingView style={{alignSelf:'flex-start',marginTop:60,borderBottomColor:'rgba(0,0,0,0.5)',borderb,marginLeft:20,width:170}} >
+                <KeyboardAvoidingView style={{alignSelf:'flex-start',marginTop:60,borderBottomColor:'rgba(0,0,0,0.5)',marginLeft:20,width:170}} >
                 <TextInput value={groupName} onChangeText={setGroupName}  placeholderTextColor ={'rgba(0,0,0,0.5)'} placeholder={'Enter Group Name'} />
                 </KeyboardAvoidingView>
         
