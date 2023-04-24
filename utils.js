@@ -60,7 +60,7 @@ export async function uploadImage(image, path, fName) {
   const uploadTask = uploadBytesResumable(imageRef, imageByte, {
     contentType: "image/jpeg",
   });
-  console.log('passed line 69')
+  
   
   uploadTask.on('state_changed', 
     (snapshot) => {
@@ -171,8 +171,8 @@ export async function EncryptAESkey(contactedUserPK,roomAESkey){//function to en
 
       const data = roomAESkey
       const publicKey = contactedUserPK
-      console.log('printing the public key :')
-      console.log(publicKey)
+      //console.log('printing the public key :')
+      //console.log(publicKey)
       const encryptedData = crypto.publicEncrypt(
         {
           key: publicKey,
@@ -280,8 +280,7 @@ export async function readUserData(userid) { //this function saves a given data 
   })
   readAsStringAsync(fileUri,{ encoding:EncodingType.UTF8 }).then((res)=>{
     console.log('retrieved data successfully readUserData utils ')
-    
-    //console.log(res)
+   // console.log(res)
     resovlve(res)
    }).catch(err=>{
     console.log('retrieved data Failed readUserData utils')
@@ -293,6 +292,41 @@ export async function readUserData(userid) { //this function saves a given data 
  return saved
 
 }
+
+
+
+export async function EncrypGroupKeys(data){
+
+  try{
+    console.log("start of EncrypGroupKeys ")
+    const {roomAESkey,participants} =data //participants is the map object from the selected participants in creategroup and the aes key
+    const Aeskeys = {}
+    console.log('printing the roomaeskey')
+    //console.log(roomAESkey)
+    const success=  await Promise.all(Array.from(participants.values()).map(async (user)=>{
+      //console.log('printing the user')
+      //console.log(user)
+      const encryptedAESkey = await EncryptAESkey(user.RSApublicKey ,roomAESkey )
+      Aeskeys[user.email] = encryptedAESkey
+      })
+    )
+    if(success){
+      return Aeskeys
+    }
+    
+
+      
+    }catch(err){
+    console.log(err)
+    return {"error":err}
+    }
+
+
+} ;// this function takes the participants object and their pk and encrypt the aes key for each one of them and returns it as an object
+ 
+
+
+
 
 
 
@@ -312,4 +346,17 @@ function decode(input) {
   }
 
   return input;
+}
+
+
+
+export function jsonToBase64(object) {
+  const json = JSON.stringify(object);
+  return Buffer.from(json).toString("base64");
+}
+
+
+export function base64ToJson(base64String) {
+  const json = Buffer.from(base64String, "base64").toString();
+  return JSON.parse(json);
 }

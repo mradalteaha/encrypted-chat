@@ -23,6 +23,9 @@ connectFunctionsEmulator(functions,'localhots', 5001)
 export const GenKey = httpsCallableFromURL(functions, "https://us-central1-secret-chat-dev.cloudfunctions.net/Genkey" );
 
 export const GenAESKey = httpsCallableFromURL(functions, "https://us-central1-secret-chat-dev.cloudfunctions.net/GenAESkey");
+//export const EncrypGroupKeys = httpsCallableFromURL(functions, "https://us-central1-secret-chat-dev.cloudfunctions.net/EncrypGroupKeys");
+
+
 
 
 export function signIn(email,password) {

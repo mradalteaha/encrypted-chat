@@ -5,9 +5,9 @@ import { Image, TouchableOpacity, View, StyleSheet, ImageBackground,Text } from 
 import GlobalContext from '../../Context/Context';//global variables to access via provider
 import { auth, db,GenAESKey } from "../firebase"; // firebase instance 
 import { useRoute } from "@react-navigation/native";
-import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc} from 'firebase/firestore';
+import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
-import { Ionicons, Fontisto } from "@expo/vector-icons";
+import { Ionicons, Fontisto ,EvilIcons} from "@expo/vector-icons";
 import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission} from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
@@ -15,7 +15,13 @@ import CryptoJS from "react-native-crypto-js";
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 import {EncryptAESkey,DecryptAESkey,uploadImagetwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
+<<<<<<< HEAD
 import { AntDesign } from '@expo/vector-icons';
+=======
+import { usePreventScreenCapture } from 'expo-screen-capture';
+
+
+>>>>>>> master
 
 
 
@@ -23,6 +29,7 @@ import { AntDesign } from '@expo/vector-icons';
 //import { v4 as uuid } from 'uuid'; //deprecated causing errors with expo SDK 48 ...
 
 function ChatScreen(props) {
+  usePreventScreenCapture();
   const {currentUser} = auth;
   const [roomHash, setroomHash] = useState('');//for generating path in the database 
   const [messages, setMessages] = useState([]);//to be able to access the data and manipulate the messages
@@ -33,12 +40,23 @@ function ChatScreen(props) {
   const { theme: { colors } } = useContext(GlobalContext)
   const [permissionStatus, permissionStatusUpdate] = useState(null);
   const [pickSendType,setPickSendType] =useState('none')
+    const [selectedItem,setSelectedItem] = useState(null)
+
 
   const route = useRoute();
   const room = route.params.room  ;
-
+  
   const selectedImage = route.params.image;
   const contactedUser = route.params.user;
+  const contactedUserUid=contactedUser.uid
+
+
+  const unreadMessages=new Map()
+  unreadMessages.set(contactedUser.uid,0)
+  unreadMessages.set(currentUser.uid,0)
+  
+  const currentUserUid=currentUser.uid
+  const localbackGround = room ? room.backGround: require('../../assets/chatbg.png')
 
 //console.log('chat screen is rendering ')
     useEffect(() => {
@@ -64,9 +82,7 @@ function ChatScreen(props) {
   const roomRef = doc(db, "rooms", roomId); //document of the room based on it's id
   const roomMessagesRef = collection(db, "rooms", roomId, "messages");//refrecnce for the messegaes on particular room
 
-    const [AesKey,setAesKey] = useState(null)
-  
-  
+  const [AesKey,setAesKey] = useState(null)
   const [Loading,setLoading] = useState(true)
 
 
@@ -90,9 +106,13 @@ function ChatScreen(props) {
         if (contactedUser.photoURL) {
           contactedUserData.photoURL = contactedUser.photoURL
         }
-        let roomData = {
+        
+        const roomData = {
           participants: [currentUserData, contactedUserData],
-          participantsArray: [currentUserData.email, contactedUserData.email]
+          participantsArray: [currentUserData.email, contactedUserData.email],
+          unreadMessages:Object.fromEntries(unreadMessages) ,
+          roomId:roomId,
+          backGround:null
         }
         try {
             //initializing the room
@@ -101,16 +121,19 @@ function ChatScreen(props) {
 
               //encrypt the ke
               console.log('generating the AES key passed key :')
-              console.log(contactedUser)
-              console.log(result.data.AES)
+            /*   console.log(contactedUser)
+              console.log(result.data.AES) */
                const encKey = await EncryptAESkey(contactedUser.RSApublicKey,result.data.AES) //encrypting the aes key before saving it in the database
                console.log('encrypting  the AES key passed key :')
-               console.log(encKey)
+               /* console.log(encKey) */
                const LoadLocalStorage = await readUserData(currentUser.uid) // getting the current saved data .
+               if(LoadLocalStorage){
                let userLocal = JSON.parse(LoadLocalStorage)
                let userLocalrooms = userLocal.rooms
+               let RsaKeys =userLocal.RsaKeys
+               
                userLocalrooms[roomId] = result.data.AES
-               let finalizeLocalData = {...LoadLocalStorage , rooms:userLocalrooms}
+               let finalizeLocalData = {RsaKeys:RsaKeys  , rooms:userLocalrooms}
                console.log('generated keys')
                const saveLocalData = await saveUserData(currentUser.uid, JSON.stringify(finalizeLocalData) )
 
@@ -130,7 +153,7 @@ function ChatScreen(props) {
                 
               }).catch(err=>console.log(err))}).catch(err=>{console.log(err)})
  
-             
+            }
         }).catch(err=>{
           console.log(err)
         }) 
@@ -165,8 +188,9 @@ function ChatScreen(props) {
                       let userLocal = JSON.parse(data)
                       console.log(data)
                     let userLocalrooms = userLocal.rooms
+                    let RsaKeys =userLocal.RsaKeys
                   userLocalrooms[roomId] = decryptedkey
-                  let finalizeLocalData = {...parsedData , rooms:userLocalrooms}
+                  let finalizeLocalData = {RsaKeys:RsaKeys  , rooms:userLocalrooms}
                   console.log('saving the new room into the local storage ')
                   saveUserData(currentUser.uid,JSON.stringify(finalizeLocalData) ).then(()=>{
                     setAesKey((prev)=> decryptedkey)
@@ -181,33 +205,6 @@ function ChatScreen(props) {
 
 
         }
-
-        /* AsyncStorageStatic.getItem(currentUser.uid).then(res =>{
-          let userLocal = JSON.parse(res)
-          
-          console.log('AESkey for the current room')
-          console.log(userLocal.rooms[roomId])
-          const localkey= userLocal.rooms[roomId]
-          setAesKey((prev)=> localkey)
-            setLoading(false)
-
-        }) // getting the current saved data .
-             /*   let userLocal = JSON.parse(LoadLocalStorage)
-               let userLocalrooms = userLocal.rooms
-
-
-        getDoc(roomRef).then(res => {
-          if (!res.exists) {
-            console.log("No such document!"); //Error
-          } else {
-            console.log(res.data().AESkey)
-            setAesKey((prev)=> res.data().AESkey)
-            setLoading(false)
-          }
-
-        }).catch(err=>console.log(err)) 
-
-        setLoading(false) */
 
         
       }
@@ -248,7 +245,32 @@ function ChatScreen(props) {
 
   },[AesKey])
 
+<<<<<<< HEAD
 //encrypt the message
+=======
+  useEffect(()=>{
+    const updateUnreadMessages = async () => {
+    
+    try{
+      const currentdocData = await getDoc(roomRef)
+      let {unreadMessages} =  currentdocData.data()
+      unreadMessages[currentUser.uid]=0;
+      updateDoc(roomRef, { unreadMessages })
+  
+    }
+    catch(e){
+      console.log(e)
+    }
+
+    };
+
+    updateUnreadMessages();
+    
+    
+   
+  },[])
+
+>>>>>>> master
   const appendMessages = useCallback((messages) => { // help function to append messages
     
 //console.log('messages from firestore')
@@ -276,11 +298,15 @@ function ChatScreen(props) {
           };
           
           
-          addDoc(roomMessagesRef,encryptedMessage)
+          setDoc(doc(roomMessagesRef,encryptedMessage._id),encryptedMessage)
         
         }) //adding the new message to the firestore
         const lastMessage= messages[messages.length -1]
-        writes.push(updateDoc(roomRef,{lastMessage}))//updating the last message for the look of chats screen
+        const currentdocData = await getDoc(roomRef)
+        let {unreadMessages} =  currentdocData.data()
+        unreadMessages[contactedUser.uid]=unreadMessages[contactedUser.uid] +1
+        
+        writes.push(updateDoc(roomRef,{lastMessage ,unreadMessages}))//updating the last message for the look of chats screen
         await Promise.all(writes)
      
       }catch(err){
@@ -329,6 +355,21 @@ function ChatScreen(props) {
     }
   }
 
+   function onLongpressHandler(context,message){
+    setSelectedItem(message)
+  }
+
+ async function deleteMessage(message){
+    console.log('message to delete')
+    console.log(message)
+    deleteDoc(doc(roomMessagesRef,message._id)).then(()=>{
+      setMessages((previousMessaged) => previousMessaged.filter(m => m._id !==message._id)) // deletes the message locally after removing it from the database
+      setSelectedItem(null)
+      console.log('deleted successfully')
+    })
+   
+  }
+
 
     if (!permissionStatus) {
       return <Text>Loading ...</Text>
@@ -337,7 +378,7 @@ function ChatScreen(props) {
       return <Text> you need to grant permission </Text>
   }
 
-  return (Loading ?<Text>loading ...</Text>:<ImageBackground style={{ flex: 1 }} resizeMode="cover" source={require('../../assets/chatbg.png')}>
+  return (Loading ?<Text>loading ...</Text>:<ImageBackground style={{ flex: 1 }} resizeMode="cover" source={room?{uri: room.backGround} :require('../../assets/chatbg.png')}>
       <GiftedChat
         onSend={onSend}
         messages={messages} //the messages needs to be rendered
@@ -404,16 +445,24 @@ function ChatScreen(props) {
 
           />
         )}
+        extraData={selectedItem}
+        shouldUpdateMessage={(props, nextProps) =>props.extraData !== nextProps.extraData}
+        isCustomViewBottom={true}
+
         renderBubble={(props) => (
-          <Bubble
-            {...props}
+          <Bubble {...props}
+           renderCustomView={()=>selectedItem === props.currentMessage ? <EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/> : null}
+           onPress={()=>{setSelectedItem(null)}}
+            onLongPress={(context , message)=> onLongpressHandler(context,message)}
             textStyle={{ right: { color: colors.text } }} //right for sender side and left for the reciever
             wrapperStyle={{
+
+            
               left: {
-                backgroundColor: colors.white,
+                backgroundColor: selectedItem === props.currentMessage ? 'red': colors.white,
               },
               right: {
-                backgroundColor: colors.tertiary,
+                backgroundColor: selectedItem === props.currentMessage ? 'red': colors.tertiary,
               },
             }}
           />

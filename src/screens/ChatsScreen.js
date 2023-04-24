@@ -1,8 +1,13 @@
-import { collection, onSnapshot, query, QuerySnapshot, where } from 'firebase/firestore';
-import React, { useContext, useEffect } from 'react';
-import { SafeAreaView ,View ,Text ,StyleSheet } from 'react-native';
+import { collection, onSnapshot, query, QuerySnapshot, where ,deleteDoc,doc} from 'firebase/firestore';
+import React, { useContext, useEffect ,useState} from 'react';
+import { SafeAreaView,Text ,StyleSheet , View,TouchableOpacity } from 'react-native';
 import GlobalContext from '../../Context/Context';
+import { useNavigation } from '@react-navigation/native'
+import {Grid,Row,Col} from 'react-native-easy-grid'
+import Avatar from '../components/Avatar';
 import {auth, db} from '../firebase'
+import {EvilIcons,Octicons } from "@expo/vector-icons";
+
 import ItemList from '../components/ItemList';
 import useContacts from '../hooks/useHooks';
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
@@ -57,13 +62,14 @@ export default function ChatsScreen() {
             {rooms.map((room) => {
                 if(typeof(room.contactedUser) !=='undefined'){
 
-                    return(
-                <ItemList type='ChatScreen' description={room.lastMessage.text}
+                    return( typeof(room) !=='undefined' &&
+                <ChatItemList type='ChatScreen' description={room.lastMessage.text}
                 key={room.id}
                 room={room}
                 time={room.lastMessage.createdAt}
-                user={getContactedUser(room.contactedUser,myContacts)}
-            />
+                unreadMessages={room.unreadMessages[currentUser.uid]}
+                user={getContactedUser(room.contactedUser,myContacts)} 
+            /> 
                ) 
                 }
                
@@ -74,6 +80,81 @@ export default function ChatsScreen() {
         </SafeAreaView>
     )
 }
+
+
+
+
+function ChatItemList({type,description,user,style,time ,room ,image,unreadMessages}) {
+      const [unread , setUnread] =useState(0)
+      const navigation = useNavigation()
+      const {theme:{colors} ,setRooms} = useContext(GlobalContext)
+      const [selected ,setSelected]=useState(false)
+   
+    // console.log(user);
+
+
+   
+      async function handleLongPress(){
+        console.log('long press')
+        if(selected){
+            setSelected(!selected)
+        }else{
+    
+            console.log('')
+            setSelected(!selected)
+        }
+    
+      }
+    
+      async function deleteGroup(){
+        console.log('room deleted')
+        console.log(room.id)
+        deleteDoc(doc(db, "rooms", room.id)).then(()=>{
+            setRooms(prev => prev.filter( currGroup => currGroup.id !== room.id))
+            alert(`chat with : ${room.user}  deleted successfully`)
+        })
+      }
+  
+    return (
+      <TouchableOpacity style={{height:80,borderRadius:30, backgroundColor: selected? 'red': "white",...style}} onLongPress={()=>handleLongPress()} onPress={()=>navigation.navigate("ChatScreen",{user,room,image})}>
+          <Grid style={{maxHeight:80}} >
+            <Col style={{width:80,alignItems:'center',justifyContent:'center'}}>
+              <Avatar user={user} size={60}/>
+            </Col>
+            <Col style={{marginLeft:10}}>
+              <Row style={{alignItems:'center'}}>
+                  <Col>
+                    <Text style={{fontWeight:'bold',fontSize:16,color:colors.text}}>
+                      {user.displayName}
+                    </Text>
+                  </Col>
+                  
+                    {time && (<Col style={{alignItems:"flex-end", }}>
+                      <Text style={{color:colors.secondaryText}}>{new Date(time.seconds *1000).toLocaleDateString()}</Text>
+                    </Col>)}
+                    {selected &&(
+                        <Col style={{alignItems:"flex-end", }}>
+                   <EvilIcons onPress={()=>deleteGroup()} style={{display: selected ? 'flex':'none'}} name='trash' size={35}/>
+                  </Col>
+                    )}
+                    {(unreadMessages>0) && !selected &&(
+                        <Col style={{alignItems:"flex-end", }}>
+                   <Text style={{display:'flex' ,marginRight:30 ,backgroundColor:'rgba(0, 252, 185,0.8)',borderRadius: 120,width:35,height:25,justifyContent:'center',textAlign:'center',flexDirection:'column',}} size={55}>{unreadMessages}</Text>
+                  </Col>
+                    )}
+                   
+              </Row>
+              {description &&(
+                <Row style={{marginTop:-5}}>
+                <Text style={{color:colors.secondaryText}}>{description}</Text>
+                </Row>
+              )}
+            </Col>
+          </Grid>  
+      </TouchableOpacity>
+    )
+  }
+  
 
 const styles = StyleSheet.create({
     container: {

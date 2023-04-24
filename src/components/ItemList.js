@@ -1,13 +1,19 @@
 import { View, Text ,TouchableOpacity } from 'react-native'
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import GlobalContext from '../../Context/Context'
 import {Grid,Row,Col} from 'react-native-easy-grid'
 import Avatar from './Avatar'
+import {db} from '../firebase'
+import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc} from 'firebase/firestore';
+
+
 export default function ItemList({type,description,user,style,time ,room ,image,}) {
 
+    const [unread , setUnread] =useState(0)
     const navigation = useNavigation()
     const {theme:{colors}} = useContext(GlobalContext)
+
 
    
   // console.log(user);

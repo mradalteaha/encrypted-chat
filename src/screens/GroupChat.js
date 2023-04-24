@@ -5,9 +5,9 @@ import { Image, TouchableOpacity, View, StyleSheet, ImageBackground,Text } from 
 import GlobalContext from '../../Context/Context';//global variables to access via provider
 import { auth, db,GenAESKey } from "../firebase"; // firebase instance 
 import { useRoute } from "@react-navigation/native";
-import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc} from 'firebase/firestore';
-import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
-import { Ionicons, Fontisto } from "@expo/vector-icons";
+import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
+import { GiftedChat, Actions, Bubble, InputToolbar  ,GiftedAvatar} from 'react-native-gifted-chat'
+import { Ionicons, Fontisto ,EvilIcons } from "@expo/vector-icons";
 import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission} from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
@@ -15,6 +15,8 @@ import CryptoJS from "react-native-crypto-js";
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 import {EncryptAESkey,DecryptAESkey} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
+import * as ScreenCapture from 'expo-screen-capture';
+
 
 
 
@@ -22,195 +24,123 @@ import { v4 as uuid } from 'uuid';
 
 //import { v4 as uuid } from 'uuid'; //deprecated causing errors with expo SDK 48 ...
 
-function GroupChat(props) {
-  const {currentUser} = auth;
+export default function GroupChat(props) {
+  ScreenCapture.usePreventScreenCapture()
+    const {currentUser} = auth;
   const [roomHash, setroomHash] = useState('');//for generating path in the database 
   const [messages, setMessages] = useState([]);//to be able to access the data and manipulate the messages
   //these two states are related to view images 
   const [modalVisible, setModalVisible] = useState(false);
-  const [myrandID,setMyrandID]=useState(uuid())
   const [selectedImageView, setSeletedImageView] = useState("");
-  const { theme: { colors } } = useContext(GlobalContext)
+  const { theme: { colors } , myContacts } = useContext(GlobalContext)
   const [permissionStatus, permissionStatusUpdate] = useState(null);
+  const [AesKey,setAesKey] = useState(null)
+  const [Loading,setLoading] = useState(true)
+  const [selectedItem,setSelectedItem] = useState(null)
+
+
 
   const route = useRoute();
   const room = route.params.room  ;
-
   const selectedImage = route.params.image;
-  const contactedUser = route.params.user;
+
+  const {groupImage,groupName,groupID,Aeskeys,participantsUsers,participantsArray,backGround} =room //destructuring the room
+  //this section is for screenshot prevention 
+
+  useEffect(() => {
+    if (permissionStatus) {
+      console.log('removing the screenshot')
+      const subscription = ScreenCapture.addScreenshotListener(() => {
+        alert('hehe no screenshot 😊');
+      });
+      return () => subscription.remove();
+    }
+  }, []);
+
+  const activate = async () => {
+    await ScreenCapture.preventScreenCaptureAsync();
+  };
+
 
 //console.log('chat screen is rendering ')
     useEffect(() => {
       (async () => {
           const status = await askForPermission();
           permissionStatusUpdate(status)
+          await activate()
       })()
     }, [])
 
-  const senderUser = currentUser.photoURL //asssigning the current user to the sender user
-    ? {
-      name: currentUser.displayName,
-      _id: currentUser.uid,
-      photoURL: currentUser.photoURL,
-    }
-    : { name: currentUser.displayName, _id: currentUser.uid   };
-
-  const roomId = room ? room.id : myrandID; //if there are no existing room generate a new room id
-
- /*  console.log('printing the room id ')
-  console.log(roomId) */
-
-  const roomRef = doc(db, "rooms", roomId); //document of the room based on it's id
-  const roomMessagesRef = collection(db, "rooms", roomId, "messages");//refrecnce for the messegaes on particular room
-
-    const [AesKey,setAesKey] = useState(null)
   
-  
-  const [Loading,setLoading] = useState(true)
+
+  const senderUser = participantsUsers.filter(e => e.email ===currentUser.email)[0]
+
+
+  const roomRef = doc(db, "groups", groupID); //document of the room based on it's id
+  const roomMessagesRef = collection(db, "groups", groupID, "messages");//refrecnce for the messegaes on particular room
+
 
 
   useEffect(() => { //initialize room if there are no existing one within the rooms array.
 
     (async () => {
-      if (!room) { //if the room doesn't exist we initialize it with the neceserly params
-       
-        const currentUserData = {
-          displayName: currentUser.displayName,
-          email: currentUser.email
-        }
-        if (currentUser.photoURL) {
-          currentUserData.photoURL = currentUser.photoURL
-        }
-        const contactedUserData = {
-          displayName: contactedUser.displayName || '',
-          email: contactedUser.email,
-
-        }
-        if (contactedUser.photoURL) {
-          contactedUserData.photoURL = contactedUser.photoURL
-        }
-        let roomData = {
-          participants: [currentUserData, contactedUserData],
-          participantsArray: [currentUserData.email, contactedUserData.email]
-        }
-        try {
-            //initializing the room
-
-            GenAESKey().then(async (result) =>{
-
-              //encrypt the ke
-              console.log('generating the AES key passed key :')
-              console.log(contactedUser)
-              console.log(result.data.AES)
-               const encKey = await EncryptAESkey(contactedUser.RSApublicKey,result.data.AES) //encrypting the aes key before saving it in the database
-               console.log('encrypting  the AES key passed key :')
-               console.log(encKey)
-               const LoadLocalStorage = await readUserData(currentUser.uid) // getting the current saved data .
-               let userLocal = JSON.parse(LoadLocalStorage)
-               let userLocalrooms = userLocal.rooms
-               userLocalrooms[roomId] = result.data.AES
-               let finalizeLocalData = {...LoadLocalStorage , rooms:userLocalrooms}
-               console.log('generated keys')
-               const saveLocalData = await saveUserData(currentUser.uid, JSON.stringify(finalizeLocalData) )
-
-              setDoc(roomRef, {...roomData,AESkey:encKey}).then(() => {
-
-
-                readUserData(currentUser.uid).then(res =>{
-                  let userLocal = JSON.parse(res)
-                  console.log('printing the user local data')
-                  //console.log(userLocal)
-                  console.log('AESkey for the current room')
-                  console.log(userLocal.rooms[roomId])
-                  const localkey= userLocal.rooms[roomId]
-                  setAesKey((prev)=> localkey)
-                    setLoading(false)
-                    return
-                
-              }).catch(err=>console.log(err))}).catch(err=>{console.log(err)})
- 
-             
-        }).catch(err=>{
-          console.log(err)
-        }) 
-
-      }
-      catch(err){
-        console.log('error on initializing the room')
-        console.log(err)
-      }
-    }
-      else{ //if the room exist we import it's key since it 
         if(!AesKey){ //if the aes key is not setup this statement to prevent multiple access to the local storage and server storage
+          try{
 
-          const data = await readUserData(currentUser.uid)
-          if(data){
-            
-            let parsedData = JSON.parse(data)
-            if(parsedData.rooms[roomId]){
-              const localkey= parsedData.rooms[roomId]
-              setAesKey((prev)=> localkey) //set the room key from the local storage 
-              setLoading(false)
-
-
-            }else{//this room doesn't exist on the local storage 
-              getDoc(roomRef).then(async (res) => {//query to get the key from the room data
-                if (!res.exists) {
-                  console.log("No such document!"); //Error
-                } else {
-                  
-                    const encryptedkey = res.data().AESkey
-                    const decryptedkey = await DecryptAESkey(parsedData.RsaKeys.privateKey,encryptedkey)
-                      let userLocal = JSON.parse(data)
-                      console.log(data)
-                    let userLocalrooms = userLocal.rooms
-                  userLocalrooms[roomId] = decryptedkey
-                  let finalizeLocalData = {...parsedData , rooms:userLocalrooms}
-                  console.log('saving the new room into the local storage ')
-                  saveUserData(currentUser.uid,JSON.stringify(finalizeLocalData) ).then(()=>{
-                    setAesKey((prev)=> decryptedkey)
-                    setLoading(false)
-                  })
-
-                }
-      
-              }).catch(err=>console.log(err))
+            console.log('no AES KEY')
+            const data = await readUserData(currentUser.uid)
+           /*  console.log(data) */
+            if(data){
+              /* console.log('data')
+              console.log(data) */
+              
+              let parsedData = JSON.parse(data)
+             /*  console.log('parsedData')
+              console.log(parsedData) */
+              if(parsedData.rooms[groupID]){
+                console.log('the room key already saved in here')
+                const localkey= parsedData.rooms[groupID]
+                setAesKey((prev)=> localkey) //set the room key from the local storage 
+                setLoading(false)
+  
+  
+              }else{//this room doesn't exist on the local storage 
+                let userLocal = JSON.parse(data)
+                const encryptedkey = Aeskeys[currentUser.email]
+                const decryptedkey = await DecryptAESkey(userLocal.RsaKeys.privateKey,encryptedkey)
+                //console.log(userLocal)
+              let RsaKeys =userLocal.RsaKeys
+              let userLocalrooms = userLocal.rooms
+              userLocalrooms[groupID] = decryptedkey
+              /* console.log('rsa keys on else this room doesnt exist on the local storage ')
+              console.log(RsaKeys)
+              console.log('type of rsa keyss')
+              console.log(typeof(RsaKeys)) */
+              let finalizeLocalData = {RsaKeys:RsaKeys , rooms:userLocalrooms}
+       /*        console.log('type of finalized data')
+              console.log(typeof(finalizeLocalData))
+              console.log('saving the new room into the local storage ') */
+              saveUserData(currentUser.uid,JSON.stringify(finalizeLocalData) ).then(()=>{
+                setAesKey((prev)=> decryptedkey)
+                setLoading(false)
+              })
+  
+               
+              }
+            }else{
+              console.log('data isnt here')
             }
+
+          }catch(error){
+            console.log('error setting up the key')
+            console.log(error)
           }
+      
 
 
         }
-
-        /* AsyncStorageStatic.getItem(currentUser.uid).then(res =>{
-          let userLocal = JSON.parse(res)
-          
-          console.log('AESkey for the current room')
-          console.log(userLocal.rooms[roomId])
-          const localkey= userLocal.rooms[roomId]
-          setAesKey((prev)=> localkey)
-            setLoading(false)
-
-        }) // getting the current saved data .
-             /*   let userLocal = JSON.parse(LoadLocalStorage)
-               let userLocalrooms = userLocal.rooms
-
-
-        getDoc(roomRef).then(res => {
-          if (!res.exists) {
-            console.log("No such document!"); //Error
-          } else {
-            console.log(res.data().AESkey)
-            setAesKey((prev)=> res.data().AESkey)
-            setLoading(false)
-          }
-
-        }).catch(err=>console.log(err)) 
-
-        setLoading(false) */
-
-        
-      }
-      const emailHash = `${currentUser.email}:${contactedUser.email}`
+      
+      const emailHash = groupID
 
       setroomHash(emailHash);
        if (selectedImage && selectedImage.uri) {
@@ -275,7 +205,7 @@ function GroupChat(props) {
           };
           
           
-          addDoc(roomMessagesRef,encryptedMessage)
+          setDoc(doc(roomMessagesRef,encryptedMessage._id),encryptedMessage)
         
         }) //adding the new message to the firestore
         const lastMessage= messages[messages.length -1]
@@ -298,7 +228,7 @@ function GroupChat(props) {
   async function sendImage(uri, roomPath) {
     const { url, fileName } = await uploadImage(
       uri,
-      `images/rooms/${roomPath || roomHash}`
+      `images/groups/${groupID}`
     );
     const message = {
       _id: fileName,
@@ -314,7 +244,25 @@ function GroupChat(props) {
     ]);
   }
 
+  function onLongpressHandler(context,message){
+    setSelectedItem(message)
+  }
 
+ async function deleteMessage(message){
+    console.log('message to delete')
+    console.log(message)
+    deleteDoc(doc(roomMessagesRef,message._id)).then(()=>{
+      setMessages((previousMessaged) => previousMessaged.filter(m => m._id !==message._id)) // deletes the message locally after removing it from the database
+      setSelectedItem(null)
+      console.log('deleted successfully')
+    })
+   
+  }
+
+  function handleAvatar(props){
+    console.log('handle avatar')
+    console.log(props)
+  } 
 
 
 
@@ -333,12 +281,18 @@ function GroupChat(props) {
       return <Text> you need to grant permission </Text>
   }
 
-  return (Loading ?<Text>loading ...</Text>:<ImageBackground style={{ flex: 1 }} resizeMode="cover" source={require('../../assets/chatbg.png')}>
+  return (Loading ?<Text>loading ...</Text>:<ImageBackground  style={{ flex: 1 }} resizeMode="cover" source={{uri:backGround ? backGround :require('../../assets/chatbg.png')}}>
       <GiftedChat
+        showUserAvatar={true}
+        
         onSend={onSend}
         messages={messages} //the messages needs to be rendered
-        user={senderUser}
-        renderAvatar={null}
+        user={{_id:senderUser.uid ,avatar:senderUser.photoURL ,name:senderUser.displayName ,email:senderUser.email}}
+        renderAvatar={(props)=>(
+          <GiftedAvatar {...props}  user={{_id: myContacts.get(props.currentMessage.user.email).uid,avatar: myContacts.get(props.currentMessage.user.email).photoURL ,name:myContacts.get(props.currentMessage.user.email).displayName }}/>
+        )}
+
+        renderUsernameOnMessage={true}
         renderActions={(props) => (
           <Actions
             {...props}
@@ -400,16 +354,24 @@ function GroupChat(props) {
 
           />
         )}
+        extraData={selectedItem}
+        shouldUpdateMessage={(props, nextProps) =>props.extraData !== nextProps.extraData}
+        isCustomViewBottom={true}
+
         renderBubble={(props) => (
-          <Bubble
-            {...props}
+          <Bubble {...props}
+           renderCustomView={()=>selectedItem === props.currentMessage ? <EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/> : null}
+           onPress={()=>{setSelectedItem(null)}}
+            onLongPress={(context , message)=> onLongpressHandler(context,message)}
             textStyle={{ right: { color: colors.text } }} //right for sender side and left for the reciever
             wrapperStyle={{
+
+            
               left: {
-                backgroundColor: colors.white,
+                backgroundColor: selectedItem === props.currentMessage ? 'red': colors.white,
               },
               right: {
-                backgroundColor: colors.tertiary,
+                backgroundColor: selectedItem === props.currentMessage ? 'red': colors.tertiary,
               },
             }}
           />
@@ -446,6 +408,9 @@ function GroupChat(props) {
             </View>
           );
         }}
+
+        
+       
       />
 
     </ImageBackground>
@@ -534,4 +499,3 @@ const styles = StyleSheet.create({
   },
 })
 
-export default ChatScreen; 
