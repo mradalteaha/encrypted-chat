@@ -208,7 +208,7 @@ function ChatScreen(props) {
 
       setroomHash(emailHash);
        if (selectedImage && selectedImage.uri) {
-         await sendImage(selectedImage.uri, emailHash);
+         await sendImage(selectedImage, emailHash);
        }
     })()
   }, [])
@@ -328,7 +328,7 @@ function ChatScreen(props) {
     };
     const lastMessage = { ...message, text: "Image" };
     await Promise.all([
-      addDoc(roomMessagesRef, message),
+      setDoc(doc(roomMessagesRef,message._id),message),
       updateDoc(roomRef, { lastMessage }),
     ]);
   }
@@ -342,8 +342,8 @@ function ChatScreen(props) {
 
   async function handlePhotoPicker() {//just help function uses expo client to pick image from gallery
     const result = await pickImageChat();
-    if (result.assets[0].uri) {
-      await sendImage(result.assets[0].uri);
+    if (result.assets[0]) {
+      await sendImage(result.assets[0],roomId);
     }
   }
 
@@ -494,7 +494,7 @@ function ChatScreen(props) {
       />
       <View style={{backgroundColor:'white',flexDirection:'row' , flex:0.25  ,display:pickSendType ,justifyContent:'space-evenly' ,alignItems:'center', borderRadius:30,
       wrap:'nowrap'}} >
-        <AntDesign name='picture' size={45} />
+        <AntDesign onPress={()=>handlePhotoPicker()} name='picture' size={45} />
         <Entypo name='video' size={45} />
         <FontAwesome5 name='file' size={45} />
       </View>
