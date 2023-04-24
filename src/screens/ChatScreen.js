@@ -8,7 +8,7 @@ import { useRoute } from "@react-navigation/native";
 import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
 import { Ionicons, Fontisto ,EvilIcons,AntDesign ,Entypo,FontAwesome5} from "@expo/vector-icons";
-import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission} from '../../utils'
+import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission,pickVideoChat} from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
 import CryptoJS from "react-native-crypto-js";
@@ -16,8 +16,6 @@ import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 import {EncryptAESkey,DecryptAESkey,uploadImagetwo ,uploadVideotwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
 import { usePreventScreenCapture } from 'expo-screen-capture';
-import VideoPlayer from 'react-native-video-controls';
-
 
 
 
@@ -337,7 +335,7 @@ function ChatScreen(props) {
   async function sendVideo(uri, roomPath) {
     const { url, fileName } = await uploadVideotwo(
       uri,
-      `images/rooms/${roomPath || roomHash}`
+      `videos/rooms/${roomPath || roomHash}`
     );
     const message = {
       _id: fileName,
@@ -495,17 +493,6 @@ function ChatScreen(props) {
                   setSeletedImageView(props.currentMessage.image);
                 }}
               >
-                <VideoPlayer
-                  resizeMode="contain"
-                  style={{
-                    width: 200,
-                    height: 200,
-                    padding: 6,
-                    borderRadius: 15,
-                    resizeMode: "cover",
-                  }}
-                  source={{ uri: props.currentMessage.video }}
-                />
                 {selectedImageView ? (
                   <ImageView
                     imageIndex={0}
