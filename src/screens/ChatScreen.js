@@ -242,7 +242,7 @@ function ChatScreen(props) {
   },[AesKey])
 
   useEffect(()=>{
-    const fetchData = async () => {
+    const updateUnreadMessages = async () => {
     
     try{
       const currentdocData = await getDoc(roomRef)
@@ -257,7 +257,7 @@ function ChatScreen(props) {
 
     };
 
-    fetchData();
+    updateUnreadMessages();
     
     
    
