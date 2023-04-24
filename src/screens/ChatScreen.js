@@ -13,10 +13,10 @@ import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
 import CryptoJS from "react-native-crypto-js";
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
-import {EncryptAESkey,DecryptAESkey,uploadImagetwo} from '../../utils.js'
+import {EncryptAESkey,DecryptAESkey,uploadImagetwo ,uploadVideotwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
 import { usePreventScreenCapture } from 'expo-screen-capture';
-
+import VideoPlayer from 'react-native-video-controls';
 
 
 
@@ -241,6 +241,7 @@ function ChatScreen(props) {
 
   },[AesKey])
 
+//encrypt the message
   useEffect(()=>{
     const updateUnreadMessages = async () => {
     
@@ -333,9 +334,26 @@ function ChatScreen(props) {
     ]);
   }
 
+  async function sendVideo(uri, roomPath) {
+    const { url, fileName } = await uploadVideotwo(
+      uri,
+      `images/rooms/${roomPath || roomHash}`
+    );
+    const message = {
+      _id: fileName,
+      text: "",
+      createdAt: new Date(),
+      user: senderUser,
+      video: url,
+    };
+    const lastMessage = { ...message, text: "Video" };
+    await Promise.all([
+      setDoc(doc(roomMessagesRef,message._id),message),
+      updateDoc(roomRef, { lastMessage }),
+    ]);
+  }
 
-
-  function pickSendTypeFunction(){//this functoi
+  function pickSendTypeFunction(){//this functoin
     console.log('paperclip clicked')
     setPickSendType(pre => pre=='none'?'flex':'none')
   }
@@ -345,6 +363,15 @@ function ChatScreen(props) {
     if (result.assets[0]) {
       await sendImage(result.assets[0],roomId);
     }
+  }
+  async function handleVideoPicker(){
+    const result = await pickVideoChat();
+    if (result.assets[0]) {
+      await sendVideo(result.assets[0],roomId);
+    }
+  }
+  async function handleFilePicker(){
+    console.log("File Pressed");
   }
 
    function onLongpressHandler(context,message){
@@ -492,6 +519,38 @@ function ChatScreen(props) {
             }}
           />
         )}
+        renderMessageVideo={(props) => {
+          return (
+            <View style={{ borderRadius: 15, padding: 2 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setModalVisible(true);
+                  setSeletedImageView(props.currentMessage.image);
+                }}
+              >
+                <VideoPlayer
+                  resizeMode="contain"
+                  style={{
+                    width: 200,
+                    height: 200,
+                    padding: 6,
+                    borderRadius: 15,
+                    resizeMode: "cover",
+                  }}
+                  source={{ uri: props.currentMessage.video }}
+                />
+                {selectedImageView ? (
+                  <ImageView
+                    imageIndex={0}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                    images={[{ uri: selectedImageView }]}
+                  />
+                ) : null}
+              </TouchableOpacity>
+            </View>
+          );
+        }}
         renderMessageImage={(props) => {
           return (
             <View style={{ borderRadius: 15, padding: 2 }}>
@@ -525,11 +584,12 @@ function ChatScreen(props) {
           );
         }}
       />
+      
       <View style={{backgroundColor:'white',flexDirection:'row' , flex:0.25  ,display:pickSendType ,justifyContent:'space-evenly' ,alignItems:'center', borderRadius:30,
       wrap:'nowrap'}} >
         <AntDesign onPress={()=>handlePhotoPicker()} name='picture' size={45} />
-        <Entypo name='video' size={45} />
-        <FontAwesome5 name='file' size={45} />
+        <Entypo onPress={()=>handleVideoPicker()} name='video' size={45} />
+        <FontAwesome5 onPress={()=>handleFilePicker()} name='file' size={45} />
       </View>
       
 
@@ -542,6 +602,24 @@ function ChatScreen(props) {
 
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  touchableOpacity: {
+    backgroundColor: 'white',
+    borderRadius: 50,
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  icon: {
+    marginLeft: 5,
+  },
   container: {
     marginTop: 10,
     width: '100%',
