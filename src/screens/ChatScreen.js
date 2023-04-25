@@ -8,7 +8,7 @@ import { useRoute } from "@react-navigation/native";
 import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
 import { Ionicons, Fontisto ,EvilIcons,AntDesign ,Entypo,FontAwesome5} from "@expo/vector-icons";
-import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission,uploadFile} from '../../utils'
+import {  pickImageChat ,readUserData,saveUserData,askForPermission,uploadFile ,pickFileChat} from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
 import CryptoJS from "react-native-crypto-js";
@@ -16,7 +16,6 @@ import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 import {EncryptAESkey,DecryptAESkey,uploadImagetwo ,uploadVideotwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
 import { usePreventScreenCapture } from 'expo-screen-capture';
-import VideoPlayer from 'react-native-video-controls';
 
 
 
@@ -371,7 +370,17 @@ function ChatScreen(props) {
     }
   }
   async function handleFilePicker(){
-    console.log("File Pressed");
+   
+    try{
+      console.log("File Pressed");
+      const result = await pickFileChat();
+      if (result) {
+        await sendFile(result,roomId);
+      }
+      
+    }catch(err){
+      console.log(err)
+    }
   }
 
    function onLongpressHandler(context,message){
@@ -380,16 +389,18 @@ function ChatScreen(props) {
 
   
   async function sendFile(uri, roomPath) {
-    const { url, fileName } = await uploadFile(
+    const { url, fileName , file } = await uploadFile(
       uri,
-      `images/rooms/${roomPath || roomHash}`
+      `files/rooms/${roomPath || roomHash}`
     );
     const message = {
       _id: fileName,
       text: "",
       createdAt: new Date(),
       user: senderUser,
-      
+      fileType:file.mimeType,
+      fileId:file.name,
+      file:url
       
     };
     const lastMessage = { ...message, text: "File" };
@@ -399,18 +410,7 @@ function ChatScreen(props) {
     ]);
   }
 
- async function filePicker(){
-  try{
-    const result = await pickImageChat();
-    if (result.assets[0]) {
-      await sendFile(result.assets[0],roomId);
-    }
-    
-  }catch(err){
-    console.log(err)
-  }
- }
-
+ 
  async function deleteMessage(message){
     console.log('message to delete')
     console.log(message)
@@ -550,6 +550,11 @@ function ChatScreen(props) {
               </TouchableOpacity>
             </View>
           );
+        }}
+        renderCustomView={(props)=>{
+          if(props.currentMessage.fileType === "application/pdf"){
+            return 
+          }
         }}
         renderMessageImage={(props) => {
           return (
