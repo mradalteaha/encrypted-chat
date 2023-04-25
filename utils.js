@@ -1,10 +1,11 @@
 import * as ImagePicker from "expo-image-picker";
+import * as DocPicker from "expo-document-picker";
 import "react-native-get-random-values";
 import { v4 as uuid } from 'uuid';
 import {ref, uploadBytes, getDownloadURL ,uploadBytesResumable,uploadString} from 'firebase/storage'
 import { storage } from "./src/firebase"
 import { Buffer } from "buffer";
-import {writeAsStringAsync,readAsStringAsync,documentDirectory,makeDirectoryAsync,getInfoAsync,StorageAccessFramework,EncodingType} from 'expo-file-system'
+import {writeAsStringAsync,readAsStringAsync,documentDirectory,makeDirectoryAsync,getInfoAsync,StorageAccessFramework,EncodingType,getContentUriAsync} from 'expo-file-system'
 import {createAssetAsync,usePermissions,createAlbumAsync} from 'expo-media-library'
 import { nanoid } from "nanoid";
 const crypto = require('./crypto-custom.js');
@@ -53,6 +54,16 @@ export async function pickImageChat(){
    });
 
 
+   return result ; 
+ }
+
+
+
+ export async function pickFileChat(){
+
+
+  //the result contain the file uri and data
+   let result = await DocPicker.getDocumentAsync()
    return result ; 
  }
 
@@ -169,9 +180,9 @@ export async function uploadImagetwo(image, path, fName) {
 export async function uploadFile(file, path, fName) {
 
   console.log(file)
-  /* const fileName = fName ||nanoid();
-  const imageRef = ref(storage, `${path}/${fileName}.jpeg`);
-  console.log('print in uploadImagetwo')
+  const fileName = fName ||nanoid();
+  const imageRef = ref(storage, `${path}/${fileName}.pdf`);
+  console.log('print in uploadFile')
 
   const response = await fetch(file.uri);
   
@@ -179,11 +190,11 @@ export async function uploadFile(file, path, fName) {
     const blob = await response.blob();
 
     const snapshot = await uploadBytes(imageRef, blob, {
-      contentType: "image/jpeg",
+      contentType: file.mimeType,
     }); 
   const url = await getDownloadURL(snapshot.ref);
     
-  return { url, fileName }; */
+  return { url, fileName ,file};
  
 }
 
