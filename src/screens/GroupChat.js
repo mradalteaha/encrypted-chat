@@ -13,7 +13,7 @@ import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
 import CryptoJS from "react-native-crypto-js";
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
-import {EncryptAESkey,DecryptAESkey} from '../../utils.js'
+import {EncryptAESkey,DecryptAESkey,uploadImagetwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
 import * as ScreenCapture from 'expo-screen-capture';
 
@@ -37,6 +37,7 @@ export default function GroupChat(props) {
   const [AesKey,setAesKey] = useState(null)
   const [Loading,setLoading] = useState(true)
   const [selectedItem,setSelectedItem] = useState(null)
+  const [pickSendType,setPickSendType] =useState('none')
 
 
 

@@ -8,7 +8,7 @@ import { useRoute } from "@react-navigation/native";
 import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
 import { Ionicons, Fontisto ,EvilIcons,AntDesign ,Entypo,FontAwesome5} from "@expo/vector-icons";
-import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission,pickVideoChat,uploadFile} from '../../utils'
+import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission,pickVideoChat,uploadFile,pickFileChat} from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
 import CryptoJS from "react-native-crypto-js";
