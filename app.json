@@ -13,7 +13,8 @@
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
       ],
-      "expo-build-properties"
+      "expo-build-properties",
+      "expo-document-picker"
     ],
     "splash": {
       "image": "./assets/splash.png",
