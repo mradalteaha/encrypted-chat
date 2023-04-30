@@ -8,11 +8,7 @@ import { useRoute } from "@react-navigation/native";
 import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar } from 'react-native-gifted-chat'
 import { Ionicons, Fontisto ,EvilIcons,AntDesign ,Entypo,FontAwesome5} from "@expo/vector-icons";
-<<<<<<< HEAD
 import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission,pickVideoChat,uploadFile} from '../../utils'
-=======
-import {  pickImageChat ,readUserData,saveUserData,askForPermission,uploadFile ,pickFileChat} from '../../utils'
->>>>>>> master
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
 import CryptoJS from "react-native-crypto-js";
@@ -20,10 +16,6 @@ import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 import {EncryptAESkey,DecryptAESkey,uploadImagetwo ,uploadVideotwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
 import { usePreventScreenCapture } from 'expo-screen-capture';
-<<<<<<< HEAD
-=======
-
->>>>>>> master
 
 
 
