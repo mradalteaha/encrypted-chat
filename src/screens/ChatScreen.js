@@ -17,6 +17,8 @@ import {EncryptAESkey,DecryptAESkey,uploadImagetwo ,uploadVideotwo} from '../../
 import { v4 as uuid } from 'uuid';
 import { usePreventScreenCapture } from 'expo-screen-capture';
 import {Video,Audio} from 'expo-av';
+import PDFView from 'react-native-view-pdf';
+
 
 function ChatScreen(props) {
   usePreventScreenCapture();
@@ -28,6 +30,8 @@ function ChatScreen(props) {
   const [myrandID,setMyrandID]=useState(uuid())
   const [selectedImageView, setSeletedImageView] = useState("");
   const [selectedVideoView, setSelectedVideoView] = useState("");
+  const [selectedFileView, setSelectedFileView] = useState("");
+
 
   const { theme: { colors } } = useContext(GlobalContext)
   const [permissionStatus, permissionStatusUpdate] = useState(null);
@@ -363,28 +367,49 @@ function ChatScreen(props) {
     console.log(error)
   }
   }
-//send file
-  async function sendFile(uri, roomPath) {
-    const { url, fileName , file } = await uploadFile(
-      uri,
-      `files/rooms/${roomPath || roomHash}`
-    );
-    const message = {
-      _id: fileName,
-      text: "",
-      createdAt: new Date(),
-      user: senderUser,
-      fileType:file.mimeType,
-      fileId:file.name,
-      file:url
+
+
+
+  async function sendFile(file, roomPath) {
+    try{
+      uploadFile(
+      file,
+      `Files/rooms/${roomPath || roomHash}`
+    ).then(async (myob)=>{
+      console.log('printing the file')
+      console.log(file)
+
+      const { url, fileName } = myob;
+      console.log('file saved at:')
+      console.log(url)
       
-    };
-    const lastMessage = { ...message, text: "File" };
-    await Promise.all([
-      setDoc(doc(roomMessagesRef,message._id),message),
-      updateDoc(roomRef, { lastMessage }),
-    ]);
+      const message = {
+        _id: fileName,
+        text: "",
+        createdAt: new Date(),
+        user: senderUser,
+        fileType:file.mimeType,
+        fileId:file.name,
+        file:url
+        
+      };
+      const lastMessage = { ...message, text: "file attatched" };
+      await Promise.all([
+        setDoc(doc(roomMessagesRef,message._id),message),
+        updateDoc(roomRef, { lastMessage }),
+      ]);     
+   
+
+    })
+    
+
+     
+ 
+  }catch(error){
+    console.log(error)
   }
+  }
+
 
   function pickSendTypeFunction(){//this functoin
     console.log('paperclip clicked')
@@ -516,9 +541,11 @@ function ChatScreen(props) {
         shouldUpdateMessage={(props, nextProps) =>props.extraData !== nextProps.extraData}
         isCustomViewBottom={true}
 
+       
+
+
         renderBubble={(props) => (
           <Bubble {...props}
-           renderCustomView={()=>selectedItem === props.currentMessage ? <EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/> : null}
            onPress={()=>{setSelectedItem(null)}}
             onLongPress={(context , message)=> onLongpressHandler(context,message)}
             textStyle={{ right: { color: colors.text } }} //right for sender side and left for the reciever
@@ -541,7 +568,6 @@ function ChatScreen(props) {
             <View style={{ borderRadius: 15, padding: 2 }}>
               <TouchableOpacity
                 onPress={() => {
-                  setModalVisible(true);
                   setSelectedVideoView(props.currentMessage.video);
                 }}
               >
@@ -558,23 +584,56 @@ function ChatScreen(props) {
                     resizeMode: "cover",
                   }}
               />
-                {selectedImageView ? (
-                  <ImageView
-                    imageIndex={0}
-                    visible={modalVisible}
-                    onRequestClose={() => setModalVisible(false)}
-                    images={[{ uri: selectedImageView }]}
-                  />
-                ) : null}
               </TouchableOpacity>
             </View>
           );
         }}
 
         renderCustomView={(props)=>{
-          if(props.currentMessage.fileType === "application/pdf"){
-            return 
+
+          if(selectedItem === props.currentMessage){
+            return(<EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/>)
           }
+          else if(props.currentMessage.fileType === 'application/pdf'){
+            return (
+            <View   style={{
+                    width: 200,
+                    height: 200,
+                    padding: 6,
+                    borderRadius: 15,
+                    resizeMode: "cover",
+                  }}>
+               <TouchableOpacity
+                onPress={() =>{
+                  setSelectedFileView(props.currentMessage.file);
+                <PDFView
+                      fadeInDuration={250.0}
+                      style={{ flex: 1 }}
+                      resourceType={props.currentMessage.file}
+                      onLoad={() => console.log(`PDF rendered from ${props.currentMessage.file}`)}
+                      onError={(error) => console.log('Cannot render PDF', error)}
+                    />
+                }
+                }
+              >
+                <ImageBackground
+                  style={{width: 200,
+                    height: 180,
+                    padding: 6,
+                    borderRadius: 15,
+                    resizeMode: "cover",}}
+                  imageStyle={{ backgroundColor: 'rgba(255,0,0,.6)' ,borderRadius:30 ,paddingBottom:15 }}
+                  source={require('../../assets/pdfimage.png')}
+                >
+                  
+                </ImageBackground>
+              </TouchableOpacity>
+              <Text>{props.currentMessage.fileId}</Text>
+            </View>
+          ); 
+          }
+          return 
+          
         }}
         renderMessageImage={(props) => {
           return (

@@ -183,7 +183,7 @@ export async function uploadImagetwo(image, path, fName) {
 
 
 
-export async function uploadFile(file, path, fName) {
+/* export async function uploadFile(file, path, fName) {
 
   console.log(file)
   const fileName = fName ||nanoid();
@@ -202,8 +202,46 @@ export async function uploadFile(file, path, fName) {
     
   return { url, fileName ,file};
  
-}
+} */
 
+
+
+export async function uploadFile(file, path, fName) {
+
+  const myprom =  await new Promise(async (resolve, reject) => {
+    try{
+
+      const fileName = fName ||nanoid();
+    const fileref = ref(storage, `${path}/${fileName}.pdf`);
+    console.log('print in file upload')
+    console.log(file)
+    const response = await fetch(file.uri);
+  
+      const blob = await response.blob();
+  
+      const snapshot = await uploadBytesResumable(fileref, blob, {
+        contentType: file.mimeType,
+      });
+    if(snapshot){
+      getDownloadURL(snapshot.ref).then((downloadURL) => {
+        console.log('File available at', downloadURL);
+
+        const myob = {url:downloadURL,fileName:fileName}
+        resolve(myob) 
+      });
+    } 
+      
+    }catch(err){
+      console.log(err)
+      reject(err)
+    }
+    
+  })
+  
+
+  return myprom
+ 
+}
 
 const palette = {
   tealBlue: "rgb(165, 241, 233)",
