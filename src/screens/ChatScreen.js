@@ -16,11 +16,7 @@ import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 import {EncryptAESkey,DecryptAESkey,uploadImagetwo ,uploadVideotwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
 import { usePreventScreenCapture } from 'expo-screen-capture';
-
-
-
-
-//import { v4 as uuid } from 'uuid'; //deprecated causing errors with expo SDK 48 ...
+import {Video,Audio} from 'expo-av';
 
 function ChatScreen(props) {
   usePreventScreenCapture();
@@ -34,7 +30,7 @@ function ChatScreen(props) {
   const { theme: { colors } } = useContext(GlobalContext)
   const [permissionStatus, permissionStatusUpdate] = useState(null);
   const [pickSendType,setPickSendType] =useState('none')
-    const [selectedItem,setSelectedItem] = useState(null)
+  const [selectedItem,setSelectedItem] = useState(null)
 
 
   const route = useRoute();
@@ -331,62 +327,34 @@ function ChatScreen(props) {
       updateDoc(roomRef, { lastMessage }),
     ]);
   }
-
+//send video
   async function sendVideo(uri, roomPath) {
-    const { url, fileName } = await uploadVideotwo(
+    try{
+    const videouploaded = await uploadVideotwo(
       uri,
       `videos/rooms/${roomPath || roomHash}`
     );
-    const message = {
-      _id: fileName,
-      text: "",
-      createdAt: new Date(),
-      user: senderUser,
-      video: url,
-    };
-    const lastMessage = { ...message, text: "Video" };
-    await Promise.all([
-      setDoc(doc(roomMessagesRef,message._id),message),
-      updateDoc(roomRef, { lastMessage }),
-    ]);
-  }
-
-  function pickSendTypeFunction(){//this functoin
-    console.log('paperclip clicked')
-    setPickSendType(pre => pre=='none'?'flex':'none')
-  }
-
-  async function handlePhotoPicker() {//just help function uses expo client to pick image from gallery
-    const result = await pickImageChat();
-    if (result.assets[0]) {
-      await sendImage(result.assets[0],roomId);
+    if(videouploaded){
+      const { url, fileName } = videouploaded;
+      const message = {
+        _id: fileName,
+        text: "",
+        createdAt: new Date(),
+        user: senderUser,
+        video: url,
+      };
+      const lastMessage = { ...message, text: "Video" };
+      await Promise.all([
+        setDoc(doc(roomMessagesRef,message._id),message),
+        updateDoc(roomRef, { lastMessage }),
+      ]);     
     }
+ 
+  }catch(error){
+    console.log(error)
   }
-  async function handleVideoPicker(){
-    const result = await pickVideoChat();
-    if (result.assets[0]) {
-      await sendVideo(result.assets[0],roomId);
-    }
   }
-  async function handleFilePicker(){
-   
-    try{
-      console.log("File Pressed");
-      const result = await pickFileChat();
-      if (result) {
-        await sendFile(result,roomId);
-      }
-      
-    }catch(err){
-      console.log(err)
-    }
-  }
-
-   function onLongpressHandler(context,message){
-    setSelectedItem(message)
-  }
-
-  
+//send file
   async function sendFile(uri, roomPath) {
     const { url, fileName , file } = await uploadFile(
       uri,
@@ -409,6 +377,45 @@ function ChatScreen(props) {
     ]);
   }
 
+  function pickSendTypeFunction(){//this functoin
+    console.log('paperclip clicked')
+    setPickSendType(pre => pre=='none'?'flex':'none')
+  }
+
+//handle photo picker the pickphotoChat function  in utils.js
+  async function handlePhotoPicker() {//just help function uses expo client to pick image from gallery
+    const result = await pickImageChat();
+    if (result.assets[0]) {
+      await sendImage(result.assets[0],roomId);
+    }
+  }
+
+  //handle video picker the pickVideoChat function in utils.js
+  async function handleVideoPicker(){
+    const result = await pickVideoChat();
+    if (result.assets[0]) {
+      await sendVideo(result.assets[0],roomId);
+    }
+  }
+    //handle file picker the pickfileChat function in utils.js
+
+  async function handleFilePicker(){
+   
+    try{
+      console.log("File Pressed");
+      const result = await pickFileChat();
+      if (result) {
+        await sendFile(result,roomId);
+      }
+      
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+   function onLongpressHandler(context,message){
+    setSelectedItem(message)
+  }
  
  async function deleteMessage(message){
     console.log('message to delete')
@@ -518,24 +525,16 @@ function ChatScreen(props) {
             }}
           />
         )}
-        renderMessageVideo={(props) => {
+        renderMessageVideo = {(props) => {
           return (
-            <View style={{ borderRadius: 15, padding: 2 }}>
-              <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(true);
-                  setSeletedImageView(props.currentMessage.image);
-                }}
-              >
-                {selectedImageView ? (
-                  <ImageView
-                    imageIndex={0}
-                    visible={modalVisible}
-                    onRequestClose={() => setModalVisible(false)}
-                    images={[{ uri: selectedImageView }]}
-                  />
-                ) : null}
-              </TouchableOpacity>
+            <View style={{ padding: 20 }}>
+               <Video
+                resizeMode="contain"
+                useNativeControls
+                shouldPlay={false}
+                source={{ uri: props.currentMessage.video}}
+                style={styles.video}
+              />
             </View>
           );
         }}

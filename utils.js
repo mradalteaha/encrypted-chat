@@ -136,12 +136,16 @@ export async function uploadVideotwo(video, path, fName) {
 
     const blob = await response.blob();
 
-    const snapshot = await uploadBytes(imageRef, blob, {
+    const snapshot = await uploadBytesResumable(imageRef, blob, {
       contentType: "video/mp4",
-    }); 
-  const url = await getDownloadURL(snapshot.ref);
-    
-  return { url, fileName };
+    });
+  if(snapshot){
+    getDownloadURL(snapshot.ref).then((downloadURL) => {
+      console.log('File available at', downloadURL);
+      const url = downloadURL
+      return { url, fileName }
+    });
+  } 
  
 }
 export async function uploadImagetwo(image, path, fName) {

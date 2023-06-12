@@ -20,6 +20,7 @@
     "aes-encryption": "^1.0.4",
     "buffer": "^6.0.3",
     "expo": "^47.0.0",
+    "expo-av": "~13.0.3",
     "expo-build-properties": "~0.4.1",
     "expo-contacts": "~11.0.1",
     "expo-document-picker": "~11.0.1",
