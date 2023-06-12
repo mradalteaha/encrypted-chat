@@ -1,7 +1,7 @@
 //@refresh reset
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import "react-native-get-random-values"; // to generate random ids 
-import { Image, TouchableOpacity, View, StyleSheet, ImageBackground,Text } from 'react-native';
+import { Image, TouchableOpacity, View, StyleSheet, ImageBackground,Text ,Modal} from 'react-native';
 import GlobalContext from '../../Context/Context';//global variables to access via provider
 import { auth, db,GenAESKey } from "../firebase"; // firebase instance 
 import { useRoute } from "@react-navigation/native";
@@ -39,6 +39,8 @@ function GroupChat(props) {
   const [selectedItem,setSelectedItem] = useState(null)
   const [pickSendType,setPickSendType] =useState('none')
   const [selectedVideoView, setSelectedVideoView] = useState("");
+  const [selectedFileView, setSelectedFileView] = useState("");
+
 
 
 
@@ -488,10 +490,73 @@ function GroupChat(props) {
         }}
 
         renderCustomView={(props)=>{
-          if(props.currentMessage.fileType === "application/pdf"){
-            return 
-          }
+
+if(selectedItem.message === props.currentMessage){
+  return(<EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/>)
+}
+else if(props.currentMessage.fileType === 'application/pdf'){
+  return (
+  <View   style={{
+          width: 200,
+          height: 200,
+          padding: 6,
+          borderRadius: 15,
+          resizeMode: "cover",
+        }}>
+    <TouchableOpacity
+    
+      onPress={() =>{
+       // setSelectedFileView(props.currentMessage.file);
+       // setSelectedItem(pre =>{return {message:pre.message , file:props.currentMessage.file}}  )
+        
+
+      }
+      }
+    >
+    {selectedFileView && props.currentMessage.file === selectedFileView  ? (
+      <Modal isVisible={modalFileVisible} style={styles.modal} 
+      onRequestClose={() => {
+        //setModalFileVisible(false)
+      //  setSelectedFileView(null)
+        //setSelectedItem(pre =>{return {message:pre.message , file:null}})
+
+
         }}
+      >
+      <TouchableOpacity
+
+      onPress={() =>{
+       // setSelectedItem(pre =>{return {message:pre.message , file:null}})
+        //setSelectedFileView(null)
+      }
+      }
+      style={{width:50,height:50,backgroundColor:'red',alignSelf:'flex-start' , marginTop:50}}
+    ></TouchableOpacity>
+      <WebView
+      style={styles.container}
+      source={{ uri:  props.currentMessage.file }}
+    />
+    </Modal>) 
+    : <ImageBackground
+        style={{width: 200,
+          height: 180,
+          padding: 6,
+          borderRadius: 15,
+          resizeMode: "cover",}}
+        imageStyle={{ backgroundColor: 'rgba(255,0,0,.6)' ,borderRadius:30 ,paddingBottom:15 }}
+        source={require('../../assets/pdfimage.png')}
+      >
+        
+      </ImageBackground>}
+      
+    </TouchableOpacity>
+    <Text>{props.currentMessage.fileId}</Text>
+  </View>
+); 
+}
+return 
+
+}}
         renderMessageImage={(props) => {
           return (
             <View style={{ borderRadius: 15, padding: 2 }}>

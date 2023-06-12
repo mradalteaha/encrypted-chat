@@ -346,6 +346,7 @@ function ChatScreen(props) {
     ).then(async (myob)=>{
 
       const { url, fileName } = myob;
+      
       console.log('video saved at:')
       console.log(url)
       const message = {
@@ -380,6 +381,8 @@ function ChatScreen(props) {
       console.log(file)
 
       const { url, fileName } = myob;
+      const googledocs = 'https://docs.google.com/gview?embedded=true&url='
+      const contacted = googledocs+url
       console.log('file saved at:')
       console.log(url)
       
@@ -609,8 +612,8 @@ const test = 'https://firebasestorage.googleapis.com/v0/b/secret-chat-dev.appspo
                 <TouchableOpacity
                 
                   onPress={() =>{
-                    setSelectedFileView(props.currentMessage.file);
-                    setSelectedItem(pre =>{return {message:pre.message , file:props.currentMessage.file}}  )
+                   // setSelectedFileView(props.currentMessage.file);
+                   // setSelectedItem(pre =>{return {message:pre.message , file:props.currentMessage.file}}  )
                     
 
                   }
@@ -619,14 +622,18 @@ const test = 'https://firebasestorage.googleapis.com/v0/b/secret-chat-dev.appspo
                 {selectedFileView && props.currentMessage.file === selectedFileView  ? (
                   <Modal isVisible={modalFileVisible} style={styles.modal} 
                   onRequestClose={() => {
-                    setModalFileVisible(false)
+                    //setModalFileVisible(false)
+                  //  setSelectedFileView(null)
+                    //setSelectedItem(pre =>{return {message:pre.message , file:null}})
+
+
                     }}
                   >
                   <TouchableOpacity
 
                   onPress={() =>{
-                    setSelectedItem(pre =>{return {message:pre.message , file:null}})
-                    setSelectedFileView(null)
+                   // setSelectedItem(pre =>{return {message:pre.message , file:null}})
+                    //setSelectedFileView(null)
                   }
                   }
                   style={{width:50,height:50,backgroundColor:'red',alignSelf:'flex-start' , marginTop:50}}
@@ -657,7 +664,7 @@ const test = 'https://firebasestorage.googleapis.com/v0/b/secret-chat-dev.appspo
 
             }}
        
-        renderMessageImage={(props) => {
+          renderMessageImage={(props) => {
           return (
             <View style={{ borderRadius: 15, padding: 2 }}>
               <TouchableOpacity
