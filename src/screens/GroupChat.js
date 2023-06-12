@@ -8,15 +8,15 @@ import { useRoute } from "@react-navigation/native";
 import { collection, onSnapshot, doc, addDoc, updateDoc, getDoc ,setDoc,deleteDoc} from 'firebase/firestore';
 import { GiftedChat, Actions, Bubble, InputToolbar  ,GiftedAvatar} from 'react-native-gifted-chat'
 import { Ionicons, Fontisto ,EvilIcons,AntDesign ,Entypo,FontAwesome5} from "@expo/vector-icons";
-import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission} from '../../utils'
+import { uploadImage, pickImageChat ,readUserData,saveUserData,askForPermission,pickVideoChat,uploadFile,pickFileChat} from '../../utils'
 import ImageView from "react-native-image-viewing";
 import {nanoid} from "nanoid"
 import CryptoJS from "react-native-crypto-js";
 import AsyncStorageStatic from '@react-native-async-storage/async-storage'
-import {EncryptAESkey,DecryptAESkey,uploadImagetwo} from '../../utils.js'
+import {EncryptAESkey,DecryptAESkey,uploadImagetwo,uploadVideotwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
 import * as ScreenCapture from 'expo-screen-capture';
-
+import {Video,Audio} from 'expo-av';
 
 
 
@@ -24,7 +24,7 @@ import * as ScreenCapture from 'expo-screen-capture';
 
 //import { v4 as uuid } from 'uuid'; //deprecated causing errors with expo SDK 48 ...
 
-export default function GroupChat(props) {
+function GroupChat(props) {
   ScreenCapture.usePreventScreenCapture()
     const {currentUser} = auth;
   const [roomHash, setroomHash] = useState('');//for generating path in the database 
@@ -38,6 +38,7 @@ export default function GroupChat(props) {
   const [Loading,setLoading] = useState(true)
   const [selectedItem,setSelectedItem] = useState(null)
   const [pickSendType,setPickSendType] =useState('none')
+  const [selectedVideoView, setSelectedVideoView] = useState("");
 
 
 
@@ -238,13 +239,65 @@ export default function GroupChat(props) {
       user: senderUser,
       image: url,
     };
+    
     const lastMessage = { ...message, text: "Image" };
     await Promise.all([
       setDoc(doc(roomMessagesRef,message._id),message),
       updateDoc(roomRef, { lastMessage }),
     ]);
   }
+  //send video
+  async function sendVideo(uri, roomPath) {
+    try{
+    uploadVideotwo(
+      uri,
+      `videos/rooms/${roomPath || roomHash}`
+    ).then(async (myob)=>{
 
+      const { url, fileName } = myob;
+      console.log('video saved at:')
+      console.log(url)
+      const message = {
+        _id: fileName,
+        text: "",
+        createdAt: new Date(),
+        user: senderUser,
+        video: url,
+      };
+      const lastMessage = { ...message, text: "Video" };
+      await Promise.all([
+        setDoc(doc(roomMessagesRef,message._id),message),
+        updateDoc(roomRef, { lastMessage }),
+      ]);     
+   
+
+    })
+    }catch(error){
+      console.log(error)
+    }
+  }
+//send file
+  async function sendFile(uri, roomPath) {
+    const { url, fileName , file } = await uploadFile(
+      uri,
+      `files/rooms/${roomPath || roomHash}`
+    );
+    const message = {
+      _id: fileName,
+      text: "",
+      createdAt: new Date(),
+      user: senderUser,
+      fileType:file.mimeType,
+      fileId:file.name,
+      file:url
+      
+    };
+    const lastMessage = { ...message, text: "File" };
+    await Promise.all([
+      setDoc(doc(roomMessagesRef,message._id),message),
+      updateDoc(roomRef, { lastMessage }),
+    ]);
+  }
   function onLongpressHandler(context,message){
     setSelectedItem(message)
   }
@@ -265,7 +318,10 @@ export default function GroupChat(props) {
     console.log(props)
   } 
 
-
+  function pickSendTypeFunction(){//this functoin
+    console.log('paperclip clicked')
+    setPickSendType(pre => pre=='none'?'flex':'none')
+  }
 
   async function handlePhotoPicker() {//just help function uses expo client to pick image from gallery
     const result = await pickImageChat();
@@ -273,7 +329,27 @@ export default function GroupChat(props) {
       await sendImage(result.assets[0],groupID);
     }
   }
+  async function handleVideoPicker(){
+    const result = await pickVideoChat();
+    if (result.assets[0]) {
+      await sendVideo(result.assets[0],groupID);
+    }
+  }
+    //handle file picker the pickfileChat function in utils.js
 
+  async function handleFilePicker(){
+   
+    try{
+      console.log("File Pressed");
+      const result = await pickFileChat();
+      if (result) {
+        await sendFile(result,groupID);
+      }
+      
+    }catch(err){
+      console.log(err)
+    }
+  }
 
     if (!permissionStatus) {
       return <Text>Loading ...</Text>
@@ -284,7 +360,6 @@ export default function GroupChat(props) {
 
   return (Loading ?<Text>loading ...</Text>:<ImageBackground  style={{ flex: 1 }} resizeMode="cover" source={backGround?{uri: room.backGround} :require('../../assets/chatbg.png')}>
       <GiftedChat
-        showUserAvatar={true}
         
         onSend={onSend}
         messages={messages} //the messages needs to be rendered
@@ -303,7 +378,7 @@ export default function GroupChat(props) {
               bottom: 5,
               zIndex: 9999,
             }}
-            onPressActionButton={handlePhotoPicker}
+            onPressActionButton={pickSendTypeFunction}
             icon={() => (
               <Fontisto name="paperclip" size={25} color={colors.iconGray} />
             )}
@@ -377,6 +452,46 @@ export default function GroupChat(props) {
             }}
           />
         )}
+        renderMessageVideo={(props) => {
+          return (
+            <View style={{ borderRadius: 15, padding: 2 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setModalVisible(true);
+                  setSelectedVideoView(props.currentMessage.video);
+                }}
+              >
+                <Video
+                resizeMode="contain"
+                useNativeControls
+                shouldPlay={false}
+                source={{ uri: props.currentMessage.video}}
+                style={{
+                    width: 200,
+                    height: 200,
+                    padding: 6,
+                    borderRadius: 15,
+                    resizeMode: "cover",
+                  }}
+              />
+                {selectedImageView ? (
+                  <ImageView
+                    imageIndex={0}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                    images={[{ uri: selectedImageView }]}
+                  />
+                ) : null}
+              </TouchableOpacity>
+            </View>
+          );
+        }}
+
+        renderCustomView={(props)=>{
+          if(props.currentMessage.fileType === "application/pdf"){
+            return 
+          }
+        }}
         renderMessageImage={(props) => {
           return (
             <View style={{ borderRadius: 15, padding: 2 }}>
@@ -410,14 +525,17 @@ export default function GroupChat(props) {
           );
         }}
       />
+      
       <View style={{backgroundColor:'white',flexDirection:'row' , flex:0.25  ,display:pickSendType ,justifyContent:'space-evenly' ,alignItems:'center', borderRadius:30,
       wrap:'nowrap'}} >
         <AntDesign onPress={()=>handlePhotoPicker()} name='picture' size={45} />
-        <Entypo name='video' size={45} />
-        <FontAwesome5 name='file' size={45} />
+        <Entypo onPress={()=>handleVideoPicker()} name='video' size={45} />
+        <FontAwesome5 onPress={()=>handleFilePicker()} name='file' size={45} />
       </View>
+      
 
     </ImageBackground>
+
 
 
   )
@@ -502,4 +620,4 @@ const styles = StyleSheet.create({
 
   },
 })
-
+export default GroupChat;

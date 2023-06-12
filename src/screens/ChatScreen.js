@@ -355,13 +355,9 @@ function ChatScreen(props) {
    
 
     })
-    
-
-     
- 
-  }catch(error){
-    console.log(error)
-  }
+    }catch(error){
+      console.log(error)
+    }
   }
 //send file
   async function sendFile(uri, roomPath) {
