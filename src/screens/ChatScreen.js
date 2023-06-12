@@ -2,7 +2,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import "react-native-get-random-values"; // to generate random ids 
 import { Image, TouchableOpacity, View, StyleSheet, ImageBackground,Text,Modal } from 'react-native';
-import {WebView} from 'react-native-webview'
 import GlobalContext from '../../Context/Context';//global variables to access via provider
 import { auth, db,GenAESKey } from "../firebase"; // firebase instance 
 import { useRoute } from "@react-navigation/native";
@@ -17,8 +16,10 @@ import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 import {EncryptAESkey,DecryptAESkey,uploadImagetwo ,uploadVideotwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
 import { usePreventScreenCapture } from 'expo-screen-capture';
+import { WebView } from 'react-native-webview';
+
 import {Video,Audio} from 'expo-av';
-import PDFView from 'react-native-view-pdf';
+//import PDFView from 'react-native-view-pdf';
 
 
 function ChatScreen(props) {
@@ -28,6 +29,8 @@ function ChatScreen(props) {
   const [messages, setMessages] = useState([]);//to be able to access the data and manipulate the messages
   //these two states are related to view images 
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalFileVisible, setModalFileVisible] = useState(false);
+
   const [myrandID,setMyrandID]=useState(uuid())
   const [selectedImageView, setSeletedImageView] = useState("");
   const [selectedVideoView, setSelectedVideoView] = useState("");
@@ -587,64 +590,73 @@ const test = 'https://firebasestorage.googleapis.com/v0/b/secret-chat-dev.appspo
             </View>
           );
         }}
+        
 
         renderCustomView={(props)=>{
 
-          if(selectedItem.message === props.currentMessage){
-            return(<EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/>)
-          }
-          else if(props.currentMessage.fileType === 'application/pdf'){
-            return (
-            <View   style={{
-                    width: 200,
-                    height: 200,
-                    padding: 6,
-                    borderRadius: 15,
-                    resizeMode: "cover",
-                  }}>
-               <TouchableOpacity
-                onPress={() =>{
-                  setSelectedFileView(props.currentMessage.file);
-                  setModalVisible(true)
-                  setSelectedItem(pre =>{return {message:pre.message , file:props.currentMessage.file}}  )
-                  
-
-                }
-                }
-              >
-              {selectedFileView && props.currentMessage.file === selectedFileView  ? (
-                <Modal isVisible={modalVisible} style={styles.modal}>
-                <View style={{width:'80%',height:'80%',backgroundColor:'red'}}>
-                  <WebView
-
-                    bounces={false}
-                    scrollEnabled={false} 
-                    source={{ uri: some+props.currentMessage.file }} />
+            if(selectedItem.message === props.currentMessage){
+              return(<EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/>)
+            }
+            else if(props.currentMessage.fileType === 'application/pdf'){
+              return (
+              <View   style={{
+                      width: 200,
+                      height: 200,
+                      padding: 6,
+                      borderRadius: 15,
+                      resizeMode: "cover",
+                    }}>
+                <TouchableOpacity
+                
+                  onPress={() =>{
+                    setSelectedFileView(props.currentMessage.file);
+                    setSelectedItem(pre =>{return {message:pre.message , file:props.currentMessage.file}}  )
                     
-                </View>
-              </Modal>
-                
-    
-                ) : <ImageBackground
-                  style={{width: 200,
-                    height: 180,
-                    padding: 6,
-                    borderRadius: 15,
-                    resizeMode: "cover",}}
-                  imageStyle={{ backgroundColor: 'rgba(255,0,0,.6)' ,borderRadius:30 ,paddingBottom:15 }}
-                  source={require('../../assets/pdfimage.png')}
+
+                  }
+                  }
                 >
+                {selectedFileView && props.currentMessage.file === selectedFileView  ? (
+                  <Modal isVisible={modalFileVisible} style={styles.modal} 
+                  onRequestClose={() => {
+                    setModalFileVisible(false)
+                    }}
+                  >
+                  <TouchableOpacity
+
+                  onPress={() =>{
+                    setSelectedItem(pre =>{return {message:pre.message , file:null}})
+                    setSelectedFileView(null)
+                  }
+                  }
+                  style={{width:50,height:50,backgroundColor:'red',alignSelf:'flex-start' , marginTop:50}}
+                ></TouchableOpacity>
+                  <WebView
+                  style={styles.container}
+                  source={{ uri:  props.currentMessage.file }}
+                />
+                </Modal>) 
+                : <ImageBackground
+                    style={{width: 200,
+                      height: 180,
+                      padding: 6,
+                      borderRadius: 15,
+                      resizeMode: "cover",}}
+                    imageStyle={{ backgroundColor: 'rgba(255,0,0,.6)' ,borderRadius:30 ,paddingBottom:15 }}
+                    source={require('../../assets/pdfimage.png')}
+                  >
+                    
+                  </ImageBackground>}
                   
-                </ImageBackground>}
-                
-              </TouchableOpacity>
-              <Text>{props.currentMessage.fileId}</Text>
-            </View>
-          ); 
-          }
-          return 
-          
-        }}
+                </TouchableOpacity>
+                <Text>{props.currentMessage.fileId}</Text>
+              </View>
+            ); 
+            }
+            return 
+
+            }}
+       
         renderMessageImage={(props) => {
           return (
             <View style={{ borderRadius: 15, padding: 2 }}>
@@ -722,6 +734,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     height: '100%',
   },
+  modal:{backgroundColor:'red',width:'50%',height:"50%",alignSelf:'center'},
   TopView: {
     backgroundColor: 'rgb(61, 178, 255)',
     marginTop: 25,
