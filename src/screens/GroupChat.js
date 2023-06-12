@@ -17,6 +17,8 @@ import {EncryptAESkey,DecryptAESkey,uploadImagetwo,uploadVideotwo} from '../../u
 import { v4 as uuid } from 'uuid';
 import * as ScreenCapture from 'expo-screen-capture';
 import {Video,Audio} from 'expo-av';
+import {WebView} from 'react-native-webview'
+
 
 
 
@@ -36,10 +38,12 @@ function GroupChat(props) {
   const [permissionStatus, permissionStatusUpdate] = useState(null);
   const [AesKey,setAesKey] = useState(null)
   const [Loading,setLoading] = useState(true)
-  const [selectedItem,setSelectedItem] = useState(null)
   const [pickSendType,setPickSendType] =useState('none')
   const [selectedVideoView, setSelectedVideoView] = useState("");
   const [selectedFileView, setSelectedFileView] = useState("");
+  const [selectedItem,setSelectedItem] = useState({message:null ,file:null})
+  const [modalFileVisible, setModalFileVisible] = useState(false);
+
 
 
 
@@ -279,9 +283,9 @@ function GroupChat(props) {
     }
   }
 //send file
-  async function sendFile(uri, roomPath) {
-    const { url, fileName , file } = await uploadFile(
-      uri,
+  async function sendFile(file, roomPath) {
+    const { url, fileName  } = await uploadFile(
+      file,
       `files/rooms/${roomPath || roomHash}`
     );
     const message = {
@@ -301,7 +305,7 @@ function GroupChat(props) {
     ]);
   }
   function onLongpressHandler(context,message){
-    setSelectedItem(message)
+    setSelectedItem(pre => {return { ...pre,message:message }}  )
   }
 
  async function deleteMessage(message){
@@ -309,7 +313,7 @@ function GroupChat(props) {
     console.log(message)
     deleteDoc(doc(roomMessagesRef,message._id)).then(()=>{
       setMessages((previousMessaged) => previousMessaged.filter(m => m._id !==message._id)) // deletes the message locally after removing it from the database
-      setSelectedItem(null)
+      setSelectedItem(pre =>{return {message:null , file:pre.file}}  )
       console.log('deleted successfully')
     })
    
@@ -438,18 +442,17 @@ function GroupChat(props) {
 
         renderBubble={(props) => (
           <Bubble {...props}
-           renderCustomView={()=>selectedItem === props.currentMessage ? <EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/> : null}
-           onPress={()=>{setSelectedItem(null)}}
+          onPress={()=>{setSelectedItem({message:null ,file:null})}}
             onLongPress={(context , message)=> onLongpressHandler(context,message)}
             textStyle={{ right: { color: colors.text } }} //right for sender side and left for the reciever
             wrapperStyle={{
 
             
               left: {
-                backgroundColor: selectedItem === props.currentMessage ? 'red': colors.white,
+                backgroundColor: selectedItem.message === props.currentMessage ? 'red': colors.white,
               },
               right: {
-                backgroundColor: selectedItem === props.currentMessage ? 'red': colors.tertiary,
+                backgroundColor: selectedItem.message === props.currentMessage ? 'red': colors.tertiary,
               },
             }}
           />
@@ -476,87 +479,78 @@ function GroupChat(props) {
                     resizeMode: "cover",
                   }}
               />
-                {selectedImageView ? (
-                  <ImageView
-                    imageIndex={0}
-                    visible={modalVisible}
-                    onRequestClose={() => setModalVisible(false)}
-                    images={[{ uri: selectedImageView }]}
-                  />
-                ) : null}
+                
               </TouchableOpacity>
             </View>
           );
         }}
 
+   
+
         renderCustomView={(props)=>{
 
-if(selectedItem.message === props.currentMessage){
-  return(<EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/>)
-}
-else if(props.currentMessage.fileType === 'application/pdf'){
-  return (
-  <View   style={{
-          width: 200,
-          height: 200,
-          padding: 6,
-          borderRadius: 15,
-          resizeMode: "cover",
-        }}>
-    <TouchableOpacity
-    
-      onPress={() =>{
-       // setSelectedFileView(props.currentMessage.file);
-       // setSelectedItem(pre =>{return {message:pre.message , file:props.currentMessage.file}}  )
-        
+        if(selectedItem.message === props.currentMessage){
+          return(<EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/>)
+        }
+        else if(props.currentMessage.fileType === 'application/pdf'){
+          return (
+          <View   style={{
+                  width: 200,
+                  height: 200,
+                  padding: 6,
+                  borderRadius: 15,
+                  resizeMode: "cover",
+                }}>
+            <TouchableOpacity
+            
+              onPress={() =>{
+               setSelectedFileView(props.currentMessage.file);
+               setSelectedItem(pre =>{return {message:pre.message , file:props.currentMessage.file}}  )
+                
 
-      }
-      }
-    >
-    {selectedFileView && props.currentMessage.file === selectedFileView  ? (
-      <Modal isVisible={modalFileVisible} style={styles.modal} 
-      onRequestClose={() => {
-        //setModalFileVisible(false)
-      //  setSelectedFileView(null)
-        //setSelectedItem(pre =>{return {message:pre.message , file:null}})
+              }
+              }
+            >
+            {selectedFileView && props.currentMessage.file === selectedFileView  ? (
+              <Modal isVisible={modalFileVisible} style={styles.modal} 
+                onRequestClose={() => {
+                  setModalFileVisible(false)
+                  }}
+              >
+              <TouchableOpacity
 
+              onPress={() =>{
+               setSelectedItem(pre =>{return {message:pre.message , file:null}})
+                setSelectedFileView(null)
+              }
+              }
+              style={{width:50,height:50,backgroundColor:'red',alignSelf:'flex-start' , marginTop:50}}
+            ></TouchableOpacity>
+              <WebView
+              style={styles.container}
+              source={{ uri:  props.currentMessage.file }}
+            />
+            </Modal>) 
+            : <ImageBackground
+                style={{width: 200,
+                  height: 180,
+                  padding: 6,
+                  borderRadius: 15,
+                  resizeMode: "cover",}}
+                imageStyle={{ backgroundColor: 'rgba(255,0,0,.6)' ,borderRadius:30 ,paddingBottom:15 }}
+                source={require('../../assets/pdfimage.png')}
+              >
+                
+              </ImageBackground>}
+              
+            </TouchableOpacity>
+            <Text>{props.currentMessage.fileId}</Text>
+          </View>
+        ); 
+        }
+        return 
 
         }}
-      >
-      <TouchableOpacity
-
-      onPress={() =>{
-       // setSelectedItem(pre =>{return {message:pre.message , file:null}})
-        //setSelectedFileView(null)
-      }
-      }
-      style={{width:50,height:50,backgroundColor:'red',alignSelf:'flex-start' , marginTop:50}}
-    ></TouchableOpacity>
-      <WebView
-      style={styles.container}
-      source={{ uri:  props.currentMessage.file }}
-    />
-    </Modal>) 
-    : <ImageBackground
-        style={{width: 200,
-          height: 180,
-          padding: 6,
-          borderRadius: 15,
-          resizeMode: "cover",}}
-        imageStyle={{ backgroundColor: 'rgba(255,0,0,.6)' ,borderRadius:30 ,paddingBottom:15 }}
-        source={require('../../assets/pdfimage.png')}
-      >
-        
-      </ImageBackground>}
-      
-    </TouchableOpacity>
-    <Text>{props.currentMessage.fileId}</Text>
-  </View>
-); 
-}
-return 
-
-}}
         renderMessageImage={(props) => {
           return (
             <View style={{ borderRadius: 15, padding: 2 }}>

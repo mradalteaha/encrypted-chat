@@ -1,7 +1,8 @@
 //@refresh reset
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import "react-native-get-random-values"; // to generate random ids 
-import { Image, TouchableOpacity, View, StyleSheet, ImageBackground,Text,Modal } from 'react-native';
+import { Image, TouchableOpacity, View, StyleSheet, ImageBackground,Text ,Modal} from 'react-native';
+import {WebView} from 'react-native-webview'
 import GlobalContext from '../../Context/Context';//global variables to access via provider
 import { auth, db,GenAESKey } from "../firebase"; // firebase instance 
 import { useRoute } from "@react-navigation/native";
@@ -16,10 +17,8 @@ import AsyncStorageStatic from '@react-native-async-storage/async-storage'
 import {EncryptAESkey,DecryptAESkey,uploadImagetwo ,uploadVideotwo} from '../../utils.js'
 import { v4 as uuid } from 'uuid';
 import { usePreventScreenCapture } from 'expo-screen-capture';
-import { WebView } from 'react-native-webview';
-
 import {Video,Audio} from 'expo-av';
-//import PDFView from 'react-native-view-pdf';
+import PDFView from 'react-native-view-pdf';
 
 
 function ChatScreen(props) {
@@ -30,6 +29,7 @@ function ChatScreen(props) {
   //these two states are related to view images 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalFileVisible, setModalFileVisible] = useState(false);
+
 
   const [myrandID,setMyrandID]=useState(uuid())
   const [selectedImageView, setSeletedImageView] = useState("");
@@ -346,7 +346,6 @@ function ChatScreen(props) {
     ).then(async (myob)=>{
 
       const { url, fileName } = myob;
-      
       console.log('video saved at:')
       console.log(url)
       const message = {
@@ -381,8 +380,6 @@ function ChatScreen(props) {
       console.log(file)
 
       const { url, fileName } = myob;
-      const googledocs = 'https://docs.google.com/gview?embedded=true&url='
-      const contacted = googledocs+url
       console.log('file saved at:')
       console.log(url)
       
@@ -450,8 +447,12 @@ function ChatScreen(props) {
     }
   }
 
-   function onLongpressHandler(context,message){
-    setSelectedItem(pre => {return { ...pre,message:message }}  )
+   function onLongpressHandler(context,messagee){
+     setSelectedItem(pre =>{
+            const {message,file} = pre 
+            let ob = new Object({message:messagee,file:file})
+            return ob
+            }  )
   }
  
  async function deleteMessage(message){
@@ -459,7 +460,11 @@ function ChatScreen(props) {
     console.log(message)
     deleteDoc(doc(roomMessagesRef,message._id)).then(()=>{
       setMessages((previousMessaged) => previousMessaged.filter(m => m._id !==message._id)) // deletes the message locally after removing it from the database
-      setSelectedItem(pre =>{return {message:null , file:pre.file}}  )
+      setSelectedItem(pre =>{
+        const {message,file} = pre 
+        let ob = new Object({message:null,file:file})
+        return ob
+        }  )
 
       console.log('deleted successfully')
     })
@@ -481,235 +486,239 @@ const test = 'https://firebasestorage.googleapis.com/v0/b/secret-chat-dev.appspo
         messages={messages} //the messages needs to be rendered
         user={senderUser}
         renderAvatar={null}
-        renderActions={(props) => (
-          <Actions
-            {...props}
-            containerStyle={{
-              position: "absolute",
-              right: 50,
-              bottom: 5,
-              zIndex: 9999,
-            }}
-            onPressActionButton={pickSendTypeFunction}
-            icon={() => (
-              <Fontisto name="paperclip" size={25} color={colors.iconGray} />
-            )}
-          />
-        )}
-        timeTextStyle={{ right: { color: colors.iconGray } }} // time stamp on the bubble 
-        renderSend={(props) => {//rendering the send button 
-          const { text, messageIdGenerator, user, onSend } = props;
-          return (
-            <TouchableOpacity
-              style={{
-                height: 40,
-                width: 40,
-                borderRadius: 40,
-                backgroundColor: text ? colors.foreground : colors.primary,
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: 5,
-              }}
-              disabled={!text}
-              onPress={() => {
-                if (text && onSend) {
-                  onSend(
-                    {// represent of the message object 
-                      text: text.trim(),
-                      user,
-                      _id: messageIdGenerator(),
-                      createdAt: new Date(),
-                    },
-                    true
-                  );
-                }
-              }}
-            >
-              <Ionicons name="send" size={20} color={colors.white} />
-            </TouchableOpacity>
-          );
-        }}
-        renderInputToolbar={(props) => (
-          <InputToolbar
-            {...props}
-            containerStyle={{
-              marginLeft: 10,
-              marginRight: 10,
-              marginBottom: 2,
-              borderRadius: 20,
-              paddingTop: 5,
-            }}
 
-          />
-        )}
-        extraData={selectedItem}
-        shouldUpdateMessage={(props, nextProps) =>props.extraData !== nextProps.extraData}
-        isCustomViewBottom={true}
+   renderUsernameOnMessage={true}
+   renderActions={(props) => (
+     <Actions
+       {...props}
+       containerStyle={{
+         position: "absolute",
+         right: 50,
+         bottom: 5,
+         zIndex: 9999,
+       }}
+       onPressActionButton={pickSendTypeFunction}
+       icon={() => (
+         <Fontisto name="paperclip" size={25} color={colors.iconGray} />
+       )}
+     />
+   )}
+   timeTextStyle={{ right: { color: colors.iconGray } }} // time stamp on the bubble 
+   renderSend={(props) => {//rendering the send button 
+     const { text, messageIdGenerator, user, onSend } = props;
+     return (
+       <TouchableOpacity
+         style={{
+           height: 40,
+           width: 40,
+           borderRadius: 40,
+           backgroundColor: text ? colors.foreground : colors.primary,
+           alignItems: "center",
+           justifyContent: "center",
+           marginBottom: 5,
+         }}
+         disabled={!text}
+         onPress={() => {
+           if (text && onSend) {
+             onSend(
+               {// represent of the message object 
+                 text: text.trim(),
+                 user,
+                 _id: messageIdGenerator(),
+                 createdAt: new Date(),
+               },
+               true
+             );
+           }
+         }}
+       >
+         <Ionicons name="send" size={20} color={colors.white} />
+       </TouchableOpacity>
+     );
+   }}
+   renderInputToolbar={(props) => (
+     <InputToolbar
+       {...props}
+       containerStyle={{
+         marginLeft: 10,
+         marginRight: 10,
+         marginBottom: 2,
+         borderRadius: 20,
+         paddingTop: 5,
+       }}
+
+     />
+   )}
+   extraData={selectedItem}
+   shouldUpdateMessage={(props, nextProps) =>props.extraData !== nextProps.extraData}
+   isCustomViewBottom={true}
+
+   renderBubble={(props) => (
+     <Bubble {...props}
+     onPress={()=>{setSelectedItem({message:null ,file:null})}}
+       onLongPress={(context , message)=> onLongpressHandler(context,message)}
+       textStyle={{ right: { color: colors.text } }} //right for sender side and left for the reciever
+       wrapperStyle={{
 
        
+         left: {
+           backgroundColor: selectedItem.message === props.currentMessage ? 'red': colors.white,
+         },
+         right: {
+           backgroundColor: selectedItem.message === props.currentMessage ? 'red': colors.tertiary,
+         },
+       }}
+     />
+   )}
+   renderMessageVideo={(props) => {
+     return (
+       <View style={{ borderRadius: 15, padding: 2 }}>
+         <TouchableOpacity
+           onPress={() => {
+             setModalVisible(true);
+             setSelectedVideoView(props.currentMessage.video);
+           }}
+         >
+           <Video
+           resizeMode="contain"
+           useNativeControls
+           shouldPlay={false}
+           source={{ uri: props.currentMessage.video}}
+           style={{
+               width: 200,
+               height: 200,
+               padding: 6,
+               borderRadius: 15,
+               resizeMode: "cover",
+             }}
+         />
+           
+         </TouchableOpacity>
+       </View>
+     );
+   }}
 
 
-        renderBubble={(props) => (
-          <Bubble {...props}
-           onPress={()=>{setSelectedItem({message:null ,file:null})}}
-            onLongPress={(context , message)=> onLongpressHandler(context,message)}
-            textStyle={{ right: { color: colors.text } }} //right for sender side and left for the reciever
-            wrapperStyle={{
 
-            
-              left: {
-                backgroundColor: selectedItem.message === props.currentMessage ? 'red': colors.white,
-              },
-              right: {
-                backgroundColor: selectedItem.message === props.currentMessage ? 'red': colors.tertiary,
-              },
-            }}
-          />
-        )}
-        
+   renderCustomView={(props)=>{
 
-        renderMessageVideo={(props) => {
-          return (
-            <View style={{ borderRadius: 15, padding: 2 }}>
-              <TouchableOpacity
-                onPress={() => {
-                  setSelectedVideoView(props.currentMessage.video);
-                }}
-              >
-                <Video
-                resizeMode="contain"
-                useNativeControls
-                shouldPlay={false}
-                source={{ uri: props.currentMessage.video}}
-                style={{
-                    width: 200,
-                    height: 200,
-                    padding: 6,
-                    borderRadius: 15,
-                    resizeMode: "cover",
-                  }}
-              />
-              </TouchableOpacity>
-            </View>
-          );
-        }}
-        
-
-        renderCustomView={(props)=>{
-
-            if(selectedItem.message === props.currentMessage){
-              return(<EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/>)
-            }
-            else if(props.currentMessage.fileType === 'application/pdf'){
-              return (
-              <View   style={{
-                      width: 200,
-                      height: 200,
-                      padding: 6,
-                      borderRadius: 15,
-                      resizeMode: "cover",
-                    }}>
-                <TouchableOpacity
-                
-                  onPress={() =>{
-                   // setSelectedFileView(props.currentMessage.file);
-                   // setSelectedItem(pre =>{return {message:pre.message , file:props.currentMessage.file}}  )
-                    
-
-                  }
-                  }
-                >
-                {selectedFileView && props.currentMessage.file === selectedFileView  ? (
-                  <Modal isVisible={modalFileVisible} style={styles.modal} 
-                  onRequestClose={() => {
-                    //setModalFileVisible(false)
-                  //  setSelectedFileView(null)
-                    //setSelectedItem(pre =>{return {message:pre.message , file:null}})
-
-
-                    }}
-                  >
-                  <TouchableOpacity
-
-                  onPress={() =>{
-                   // setSelectedItem(pre =>{return {message:pre.message , file:null}})
-                    //setSelectedFileView(null)
-                  }
-                  }
-                  style={{width:50,height:50,backgroundColor:'red',alignSelf:'flex-start' , marginTop:50}}
-                ></TouchableOpacity>
-                  <WebView
-                  style={styles.container}
-                  source={{ uri:  props.currentMessage.file }}
-                />
-                </Modal>) 
-                : <ImageBackground
-                    style={{width: 200,
-                      height: 180,
-                      padding: 6,
-                      borderRadius: 15,
-                      resizeMode: "cover",}}
-                    imageStyle={{ backgroundColor: 'rgba(255,0,0,.6)' ,borderRadius:30 ,paddingBottom:15 }}
-                    source={require('../../assets/pdfimage.png')}
-                  >
-                    
-                  </ImageBackground>}
-                  
-                </TouchableOpacity>
-                <Text>{props.currentMessage.fileId}</Text>
-              </View>
-            ); 
-            }
-            return 
-
-            }}
+   if(selectedItem.message === props.currentMessage){
+     return(<EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/>)
+   }
+   else if(props.currentMessage.fileType === 'application/pdf'){
+     return (
+     <View   style={{
+             width: 200,
+             height: 200,
+             padding: 6,
+             borderRadius: 15,
+             resizeMode: "cover",
+           }}>
+       <TouchableOpacity
        
-          renderMessageImage={(props) => {
-          return (
-            <View style={{ borderRadius: 15, padding: 2 }}>
-              <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(true);
-                  setSeletedImageView(props.currentMessage.image);
-                }}
-              >
-                <Image
-                  resizeMode="contain"
-                  style={{
-                    width: 200,
-                    height: 200,
-                    padding: 6,
-                    borderRadius: 15,
-                    resizeMode: "cover",
-                  }}
-                  source={{ uri: props.currentMessage.image }}
-                />
-                {selectedImageView ? (
-                  <ImageView
-                    imageIndex={0}
-                    visible={modalVisible}
-                    onRequestClose={() => setModalVisible(false)}
-                    images={[{ uri: selectedImageView }]}
-                  />
-                ) : null}
-              </TouchableOpacity>
-            </View>
-          );
-        }}
-      />
-      
-      <View style={{backgroundColor:'white',flexDirection:'row' , flex:0.25  ,display:pickSendType ,justifyContent:'space-evenly' ,alignItems:'center', borderRadius:30,
-      wrap:'nowrap'}} >
-        <AntDesign onPress={()=>handlePhotoPicker()} name='picture' size={45} />
-        <Entypo onPress={()=>handleVideoPicker()} name='video' size={45} />
-        <FontAwesome5 onPress={()=>handleFilePicker()} name='file' size={45} />
-      </View>
-      
+         onPress={() =>{
+          setSelectedFileView(props.currentMessage.file);
+          setSelectedItem(pre =>{
+            const {message,file} = pre 
+            let ob = new Object({message:message,file:file})
+            return ob
+            }  )
+           
 
-    </ImageBackground>
+         }
+         }
+       >
+       {selectedFileView && props.currentMessage.file === selectedFileView  ? (
+         <Modal isVisible={modalFileVisible} style={styles.modal} 
+           onRequestClose={() => {
+             setModalFileVisible(false)
+             }}
+         >
+         <TouchableOpacity
+
+         onPress={() =>{
+          setSelectedItem(pre =>{
+            const {message,file} = pre 
+            let ob = new Object({message:message,file:null})
+            return ob
+            }  )
+           setSelectedFileView(null)
+         }
+         }
+         style={{width:50,height:50,backgroundColor:'red',alignSelf:'flex-start' , marginTop:50}}
+       ></TouchableOpacity>
+         <WebView
+         style={styles.container}
+         source={{ uri:  props.currentMessage.file }}
+       />
+       </Modal>) 
+       : <ImageBackground
+           style={{width: 200,
+             height: 180,
+             padding: 6,
+             borderRadius: 15,
+             resizeMode: "cover",}}
+           imageStyle={{ backgroundColor: 'rgba(255,0,0,.6)' ,borderRadius:30 ,paddingBottom:15 }}
+           source={require('../../assets/pdfimage.png')}
+         >
+           
+         </ImageBackground>}
+         
+       </TouchableOpacity>
+       <Text>{props.currentMessage.fileId}</Text>
+     </View>
+   ); 
+   }
+   return 
+
+   }}
+   renderMessageImage={(props) => {
+     return (
+       <View style={{ borderRadius: 15, padding: 2 }}>
+         <TouchableOpacity
+           onPress={() => {
+             setModalVisible(true);
+             setSeletedImageView(props.currentMessage.image);
+           }}
+         >
+           <Image
+             resizeMode="contain"
+             style={{
+               width: 200,
+               height: 200,
+               padding: 6,
+               borderRadius: 15,
+               resizeMode: "cover",
+             }}
+             source={{ uri: props.currentMessage.image }}
+           />
+           {selectedImageView ? (
+             <ImageView
+               imageIndex={0}
+               visible={modalVisible}
+               onRequestClose={() => setModalVisible(false)}
+               images={[{ uri: selectedImageView }]}
+             />
+           ) : null}
+         </TouchableOpacity>
+       </View>
+     );
+   }}
+ />
+ 
+ <View style={{backgroundColor:'white',flexDirection:'row' , flex:0.25  ,display:pickSendType ,justifyContent:'space-evenly' ,alignItems:'center', borderRadius:30,
+ wrap:'nowrap'}} >
+   <AntDesign onPress={()=>handlePhotoPicker()} name='picture' size={45} />
+   <Entypo onPress={()=>handleVideoPicker()} name='video' size={45} />
+   <FontAwesome5 onPress={()=>handleFilePicker()} name='file' size={45} />
+ </View>
+ 
+
+</ImageBackground>
 
 
-  )
+
+)
 
 }
 
@@ -741,7 +750,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     height: '100%',
   },
-  modal:{backgroundColor:'red',width:'50%',height:"50%",alignSelf:'center'},
   TopView: {
     backgroundColor: 'rgb(61, 178, 255)',
     marginTop: 25,
