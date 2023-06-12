@@ -1,7 +1,8 @@
 //@refresh reset
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import "react-native-get-random-values"; // to generate random ids 
-import { Image, TouchableOpacity, View, StyleSheet, ImageBackground,Text } from 'react-native';
+import { Image, TouchableOpacity, View, StyleSheet, ImageBackground,Text,Modal } from 'react-native';
+import {WebView} from 'react-native-webview'
 import GlobalContext from '../../Context/Context';//global variables to access via provider
 import { auth, db,GenAESKey } from "../firebase"; // firebase instance 
 import { useRoute } from "@react-navigation/native";
@@ -36,7 +37,7 @@ function ChatScreen(props) {
   const { theme: { colors } } = useContext(GlobalContext)
   const [permissionStatus, permissionStatusUpdate] = useState(null);
   const [pickSendType,setPickSendType] =useState('none')
-  const [selectedItem,setSelectedItem] = useState(null)
+  const [selectedItem,setSelectedItem] = useState({message:null ,file:null})
 
 
   const route = useRoute();
@@ -444,7 +445,7 @@ function ChatScreen(props) {
   }
 
    function onLongpressHandler(context,message){
-    setSelectedItem(message)
+    setSelectedItem(pre => {return { ...pre,message:message }}  )
   }
  
  async function deleteMessage(message){
@@ -452,7 +453,8 @@ function ChatScreen(props) {
     console.log(message)
     deleteDoc(doc(roomMessagesRef,message._id)).then(()=>{
       setMessages((previousMessaged) => previousMessaged.filter(m => m._id !==message._id)) // deletes the message locally after removing it from the database
-      setSelectedItem(null)
+      setSelectedItem(pre =>{return {message:null , file:pre.file}}  )
+
       console.log('deleted successfully')
     })
    
@@ -465,8 +467,9 @@ function ChatScreen(props) {
   if (permissionStatus !== 'granted') {
       return <Text> you need to grant permission </Text>
   }
-
-  return (Loading ?<Text>loading ...</Text>:<ImageBackground style={{ flex: 1 }} resizeMode="cover" source={room?{uri: room.backGround} :require('../../assets/chatbg.png')}>
+const test = 'https://firebasestorage.googleapis.com/v0/b/secret-chat-dev.appspot.com/o/files%2Frooms%2Fca624b04-095a-488f-b539-a4e6cc1ea061%2FLrPYWrE6GDEzbN_z2Vn5r.pdf?alt=media&token=2ab80ff1-4404-45c5-9fe0-b1974f610724&_gl=1*1txnjy0*_ga*NzgxMDA4MjczLjE2NTE2NjYxMjY.*_ga_CW55HF8NVT*MTY4NjU4MDQzNS40Ny4wLjE2ODY1ODA0MzUuMC4wLjA.'
+ const some='http://docs.google.com/gview?embedded=true&url='
+ return (Loading ?<Text>loading ...</Text>:<ImageBackground style={{ flex: 1 }} resizeMode="cover" source={room?{uri: room.backGround} :require('../../assets/chatbg.png')}>
       <GiftedChat
         onSend={onSend}
         messages={messages} //the messages needs to be rendered
@@ -542,17 +545,17 @@ function ChatScreen(props) {
 
         renderBubble={(props) => (
           <Bubble {...props}
-           onPress={()=>{setSelectedItem(null)}}
+           onPress={()=>{setSelectedItem({message:null ,file:null})}}
             onLongPress={(context , message)=> onLongpressHandler(context,message)}
             textStyle={{ right: { color: colors.text } }} //right for sender side and left for the reciever
             wrapperStyle={{
 
             
               left: {
-                backgroundColor: selectedItem === props.currentMessage ? 'red': colors.white,
+                backgroundColor: selectedItem.message === props.currentMessage ? 'red': colors.white,
               },
               right: {
-                backgroundColor: selectedItem === props.currentMessage ? 'red': colors.tertiary,
+                backgroundColor: selectedItem.message === props.currentMessage ? 'red': colors.tertiary,
               },
             }}
           />
@@ -587,7 +590,7 @@ function ChatScreen(props) {
 
         renderCustomView={(props)=>{
 
-          if(selectedItem === props.currentMessage){
+          if(selectedItem.message === props.currentMessage){
             return(<EvilIcons name="trash" size={35} onPress={()=>deleteMessage(props.currentMessage)}/>)
           }
           else if(props.currentMessage.fileType === 'application/pdf'){
@@ -602,17 +605,27 @@ function ChatScreen(props) {
                <TouchableOpacity
                 onPress={() =>{
                   setSelectedFileView(props.currentMessage.file);
-                <PDFView
-                      fadeInDuration={250.0}
-                      style={{ flex: 1 }}
-                      resourceType={props.currentMessage.file}
-                      onLoad={() => console.log(`PDF rendered from ${props.currentMessage.file}`)}
-                      onError={(error) => console.log('Cannot render PDF', error)}
-                    />
+                  setModalVisible(true)
+                  setSelectedItem(pre =>{return {message:pre.message , file:props.currentMessage.file}}  )
+                  
+
                 }
                 }
               >
-                <ImageBackground
+              {selectedFileView && props.currentMessage.file === selectedFileView  ? (
+                <Modal isVisible={modalVisible} style={styles.modal}>
+                <View style={{width:'80%',height:'80%',backgroundColor:'red'}}>
+                  <WebView
+
+                    bounces={false}
+                    scrollEnabled={false} 
+                    source={{ uri: some+props.currentMessage.file }} />
+                    
+                </View>
+              </Modal>
+                
+    
+                ) : <ImageBackground
                   style={{width: 200,
                     height: 180,
                     padding: 6,
@@ -622,7 +635,8 @@ function ChatScreen(props) {
                   source={require('../../assets/pdfimage.png')}
                 >
                   
-                </ImageBackground>
+                </ImageBackground>}
+                
               </TouchableOpacity>
               <Text>{props.currentMessage.fileId}</Text>
             </View>
@@ -738,6 +752,10 @@ const styles = StyleSheet.create({
     marginBottom: 25,
 
 
+  },
+  container2: {
+    flex: 1,
+    paddingTop: 15,
   }
   ,
   TextInput: {
