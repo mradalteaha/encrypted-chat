@@ -27,6 +27,8 @@ function ChatScreen(props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [myrandID,setMyrandID]=useState(uuid())
   const [selectedImageView, setSeletedImageView] = useState("");
+  const [selectedVideoView, setSelectedVideoView] = useState("");
+
   const { theme: { colors } } = useContext(GlobalContext)
   const [permissionStatus, permissionStatusUpdate] = useState(null);
   const [pickSendType,setPickSendType] =useState('none')
@@ -330,12 +332,14 @@ function ChatScreen(props) {
 //send video
   async function sendVideo(uri, roomPath) {
     try{
-    const videouploaded = await uploadVideotwo(
+    uploadVideotwo(
       uri,
       `videos/rooms/${roomPath || roomHash}`
-    );
-    if(videouploaded){
-      const { url, fileName } = videouploaded;
+    ).then(async (myob)=>{
+
+      const { url, fileName } = myob;
+      console.log('video saved at:')
+      console.log(url)
       const message = {
         _id: fileName,
         text: "",
@@ -348,7 +352,12 @@ function ChatScreen(props) {
         setDoc(doc(roomMessagesRef,message._id),message),
         updateDoc(roomRef, { lastMessage }),
       ]);     
-    }
+   
+
+    })
+    
+
+     
  
   }catch(error){
     console.log(error)
@@ -525,19 +534,43 @@ function ChatScreen(props) {
             }}
           />
         )}
-        renderMessageVideo = {(props) => {
+        
+
+        renderMessageVideo={(props) => {
           return (
-            <View style={{ padding: 20 }}>
-               <Video
+            <View style={{ borderRadius: 15, padding: 2 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setModalVisible(true);
+                  setSelectedVideoView(props.currentMessage.video);
+                }}
+              >
+                <Video
                 resizeMode="contain"
                 useNativeControls
                 shouldPlay={false}
                 source={{ uri: props.currentMessage.video}}
-                style={styles.video}
+                style={{
+                    width: 200,
+                    height: 200,
+                    padding: 6,
+                    borderRadius: 15,
+                    resizeMode: "cover",
+                  }}
               />
+                {selectedImageView ? (
+                  <ImageView
+                    imageIndex={0}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                    images={[{ uri: selectedImageView }]}
+                  />
+                ) : null}
+              </TouchableOpacity>
             </View>
           );
         }}
+
         renderCustomView={(props)=>{
           if(props.currentMessage.fileType === "application/pdf"){
             return 

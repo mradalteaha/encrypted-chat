@@ -127,25 +127,38 @@ export async function askForPermission(){
 
 export async function uploadVideotwo(video, path, fName) {
 
+  const myprom =  await new Promise(async (resolve, reject) => {
+    try{
 
-  const fileName = fName ||nanoid();
-  const imageRef = ref(storage, `${path}/${fileName}.mp4`);
-  console.log('print in uploadVideo')
-  console.log(video)
-  const response = await fetch(video.uri);
+      const fileName = fName ||nanoid();
+    const imageRef = ref(storage, `${path}/${fileName}.mp4`);
+    console.log('print in uploadVideo')
+    console.log(video)
+    const response = await fetch(video.uri);
+  
+      const blob = await response.blob();
+  
+      const snapshot = await uploadBytesResumable(imageRef, blob, {
+        contentType: "video/mp4",
+      });
+    if(snapshot){
+      getDownloadURL(snapshot.ref).then((downloadURL) => {
+        console.log('File available at', downloadURL);
 
-    const blob = await response.blob();
+        const myob = {url:downloadURL,fileName:fileName}
+        resolve(myob) 
+      });
+    } 
+      
+    }catch(err){
+      console.log(err)
+      reject(err)
+    }
+    
+  })
+  
 
-    const snapshot = await uploadBytesResumable(imageRef, blob, {
-      contentType: "video/mp4",
-    });
-  if(snapshot){
-    getDownloadURL(snapshot.ref).then((downloadURL) => {
-      console.log('File available at', downloadURL);
-      const url = downloadURL
-      return { url, fileName }
-    });
-  } 
+  return myprom
  
 }
 export async function uploadImagetwo(image, path, fName) {
